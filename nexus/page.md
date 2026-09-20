@@ -5,7 +5,7 @@ Tracks the mod's Nexus page details.
 - Mod name: Project Cook
 - Game domain: `survivallog` (add-mod page: https://www.nexusmods.com/survivallog/mods/add)
 - Mod id and URL: 13, https://www.nexusmods.com/survivallog/mods/13. Published 2026-09-20.
-- Category: open choice at page creation - User Interface, or the closest category the game offers.
+- Category: Miscellaneous. It is the only category the game offers on Nexus.
 - Version: `1.0.0`
 - File name under Manage Files: `Project Cook 1.0.0`, the zip `ProjectCook-1.0.0.zip`, marked as the main file. It is the same zip as the GitHub Release asset.
 - Requirement: BepInEx Pack for Survival Log (https://www.nexusmods.com/survivallog/mods/12). Add it as a Nexus requirement, so the page gets a Requirements tab.
