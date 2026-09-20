@@ -8,7 +8,7 @@ The added text follows the game language, English and Chinese. The quality, tier
 
 The mod only changes what the cooking window displays. It does not change the cooking result, the recipes, or the save. The stats and the portion count come from the game's own formula, so they are equal to what the cooked dish gives. The chances use the same inputs as the game's quality roll (cooking level, cook furniture, fresh or rotten ingredients, seasonings, exact recipe), but they do not include character talents that change the quality roll. Hot pot mode has no preview.
 
-Nexus page: not published yet.
+Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## Install
 

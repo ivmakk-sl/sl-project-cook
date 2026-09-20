@@ -4,7 +4,7 @@ Tracks the mod's Nexus page details.
 
 - Mod name: Project Cook
 - Game domain: `survivallog` (add-mod page: https://www.nexusmods.com/survivallog/mods/add)
-- Mod id and URL: not created yet. Record them here after the page exists.
+- Mod id and URL: 13, https://www.nexusmods.com/survivallog/mods/13. Published 2026-09-20.
 - Category: open choice at page creation - User Interface, or the closest category the game offers.
 - Version: `1.0.0`
 - File name under Manage Files: `Project Cook 1.0.0`, the zip `ProjectCook-1.0.0.zip`, marked as the main file. It is the same zip as the GitHub Release asset.
@@ -24,4 +24,4 @@ Tracks the mod's Nexus page details.
 - Full description: `description.bbcode` (paste into the editor's raw BBCode mode).
 - Changelog: none for `1.0.0`. The first release has nothing to change. `changelog.txt` starts with the release that follows.
 - Background: `images/banner.jpg` (1300x372). Set as the mod page background.
-- Gallery images (1920x1080): `images/01-cooking-window.jpg` (hero, pick as the mods-grid thumbnail), `images/02-dish-card.jpg`, `images/03-ingredient-tooltip.jpg`. See `images/README.md` for each role.
+- Gallery images (1920x1080): `images/sl_project_cook_sample.jpg` (hero, the whole cooking window with both features) and `images/sl_project_cook_thumb.jpg` (title card, pick as the mods-grid thumbnail). See `images/README.md` for each role.
