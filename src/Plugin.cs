@@ -13,7 +13,7 @@ using Il2CppDict = Il2CppSystem.Collections.Generic;
 
 namespace ProjectCook
 {
-    [BepInPlugin(PluginGuid, "Project Cook", "1.0.0")]
+    [BepInPlugin(PluginGuid, "Project Cook", "1.1.0")]
     [BepInProcess("SurvivalLog.exe")]
     public sealed class Plugin : BasePlugin
     {
@@ -21,6 +21,7 @@ namespace ProjectCook
 
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
+        internal static ConfigEntry<bool> IgnoreCookingTalents;
 
         public override void Load()
         {
@@ -28,12 +29,24 @@ namespace ProjectCook
             Verbose = Config.Bind(
                 "General", "Verbose", false,
                 "Log each preview (quality inputs, chances, stats, portions), each cooked result (quality roll and stats), and the page script state. Use it to compare the preview with the real result. Keep off in normal play.");
+            IgnoreCookingTalents = Config.Bind(
+                "Debug", "IgnoreCookingTalents", false,
+                "For tests only. The game and the preview read each cooking talent as 0, so dishes of lower quality can occur with a character that has the talents. It changes the real cooking results while it is on. The save does not change. Needs a game restart.");
             var harmony = new Harmony(PluginGuid);
             // One patch that fails to attach must not stop the others.
-            foreach (var type in new[] { typeof(RefreshPredictionPatch), typeof(RollCookingQualityLog), typeof(CalcProductVDLog) })
+            foreach (var type in new[] { typeof(RefreshPredictionPatch), typeof(RollCookingQualityLog), typeof(CalcProductVDLog), typeof(AddCookExpLog) })
             {
                 try { harmony.CreateClassProcessor(type).Patch(); }
                 catch (Exception e) { Log.LogError($"patch {type.Name} failed: {e.Message}"); }
+            }
+            if (IgnoreCookingTalents.Value)
+            {
+                try
+                {
+                    harmony.CreateClassProcessor(typeof(IgnoreCookingTalentsPatch)).Patch();
+                    Log.LogWarning("Debug option IgnoreCookingTalents is on: the cooking talents of the character have no effect.");
+                }
+                catch (Exception e) { Log.LogError($"patch {nameof(IgnoreCookingTalentsPatch)} failed: {e.Message}"); }
             }
             Log.LogInfo("Project Cook loaded.");
         }
@@ -67,10 +80,10 @@ namespace ProjectCook
                     return;
                 }
 
-                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, words);
+                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, words, out var tips);
                 if (previews.Count == 0) return;
 
-                state.PredictionListJson.Value = PreviewLogic.AddPreviews(json, previews);
+                state.PredictionListJson.Value = PreviewLogic.AddPreviews(json, previews, tips);
             }
             catch (Exception e)
             {
@@ -125,6 +138,42 @@ namespace ProjectCook
         }
     }
 
+    // The talent and buff ratios that the quality and EXP math need, read once for each refresh: the game's own
+    // method gives the sum of the owned talents and any temporary buff. A failed read counts as 0 and warns once.
+    internal struct TalentInputs
+    {
+        public float PerfectQuality, TagQuality, RottenReduce, ExpRatio, DishNourish, EatPerfectMorale;
+
+        private static bool warned;
+
+        public static TalentInputs Read()
+        {
+            return new TalentInputs
+            {
+                PerfectQuality = Ratio("Buff/AE_PerfectQualityMultiplier"),
+                TagQuality = Ratio("Buff/AE_CookTagQualityBonus"),
+                RottenReduce = Ratio("Buff/AE_CookRottenPenaltyReduce"),
+                ExpRatio = Ratio("Buff/AE_CookExpMultiplier"),
+                DishNourish = Ratio("Buff/AE_CookDishNourish"),
+                EatPerfectMorale = Ratio("Buff/AE_CookEatPerfectMorale"),
+            };
+        }
+
+        private static float Ratio(string key)
+        {
+            try { return Furniture.GetTalentEffectRatio(key); }
+            catch (Exception e)
+            {
+                if (!warned)
+                {
+                    warned = true;
+                    Plugin.Log.LogWarning($"talent read of {key} failed, treated as 0: {e.Message}");
+                }
+                return 0f;
+            }
+        }
+    }
+
     internal static class Preview
     {
         // True while the mod calls the game's formula methods, so the result log skips these calls.
@@ -133,13 +182,15 @@ namespace ProjectCook
         // Index is PreviewLogic.Fail..Perfect. The value is the qualityTier argument of CookingFormula.
         private static readonly int[] FormulaQualityTier = { 0, 1, 2, 3 };
 
-        public static Dictionary<int, string> Build(State_Web_Cooking state, List<PreviewLogic.Entry> entries, Il2CppDict.Dictionary<int, int> workbenchIds, Il2CppDict.Dictionary<int, int> workbenchTags, PreviewLogic.Words words)
+        public static Dictionary<int, string> Build(State_Web_Cooking state, List<PreviewLogic.Entry> entries, Il2CppDict.Dictionary<int, int> workbenchIds, Il2CppDict.Dictionary<int, int> workbenchTags, PreviewLogic.Words words, out Dictionary<int, string> tips)
         {
             var result = new Dictionary<int, string>();
+            tips = new Dictionary<int, string>();
             var config = ConfigManager.Instance;
 
-
-            int qualityBase = QualityBonusWithoutRecipe(state, config, out int floor, out string inputs);
+            var talents = TalentInputs.Read();
+            int perfectMorale = (int)Math.Round((double)talents.EatPerfectMorale);
+            int qualityBase = QualityBonusWithoutRecipe(state, config, talents, out int floor, out string inputs);
 
             // The interop layer reads the value tuples of PreMatchRecipes and CalcSplit wrongly, so the mod takes
             // the recipes from the prediction list and builds the ingredient set with the game's own method.
@@ -151,12 +202,15 @@ namespace ProjectCook
                 var participated = Reducer_Web_Cooking.BuildParticipatedIngredients(recipe, workbenchIds, workbenchTags);
                 if (participated == null) continue;
 
-                int bonus = qualityBase + (entry.IsExact ? Setting(config, "CookingQuality_ExactMatchBonus") : 0);
+                int bonus = qualityBase + (entry.IsExact ? Setting(config, "CookingQuality_ExactMatchBonus") : 0)
+                    + PreviewLogic.TalentQualityBonus(talents.PerfectQuality, talents.TagQuality, entry.IsExact);
                 double[] chances = PreviewLogic.QualityChances(floor, bonus, ToArray(recipe.QualityMap));
 
                 int[] productIds = { recipe.FailItemID, recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID };
                 var stats = new int[4][];
                 var portions = new int[4];
+                var tradeValues = new int[4];
+                var exps = new int[4];
                 Calculating = true;
                 try
                 {
@@ -166,6 +220,8 @@ namespace ProjectCook
                         stats[level] = new int[vd.Length];
                         for (int i = 0; i < vd.Length; i++) stats[level][i] = (int)Math.Round(vd[i]);
                         portions[level] = PreviewLogic.Portions(stats[level][0], recipe.SatietyStandard > 0 ? recipe.SatietyStandard : Setting(config, "CookingSatiety_SplitThreshold"));
+                        tradeValues[level] = config.Get_Config_Item(productIds[level])?.TradeValue ?? 0;
+                        exps[level] = PreviewLogic.CookExp(recipe.CookExp, talents.ExpRatio, level);
                     }
                 }
                 finally
@@ -175,13 +231,15 @@ namespace ProjectCook
 
                 var lines = PreviewLogic.Lines(chances, stats, portions, words);
                 result[recipeId] = string.Join("\n", lines);
-                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents=not included (AE_PerfectQualityMultiplier, AE_CookTagQualityBonus, AE_CookRottenPenaltyReduce) | {string.Join(" | ", lines)} | all levels F/N/G/P sat={stats[0][0]}/{stats[1][0]}/{stats[2][0]}/{stats[3][0]} portions={string.Join("/", portions)}");
+                var tipLines = PreviewLogic.TipLines(chances, tradeValues, exps[PreviewLogic.Perfect], entry.Tier, talents.DishNourish, perfectMorale, words);
+                tips[recipeId] = string.Join("\n", tipLines);
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents perfect={talents.PerfectQuality} tag={talents.TagQuality} rotten={talents.RottenReduce} exp={talents.ExpRatio} nourish={talents.DishNourish} perfectMorale={talents.EatPerfectMorale} | {string.Join(" | ", lines)} | all levels F/N/G/P sat={stats[0][0]}/{stats[1][0]}/{stats[2][0]}/{stats[3][0]} portions={string.Join("/", portions)} trade={tradeValues[0]}/{tradeValues[1]}/{tradeValues[2]}/{tradeValues[3]} exp={exps[0]}/{exps[1]}/{exps[2]}/{exps[3]}");
             }
             return result;
         }
 
         // Quality floor and all bonuses that do not depend on the recipe: fresh or rotten, seasonings, furniture.
-        private static int QualityBonusWithoutRecipe(State_Web_Cooking state, ConfigManager config, out int floor, out string inputs)
+        private static int QualityBonusWithoutRecipe(State_Web_Cooking state, ConfigManager config, TalentInputs talents, out int floor, out string inputs)
         {
             floor = config.Get_Config_CookingLv(state.CookingLevel)?.QualityFloor ?? 0;
             int furniture = config.Get_Config_FurnitureCook(state.CookFurnitureId)?.QualityBonus ?? 0;
@@ -196,7 +254,9 @@ namespace ProjectCook
                 if (item.SubCategory.Value == SeasoningFoodType) seasonings++;
             }
 
-            int freshness = Setting(config, rotten ? "CookingQuality_RottenPenalty" : "CookingQuality_FreshBonus");
+            int freshness = rotten
+                ? PreviewLogic.RottenPenalty(Setting(config, "CookingQuality_RottenPenalty"), talents.RottenReduce)
+                : Setting(config, "CookingQuality_FreshBonus");
             var seasoningSetting = config.Get_Config_GlobalSetting("CookingQuality_SeasoningBonus");
             int seasoning = seasoningSetting == null ? 0 : PreviewLogic.SeasoningBonus(seasonings, seasoningSetting.Params1, seasoningSetting.Params2);
 
@@ -255,86 +315,64 @@ namespace ProjectCook
         }
     }
 
+    // Log of the cooking EXP that the game actually awards. Furniture.SettleCookingResult calls this to give the
+    // cooking EXP for a cooked dish. It is not known if the game calls it once for each dish or once for the pot
+    // with the sum, so the entry logs the raw argument.
+    [HarmonyPatch(typeof(CookingRecordComponent), "AddCookExp")]
+    internal static class AddCookExpLog
+    {
+        private static void Postfix(int exp, int __result)
+        {
+            if (!Plugin.Verbose.Value) return;
+            try
+            {
+                Plugin.Log.LogDebug($"result exp value={exp} returned={__result}");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Project Cook result log failed: {e}");
+            }
+        }
+    }
+
+    // Attached only when the debug option IgnoreCookingTalents is on. The game reads each talent effect through the
+    // overloads of this method, the quality roll and the EXP grant included, so the real results and the preview
+    // stay equal. The last argument of each overload is the effect key.
+    [HarmonyPatch]
+    internal static class IgnoreCookingTalentsPatch
+    {
+        private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
+        {
+            foreach (var method in AccessTools.GetDeclaredMethods(typeof(Furniture)))
+                if (method.Name == "GetTalentEffectRatio") yield return method;
+        }
+
+        private static void Postfix(object[] __args, ref float __result)
+        {
+            string key = __args.Length > 0 ? __args[__args.Length - 1] as string : null;
+            if (key != null && (key.StartsWith("Buff/AE_Cook") || key == "Buff/AE_PerfectQualityMultiplier")) __result = 0f;
+        }
+    }
+
     // The cooking page draws each card with a fixed name line and hint line. The page ignores unknown entry fields,
     // so the mod sends the preview text in a "Preview" field and this script adds it to the card as extra lines.
+    // The install script itself lives in page.js (an embedded resource), so it can be edited and tested as a file.
     internal static class PageScript
     {
-        // Runs in the root page. Each UI page is an iframe, and a reopened panel is a new iframe, so the hook is
-        // installed again when it is missing. The wrapper keeps the game's render function and only adds lines.
-        // A panel that opens with ingredients has no frame yet at the first refresh, so the script tries again for 3 seconds.
-        // The colors are the game's own: quality colors of the cooking page (--q-perfect, --q-good, --q-fail), tier colors
-        // of its result window (tier-high, tier-low), and the value colors of the item window (pos, neg).
-        private const string Script = @"(function attempt(retries){
-  var qualityColors = { 3: '#FFC107', 2: '#B988E6', 0: '#707070' };
-  var tierColors = { 1: '#a4b546', 3: '#c0c0c0' };
-  var frames = document.querySelectorAll('iframe'), result = 'no cooking frame';
-  for (var i = 0; i < frames.length; i++) {
-    try {
-      var w = frames[i].contentWindow;
-      if (!w || typeof w.renderPredictionList !== 'function') continue;
-      if (w.__cookingPreview) { result = 'already installed'; continue; }
-      var original = w.renderPredictionList;
-      w.renderPredictionList = function (entries) {
-        original(entries);
-        try {
-          var cards = w.document.querySelectorAll('#predictionList .pot-card');
-          for (var k = 0; k < cards.length && k < entries.length; k++) {
-            if (!entries[k].Preview) continue;
-            var hint = cards[k].querySelector('.pot-hint');
-            if (hint) hint.style.display = 'none';
-            var rows = entries[k].Preview.split('\n').map(function (text) { return text.split('|'); });
-            var grid = w.document.createElement('div');
-            grid.className = 'pot-hint';
-            grid.style.cssText = 'opacity:1;color:#e8dcc8;display:grid;column-gap:8px;white-space:nowrap;' +
-              'grid-template-columns:repeat(' + (rows[0].length - 1) + ',max-content)';
-            rows.forEach(function (cells) {
-              cells.forEach(function (text, column) {
-                if (column === 0) return;
-                var cell = w.document.createElement('span');
-                if (column === 2) cell.style.textAlign = 'right';
-                if (column === 1 && qualityColors[cells[0]]) cell.style.color = qualityColors[cells[0]];
-                cell.textContent = text;
-                grid.appendChild(cell);
-              });
-            });
-            cards[k].querySelector('.pot-bd').appendChild(grid);
-          }
-        } catch (e) {}
-      };
-      if (typeof w.showItemTip === 'function') {
-        var originalTip = w.showItemTip;
-        w.showItemTip = function (item) {
-          originalTip(item);
-          try {
-            var tip = item && item.name && item.canCook !== false && window.__cookingTips && window.__cookingTips[item.configId];
-            if (tip) tip.split('\n').forEach(function (text) {
-              var line = w.document.createElement('div'), tier = text.match(/^T(\d)\|(.*)\|(.*)$/), parts = text.match(/^(.*: )(.+)$/);
-              if (tier) {
-                var tierName = w.document.createElement('span');
-                tierName.textContent = tier[3];
-                tierName.style.color = tierColors[tier[1]] || '';
-                line.textContent = tier[2] + ': ';
-                line.appendChild(tierName);
-              } else if (parts) {
-                var value = w.document.createElement('span');
-                value.textContent = parts[2];
-                value.style.color = parts[2][0] === '-' ? '#EF5350' : parts[2][0] === '+' ? '#66BB6A' : '';
-                line.textContent = parts[1];
-                line.appendChild(value);
-              } else line.textContent = text;
-              w.document.getElementById('recipeTooltip').appendChild(line);
-            });
-          } catch (e) {}
-        };
-      }
-      w.__cookingPreview = true;
-      result = 'installed';
-      try { w.renderPredictionList(w.eval('State.lastPredictionEntries')); } catch (e) { result = 'installed, no redraw: ' + e; }
-    } catch (e) { result = 'error: ' + e; }
-  }
-  if (result === 'no cooking frame' && retries > 0) setTimeout(function () { attempt(retries - 1); }, 300);
-  return result;
-})(10)";
+        private static string script;
+        private static readonly HashSet<string> loggedMissing = new HashSet<string>();
+        private static readonly HashSet<string> loggedErrors = new HashSet<string>();
+
+        private static string Script()
+        {
+            if (script != null) return script;
+            var assembly = typeof(PageScript).Assembly;
+            string name = Array.Find(assembly.GetManifestResourceNames(), n => n.EndsWith("page.js", StringComparison.Ordinal));
+            using (var stream = assembly.GetManifestResourceStream(name))
+            using (var reader = new System.IO.StreamReader(stream))
+                script = reader.ReadToEnd();
+            return script;
+        }
 
         public static void Install(PreviewLogic.Words words)
         {
@@ -347,44 +385,86 @@ namespace ProjectCook
             // After a language change the tips in the root page have the old words, also with the hook in place.
             bool wordsChanged = !words.SameAs(tipsWords);
             string tips = TipsScript(words);
-            webView.ExecuteJavaScript(Script, (Il2CppSystem.Action<string>)(r =>
+            webView.ExecuteJavaScript(Script(), (Il2CppSystem.Action<string>)(r =>
             {
-                if (r == "already installed" && !wordsChanged) return;
+                LogPageCheck(r);
+                if (r.StartsWith("already installed", StringComparison.Ordinal) && !wordsChanged) return;
                 if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"page script: {r}");
-                webView.ExecuteJavaScript(tips, null);
+                // The tier table arrives after the install, so the grids draw their items again to get the tier rings.
+                webView.ExecuteJavaScript(tips + ";" + RedrawTiers, null);
             }));
         }
+
+        // The result of page.js has an optional "; missing: ..." part (one text for each distinct set of missing
+        // parts) and an optional "; errors: text1 || text2" part (the errors that page.js has not reported before).
+        // Each is logged one time, with Verbose off also, so a game update or a page bug is not silent.
+        private static void LogPageCheck(string r)
+        {
+            if (r == null) return;
+            const string missingMarker = "; missing: ";
+            const string errorsMarker = "; errors: ";
+            int missingAt = r.IndexOf(missingMarker, StringComparison.Ordinal);
+            int errorsAt = r.IndexOf(errorsMarker, StringComparison.Ordinal);
+            if (missingAt >= 0)
+            {
+                int end = errorsAt >= 0 ? errorsAt : r.Length;
+                string missing = r.Substring(missingAt + missingMarker.Length, end - missingAt - missingMarker.Length);
+                if (loggedMissing.Add(missing)) Plugin.Log.LogWarning($"page check: missing {missing}");
+            }
+            if (errorsAt >= 0)
+            {
+                string errors = r.Substring(errorsAt + errorsMarker.Length);
+                foreach (var text in errors.Split(new[] { " || " }, StringSplitOptions.None))
+                    if (loggedErrors.Add(text)) Plugin.Log.LogError($"page script error: {text}");
+            }
+        }
+
+        private const string RedrawTiers =
+            "(function(){var f=document.querySelectorAll('iframe');for(var i=0;i<f.length;i++){try{var w=f[i].contentWindow;" +
+            "if(w&&typeof w.__cookingRedrawTiers==='function'&&!w.__cookingTiersDrawn)w.__cookingRedrawTiers();}catch(e){}}})()";
 
         private static string tipsScript;
         private static PreviewLogic.Words tipsWords;
 
-        // Sets the tooltip line of each ingredient in the root page, by config ID. The script is kept until the words
-        // change. The names are game text, so a backslash or a quote in them is escaped for the script string.
+        // Sets the tooltip line of each ingredient in the root page, by config ID, and the tier of each ingredient
+        // that has one (for the tier ring). The script is kept until the words change. The names are game text,
+        // so a backslash or a quote in them is escaped for the script string.
         private static string TipsScript(PreviewLogic.Words words)
         {
             if (tipsScript != null && words.SameAs(tipsWords)) return tipsScript;
             tipsWords = words;
             var sb = new StringBuilder("window.__cookingTips={");
+            var tiers = new StringBuilder("window.__cookingTiers={");
             int count = 0;
+            int tierCount = 0;
             var e = ConfigManager.Instance._Config_Item_Dict.GetEnumerator();
             while (e.MoveNext())
             {
                 var item = e.Current.Value;
                 if (item == null || item.Category != 1) continue;
+                int tier = Reducer_Web_Cooking.ResolveIngredientTier(item.ID);
                 string tip = PreviewLogic.IngredientTip(
                     new[]
                     {
                         (int)Math.Round(item.ValueDisplay1), (int)Math.Round(item.ValueDisplay2), (int)Math.Round(item.ValueDisplay3),
                         (int)Math.Round(item.ValueDisplay4), (int)Math.Round(item.ValueDisplay5),
                     },
-                    Reducer_Web_Cooking.ResolveIngredientTier(item.ID), words);
-                if (tip == null) continue;
-                sb.Append(item.ID).Append(":'").Append(tip.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n")).Append("',");
-                count++;
+                    tier, item.TradeValue, words);
+                if (tip != null)
+                {
+                    sb.Append(item.ID).Append(":'").Append(tip.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\n", "\\n")).Append("',");
+                    count++;
+                }
+                if (tier >= 1 && tier <= 3)
+                {
+                    tiers.Append(item.ID).Append(':').Append(tier).Append(',');
+                    tierCount++;
+                }
             }
             sb.Append("}");
-            if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ingredient tips: {count} items");
-            return tipsScript = sb.ToString();
+            tiers.Append("}");
+            if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ingredient tips: {count} items, {tierCount} with a tier");
+            return tipsScript = sb.ToString() + ";" + tiers.ToString();
         }
     }
 }

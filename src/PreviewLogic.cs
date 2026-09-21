@@ -21,11 +21,16 @@ namespace ProjectCook
             public string[] Stat;
             // The label before the tier name. The game has no text for it, so it is the one word that the mod translates.
             public string TierLabel;
+            // The labels of the dish card tooltip. The game has no text for them either, so the mod translates them too.
+            public string TradeLabel, ExpLabel, RecoveryLabel;
 
             public bool SameAs(Words other)
             {
                 return other != null
                     && TierLabel == other.TierLabel
+                    && TradeLabel == other.TradeLabel
+                    && ExpLabel == other.ExpLabel
+                    && RecoveryLabel == other.RecoveryLabel
                     && string.Join("|", Quality) == string.Join("|", other.Quality)
                     && string.Join("|", Tier) == string.Join("|", other.Tier)
                     && string.Join("|", Stat) == string.Join("|", other.Stat);
@@ -39,6 +44,9 @@ namespace ProjectCook
             Tier = new[] { null, "High-end", "Mid-tier", "Low-grade" },
             Stat = new[] { "Satiety", "Morale", "Stamina", "Fitness", "Life" },
             TierLabel = "Tier",
+            TradeLabel = "Trade value",
+            ExpLabel = "Cooking XP",
+            RecoveryLabel = "Recovery when eaten",
         };
 
         // Builds the words from the game texts. keys and texts have the order: quality Fail..Perfect, tier High..Low,
@@ -69,6 +77,9 @@ namespace ProjectCook
                 Tier = new[] { null, words[4], words[5], words[6] },
                 Stat = new[] { words[7], words[8], words[9], words[10], words[11] },
                 TierLabel = chinese ? "档次" : EnglishWords.TierLabel,
+                TradeLabel = chinese ? "交易价值" : EnglishWords.TradeLabel,
+                ExpLabel = chinese ? "烹饪熟练度" : EnglishWords.ExpLabel,
+                RecoveryLabel = chinese ? "食用恢复" : EnglishWords.RecoveryLabel,
             };
         }
 
@@ -94,6 +105,29 @@ namespace ProjectCook
                 result[level] += 100.0 / total;
             }
             return result;
+        }
+
+        // Quality bonus from the "Practice Makes Perfect" and "Tag Master" talents, each read as the game's own
+        // ratio (the sum of the owned levels). The tag bonus applies only to a tag recipe, not an exact recipe.
+        public static int TalentQualityBonus(float perfectRatio, float tagRatio, bool isExact)
+        {
+            int bonus = (int)Math.Round((double)(perfectRatio * 100f));
+            if (!isExact) bonus += (int)Math.Round((double)(tagRatio * 100f));
+            return bonus;
+        }
+
+        // The rotten penalty (a negative number) reduced by the "Mold Master" talent ratio. A ratio at or above 1
+        // removes the whole penalty.
+        public static int RottenPenalty(int penalty, float reduceRatio)
+        {
+            return (int)Math.Round((double)(penalty * Math.Max(0f, 1f - reduceRatio)));
+        }
+
+        // Cooking EXP for one dish: 0 for the Fail level, else the recipe EXP raised by the "Cooking XP" talent ratio.
+        public static int CookExp(int recipeExp, float expRatio, int level)
+        {
+            if (level == Fail) return 0;
+            return (int)Math.Round((double)(recipeExp * (1f + expRatio)));
         }
 
         // Each seasoning adds less than the one before: base, base x ratio, base x ratio^2, ...
@@ -150,9 +184,9 @@ namespace ProjectCook
             return list;
         }
 
-        // Adds a "Preview" field to each entry whose RecipeId has a text. The page ignores unknown fields.
-        // Returns the input unchanged when nothing matches or when anything fails.
-        public static string AddPreviews(string json, Dictionary<int, string> previewByRecipeId)
+        // Adds a "Preview" field, and a "PreviewTip" field when tipByRecipeId has a text for the entry's RecipeId.
+        // The page ignores unknown fields. Returns the input unchanged when nothing matches or when anything fails.
+        public static string AddPreviews(string json, Dictionary<int, string> previewByRecipeId, Dictionary<int, string> tipByRecipeId = null)
         {
             try
             {
@@ -160,8 +194,15 @@ namespace ProjectCook
                 var sb = new StringBuilder(json);
                 // Last entry first, so an insert does not move the start of an entry that is still to do.
                 for (int i = entries.Count - 1; i >= 0; i--)
-                    if (previewByRecipeId.TryGetValue(entries[i].Value.RecipeId, out string text))
-                        sb.Insert(entries[i].Key + 1, "\"Preview\":\"" + Escape(text) + "\",");
+                {
+                    int recipeId = entries[i].Value.RecipeId;
+                    var fields = new StringBuilder();
+                    if (previewByRecipeId.TryGetValue(recipeId, out string preview))
+                        fields.Append("\"Preview\":\"").Append(Escape(preview)).Append("\",");
+                    if (tipByRecipeId != null && tipByRecipeId.TryGetValue(recipeId, out string tip))
+                        fields.Append("\"PreviewTip\":\"").Append(Escape(tip)).Append("\",");
+                    if (fields.Length > 0) sb.Insert(entries[i].Key + 1, fields.ToString());
+                }
                 return entries.Count == 0 ? json : sb.ToString();
             }
             catch (Exception)
@@ -189,13 +230,55 @@ namespace ProjectCook
         // Tooltip lines of an ingredient: the ingredient tier (the game's tier number: 0 none, 1 High, 2 Mid, 3 Low),
         // then each stat of the raw item that is not 0, with its sign as in the item window of the game.
         // The tier line is "T<tier number>|<label>|<tier name>", so the page can pick the tier color without the word.
-        public static string IngredientTip(int[] stats, int tier, Words words)
+        // A trade value above 0 gets a line after the tier.
+        public static string IngredientTip(int[] stats, int tier, int tradeValue, Words words)
         {
             var lines = new List<string>();
-            if (tier >= 1 && tier <= 3) lines.Add("T" + tier + "|" + words.TierLabel + "|" + words.Tier[tier]);
+            if (tier >= 1 && tier <= 3) lines.Add(TierLine(tier, words));
+            if (tradeValue > 0) lines.Add($"{words.TradeLabel}: {tradeValue}");
             for (int i = 0; i < words.Stat.Length && i < stats.Length; i++)
                 if (stats[i] != 0) lines.Add($"{StatIcons[i]} {words.Stat[i]}: {(stats[i] > 0 ? "+" : "")}{stats[i]}");
             return lines.Count > 0 ? string.Join("\n", lines) : null;
+        }
+
+        private static string TierLine(int tier, Words words) => "T" + tier + "|" + words.TierLabel + "|" + words.Tier[tier];
+
+        // Lines of the dish card tooltip: the tier line of the dish in the format of IngredientTip (none for a dish
+        // with no tier), the cooking EXP, the trade value, then the lines for the eat-time talents. The EXP is the
+        // same for each level but Fail, which gives 0, so it is one line: "+<exp>", with "(<Fail name> 0)" after it
+        // when Fail and another level can occur, and "0" when only Fail can occur. With one level the trade value
+        // is a plain line also, because the card already names the level. With more levels it is a grid: a header
+        // row with an empty label cell and "<level>:<quality name>" cells (highest first), so the page can color
+        // each name, then a row with the label and one value for each level. Only the grid rows have '|' cells.
+        public static List<string> TipLines(double[] chances, int[] tradeValues, int exp, int tier, float nourishRatio, int perfectMorale, Words words)
+        {
+            var header = new StringBuilder();
+            var trade = new StringBuilder(words.TradeLabel);
+            int levels = 0, onlyLevel = Fail;
+            for (int level = Perfect; level >= Fail; level--)
+            {
+                if (chances[level] <= 0) continue;
+                levels++;
+                onlyLevel = level;
+                header.Append('|').Append(level).Append(':').Append(words.Quality[level]);
+                trade.Append('|').Append(tradeValues[level]);
+            }
+            bool failOnly = levels == 1 && onlyLevel == Fail;
+            string failNote = chances[Fail] > 0 && !failOnly ? $" ({words.Quality[Fail]} 0)" : "";
+            var lines = new List<string>();
+            if (tier >= 1 && tier <= 3) lines.Add(TierLine(tier, words));
+            lines.Add($"{words.ExpLabel}: {(failOnly ? "0" : "+" + exp + failNote)}");
+            if (levels > 1)
+            {
+                lines.Add(header.ToString());
+                lines.Add(trade.ToString());
+            }
+            else lines.Add($"{words.TradeLabel}: {tradeValues[onlyLevel]}");
+            if (nourishRatio > 0)
+                lines.Add($"{words.RecoveryLabel}: +{(int)Math.Round(nourishRatio * 100)}%");
+            if (perfectMorale > 0 && chances[Perfect] > 0)
+                lines.Add($"{words.Quality[Perfect]} {StatIcons[1]} {words.Stat[1]}: +{perfectMorale}");
+            return lines;
         }
 
         // One line for each quality level that can occur, highest level first. stats[level] is the stat array of that level.

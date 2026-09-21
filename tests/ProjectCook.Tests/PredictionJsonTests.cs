@@ -115,4 +115,39 @@ public class PredictionJsonTests
     {
         Assert.Equal(Known, PreviewLogic.AddPreviews(Known, null));
     }
+
+    [Fact]
+    public void AddPreviews_WithTip_AddsBothFieldsEscaped()
+    {
+        string result = PreviewLogic.AddPreviews(Known, new Dictionary<int, string> { [7008] = "prev" }, new Dictionary<int, string> { [7008] = "tip \"text\"" });
+        var entry = JsonDocument.Parse(result).RootElement[0];
+        Assert.Equal("prev", entry.GetProperty("Preview").GetString());
+        Assert.Equal("tip \"text\"", entry.GetProperty("PreviewTip").GetString());
+    }
+
+    [Fact]
+    public void AddPreviews_NoTipForTheEntry_OnlyThePreviewField()
+    {
+        string result = PreviewLogic.AddPreviews(Known, new Dictionary<int, string> { [7008] = "prev" }, new Dictionary<int, string>());
+        var entry = JsonDocument.Parse(result).RootElement[0];
+        Assert.True(entry.TryGetProperty("Preview", out _));
+        Assert.False(entry.TryGetProperty("PreviewTip", out _));
+    }
+
+    [Fact]
+    public void AddPreviews_NullTipDictionary_SameOutputAsBefore()
+    {
+        var previews = new Dictionary<int, string> { [7008] = "prev" };
+        Assert.Equal(PreviewLogic.AddPreviews(Known, previews), PreviewLogic.AddPreviews(Known, previews, null));
+    }
+
+    [Theory]
+    [InlineData("[]")]
+    [InlineData("")]
+    [InlineData(null)]
+    [InlineData("not json")]
+    public void AddPreviews_WithTip_ReturnsTheInputWhenNothingMatches(string json)
+    {
+        Assert.Equal(json, PreviewLogic.AddPreviews(json, new Dictionary<int, string> { [7008] = "x" }, new Dictionary<int, string> { [7008] = "y" }));
+    }
 }
