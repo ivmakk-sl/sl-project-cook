@@ -24,4 +24,4 @@ Tracks the mod's Nexus page details.
 - Full description: `description.bbcode` (paste into the editor's raw BBCode mode).
 - Changelog: none for `1.0.0`. The first release has nothing to change. `changelog.txt` starts with the release that follows.
 - Background: `images/banner.jpg` (1300x372). Set as the mod page background.
-- Gallery images (1920x1080): `images/sl_project_cook_sample.jpg` (hero, the whole cooking window with both features) and `images/sl_project_cook_thumb.jpg` (title card, pick as the mods-grid thumbnail). See `images/README.md` for each role.
+- Gallery images (1920x1080): `images/sl_project_cook_sample.jpg` (hero, the whole cooking window with both features), `images/sl_project_cook_s2.jpg` (dish card tooltip), `images/sl_project_cook_s3.jpg` (tier badges), and `images/sl_project_cook_thumb.jpg` (title card, pick as the mods-grid thumbnail). See `images/README.md` for each role.
