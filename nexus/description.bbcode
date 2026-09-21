@@ -7,12 +7,24 @@ The mod only changes what the cooking window shows. It does not change the cooki
 [*][b]Quality chances.[/b] One line for each quality level (Perfect, Good, Average, Failed) with its chance in percent. Levels that cannot occur do not show.[/*]
 [*][b]Dish stats for each level.[/b] Satiety, morale, stamina, health, and life of the dish at that quality.[/*]
 [*][b]Portion count.[/b] Shows when the dish splits into more than one portion.[/*]
-[*][b]Ingredient tooltips.[/b] Point at an ingredient in the cooking window to see its tier (High-end, Mid-tier, Low-grade) and its raw stats.[/*]
+[*][b]Talents included.[/b] The chances include the cooking talents of your character, for example "Practice Makes Perfect".[/*]
+[*][b]Dish card tooltip.[/b] Point at a dish card to see the tier of the dish, the cooking XP of the pot, and the trade value at each quality level. It also shows the eat bonus of your talents, if you have one.[/*]
+[*][b]Ingredient tooltips.[/b] Point at an ingredient in the cooking window to see its tier (High-end, Mid-tier, Low-grade), its trade value, and its raw stats.[/*]
+[*][b]Tier badge.[/b] The food badge of an ingredient shows its tier: gold with a triangle up is High-end, grey with a triangle down is Low-grade.[/*]
+[/list]
+
+[size=5]How the ingredient tier works[/size]
+The game does not explain the tier, so here is the short version:
+[list]
+[*]The tier matters only for a recipe that asks for ingredient types (for example Meat + Vegetables). A recipe that asks for specific items has fixed stats and ignores the tier.[/*]
+[*]The dish gets the tier of its best ingredient, not the average. One High-end ingredient is enough, more of them add nothing to the tier.[/*]
+[*]The tier multiplies satiety, health, and life of the dish: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. It also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the trade value.[/*]
+[*]The multiplier works on the sum of the ingredient stats. A High-end ingredient with weak stats (for example Enoki Mushrooms) can raise the tier and the trade value, and still lower the stats. The dish card shows the final numbers, so compare there.[/*]
+[*]The tier of an ingredient comes from its price. Staple food, snacks, and drinks have no tier.[/*]
 [/list]
 
 [size=5]Limitations[/size]
 [list]
-[*]Quality chances do not account for character talents, so your actual chances may differ from the preview.[/*]
 [*]Cooking previews are not available in hot pot mode.[/*]
 [/list]
 

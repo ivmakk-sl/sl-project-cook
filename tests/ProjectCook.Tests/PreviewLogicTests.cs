@@ -63,6 +63,60 @@ public class QualityChancesTests
     {
         Assert.Equal(100, PreviewLogic.QualityChances(0, 0, new[] { 0, 30 })[Normal], 6);
     }
+
+    [Fact]
+    public void TalentBonusIsJustPartOfTheBonusArgument()
+    {
+        // floor 40, bonus 15 (base) + 15 (talent) = 30: quality >= 90 needs a roll of 60 or more, 41 of 61 rolls
+        var c = PreviewLogic.QualityChances(40, 15 + 15, Map);
+        Assert.Equal(100.0 * 41 / 61, c[Perfect], 6);
+    }
+}
+
+public class TalentQualityBonusTests
+{
+    [Theory]
+    [InlineData(0f, 0f, true, 0)]
+    [InlineData(0f, 0f, false, 0)]
+    [InlineData(0.15f, 0f, true, 15)]
+    [InlineData(0.15f, 0f, false, 15)]
+    [InlineData(0.45f, 0.15f, false, 60)] // tag recipe: perfect bonus plus tag bonus
+    [InlineData(0.45f, 0.15f, true, 45)]  // exact recipe: tag bonus does not apply
+    public void RoundsEachRatioToWholePercent(float perfectRatio, float tagRatio, bool isExact, int expected)
+    {
+        Assert.Equal(expected, PreviewLogic.TalentQualityBonus(perfectRatio, tagRatio, isExact));
+    }
+}
+
+public class RottenPenaltyTests
+{
+    [Theory]
+    [InlineData(-20, 0f, -20)]
+    [InlineData(-20, 0.3f, -14)]
+    [InlineData(-20, 0.6f, -8)]
+    [InlineData(-20, 1.0f, 0)]
+    [InlineData(-20, 1.5f, 0)]
+    public void ReducesThePenaltyByTheRatio(int penalty, float reduceRatio, int expected)
+    {
+        Assert.Equal(expected, PreviewLogic.RottenPenalty(penalty, reduceRatio));
+    }
+}
+
+public class CookExpTests
+{
+    private const int Fail = 0, Good = 2;
+
+    [Theory]
+    [InlineData(40, 0f, Good, 40)]
+    [InlineData(40, 0.25f, Good, 50)]
+    [InlineData(45, 0.75f, Good, 79)]  // 78.75 rounds up to 79
+    [InlineData(15, 0.5f, Good, 22)]   // 22.5 rounds to the even 22
+    [InlineData(13, 0.5f, Good, 20)]   // 19.5 rounds to the even 20
+    [InlineData(40, 0.25f, Fail, 0)]
+    public void RoundsTheExpRatio_ZeroForFail(int recipeExp, float expRatio, int level, int expected)
+    {
+        Assert.Equal(expected, PreviewLogic.CookExp(recipeExp, expRatio, level));
+    }
 }
 
 public class SeasoningBonusTests
@@ -129,25 +183,25 @@ public class IngredientTipTests
 {
     [Theory]
     // stat order: satiety, mood, energy, health, life
-    [InlineData(new[] { 2, -3, 0, 0, 2 }, 3, "T3|Tier|Low-grade\n🍖 Satiety: +2\n🧠 Morale: -3\n❤️ Life: +2")]
-    [InlineData(new[] { 5, 0, 4, 2, 0 }, 1, "T1|Tier|High-end\n🍖 Satiety: +5\n⚡ Stamina: +4\n💚 Fitness: +2")]
-    [InlineData(new[] { 0, 0, 0, 0, 0 }, 2, "T2|Tier|Mid-tier")]
-    [InlineData(new[] { 8, 0, 0, 0, 0 }, 0, "🍖 Satiety: +8")]
-    public void TierThenOneSignedLineForEachStat(int[] stats, int tier, string expected)
+    [InlineData(new[] { 2, -3, 0, 0, 2 }, 3, 0, "T3|Tier|Low-grade\n🍖 Satiety: +2\n🧠 Morale: -3\n❤️ Life: +2")]
+    [InlineData(new[] { 5, 0, 4, 2, 0 }, 1, 12, "T1|Tier|High-end\nTrade value: 12\n🍖 Satiety: +5\n⚡ Stamina: +4\n💚 Fitness: +2")]
+    [InlineData(new[] { 0, 0, 0, 0, 0 }, 2, 0, "T2|Tier|Mid-tier")]
+    [InlineData(new[] { 8, 0, 0, 0, 0 }, 0, 3, "Trade value: 3\n🍖 Satiety: +8")]
+    public void TierThenTradeValueThenOneSignedLineForEachStat(int[] stats, int tier, int tradeValue, string expected)
     {
-        Assert.Equal(expected, PreviewLogic.IngredientTip(stats, tier, PreviewLogic.EnglishWords));
+        Assert.Equal(expected, PreviewLogic.IngredientTip(stats, tier, tradeValue, PreviewLogic.EnglishWords));
     }
 
     [Fact]
     public void NothingToShow()
     {
-        Assert.Null(PreviewLogic.IngredientTip(new int[5], 0, PreviewLogic.EnglishWords));
+        Assert.Null(PreviewLogic.IngredientTip(new int[5], 0, 0, PreviewLogic.EnglishWords));
     }
 
     [Fact]
     public void NamesComeFromTheWords()
     {
-        Assert.Equal("T3|档次|低档\n🍖 饱腹: +7\n🧠 心态: -4", PreviewLogic.IngredientTip(new[] { 7, -4, 0, 0, 0 }, 3, WordsTests.Chinese()));
+        Assert.Equal("T3|档次|低档\n交易价值: 5\n🍖 饱腹: +7\n🧠 心态: -4", PreviewLogic.IngredientTip(new[] { 7, -4, 0, 0, 0 }, 3, 5, WordsTests.Chinese()));
     }
 }
 public class WordsTests
@@ -191,6 +245,20 @@ public class WordsTests
     }
 
     [Fact]
+    public void TooltipLabelsAreWordsOfTheMod_ByLanguage()
+    {
+        var english = PreviewLogic.WordsOrEnglish(Keys, null, false, out _);
+        Assert.Equal("Trade value", english.TradeLabel);
+        Assert.Equal("Cooking XP", english.ExpLabel);
+        Assert.Equal("Recovery when eaten", english.RecoveryLabel);
+
+        var chinese = PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _);
+        Assert.Equal("交易价值", chinese.TradeLabel);
+        Assert.Equal("烹饪熟练度", chinese.ExpLabel);
+        Assert.Equal("食用恢复", chinese.RecoveryLabel);
+    }
+
+    [Fact]
     public void NoTextsAtAllGivesEnglish()
     {
         var words = PreviewLogic.WordsOrEnglish(Keys, null, false, out var fellBack);
@@ -218,7 +286,103 @@ public class WordsTests
         Assert.False(Chinese().SameAs(PreviewLogic.EnglishWords));
         Assert.False(Chinese().SameAs(null));
     }
+
+    [Fact]
+    public void SameAsIsFalseWhenOnlyATooltipLabelDiffers()
+    {
+        var a = Chinese();
+        var b = Chinese();
+        b.ExpLabel = "other";
+        Assert.False(a.SameAs(b));
+    }
 }
+public class TipLinesTests
+{
+    [Fact]
+    public void ExpLineThenQualityHeaderAndTradeRow_HighestFirst_ZeroChanceOmitted()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 28.0, 72.0 }, new[] { 20, 50, 90, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[]
+        {
+            "Cooking XP: +79",
+            "|3:Perfect|2:Good",
+            "Trade value|200|90",
+        }, lines);
+    }
+
+    [Fact]
+    public void ExpLineNamesTheZeroOfAFailedDish()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 20.0, 0, 0, 80.0 }, new[] { 5, 0, 0, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[]
+        {
+            "Cooking XP: +79 (Failed 0)",
+            "|3:Perfect|0:Failed",
+            "Trade value|200|5",
+        }, lines);
+    }
+
+    [Fact]
+    public void NourishRatioAddsARecoveryLine_ZeroRatioAddsNone()
+    {
+        var withRatio = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0.05f, 0, PreviewLogic.EnglishWords);
+        Assert.Contains("Recovery when eaten: +5%", withRatio);
+
+        var noRatio = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0f, 0, PreviewLogic.EnglishWords);
+        Assert.DoesNotContain(noRatio, l => l.Contains("Recovery"));
+    }
+
+    [Fact]
+    public void PerfectMoraleLineOnlyWhenPerfectCanOccur()
+    {
+        var withPerfect = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0, 3, PreviewLogic.EnglishWords);
+        Assert.Contains("Perfect 🧠 Morale: +3", withPerfect);
+
+        var noPerfect = PreviewLogic.TipLines(new[] { 0, 0, 100.0, 0 }, new[] { 0, 0, 90, 0 }, 60, 0, 0, 3, PreviewLogic.EnglishWords);
+        Assert.DoesNotContain(noPerfect, l => l.Contains("Morale"));
+    }
+
+    [Fact]
+    public void OneLevelGivesPlainLines_ChineseWordsGiveChineseLabels()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0.05f, 3, WordsTests.Chinese());
+        Assert.Equal(new[]
+        {
+            "烹饪熟练度: +79",
+            "交易价值: 200",
+            "食用恢复: +5%",
+            "完美 🧠 心态: +3",
+        }, lines);
+    }
+}
+
+public class TipLinesOnlyFailTests
+{
+    [Fact]
+    public void OnlyFailedCanOccur_ExpIsAPlainZero()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 100.0, 0, 0, 0 }, new[] { 5, 0, 0, 0 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[] { "Cooking XP: 0", "Trade value: 5" }, lines);
+    }
+}
+
+public class TipLinesTierTests
+{
+    [Fact]
+    public void TierLineComesFirst_InTheFormatOfTheIngredientTip()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 2, 0, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[] { "T2|Tier|Mid-tier", "Cooking XP: +79", "Trade value: 200" }, lines);
+    }
+
+    [Fact]
+    public void DishWithNoTierHasNoTierLine()
+    {
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[] { "Cooking XP: +79", "Trade value: 200" }, lines);
+    }
+}
+
 public class PortionsTests
 {
     [Theory]

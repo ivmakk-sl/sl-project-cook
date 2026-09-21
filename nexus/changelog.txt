@@ -1,0 +1,5 @@
+v1.1.0 - 2026-09-21
+Added: Point at a dish card to see the tier of the dish, the cooking XP, and the trade value at each quality level, plus the eat bonus of your talents.
+Added: The food badge of an ingredient shows its tier: gold with a triangle up is High-end, grey with a triangle down is Low-grade.
+Added: Ingredient tooltips show the trade value.
+Changed: Quality chances now include the cooking talents of your character.
