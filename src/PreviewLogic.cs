@@ -17,7 +17,7 @@ namespace ProjectCook
             public string[] Quality;
             // Index is the game's tier number: 1 High, 2 Mid, 3 Low. Index 0 has no name.
             public string[] Tier;
-            // Order of the game's stat array: satiety, mood, energy, health, life.
+            // Order of the game's stat array: satiety, morale, stamina, health, life.
             public string[] Stat;
             // The label before the tier name. The game has no text for it, so it is the one word that the mod translates.
             public string TierLabel;
@@ -116,7 +116,7 @@ namespace ProjectCook
             return bonus;
         }
 
-        // The rotten penalty (a negative number) reduced by the "Mold Master" talent ratio. A ratio at or above 1
+        // The expired penalty (a negative number) reduced by the "Mold Master" talent ratio. A ratio at or above 1
         // removes the whole penalty.
         public static int RottenPenalty(int penalty, float reduceRatio)
         {
@@ -224,7 +224,7 @@ namespace ProjectCook
             return sb.ToString();
         }
 
-        // Same icons as the item tooltip of the game. Order of the game's stat array: satiety, mood, energy, health, life.
+        // Same icons as the item tooltip of the game. Order of the game's stat array: satiety, morale, stamina, health, life.
         private static readonly string[] StatIcons = { "🍖", "🧠", "⚡", "💚", "❤️" };
 
         // Tooltip lines of an ingredient: the ingredient tier (the game's tier number: 0 none, 1 High, 2 Mid, 3 Low),

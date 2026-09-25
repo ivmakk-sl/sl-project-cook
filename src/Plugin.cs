@@ -238,7 +238,7 @@ namespace ProjectCook
             return result;
         }
 
-        // Quality floor and all bonuses that do not depend on the recipe: fresh or rotten, seasonings, furniture.
+        // Quality floor and all bonuses that do not depend on the recipe: fresh or expired, seasonings, furniture.
         private static int QualityBonusWithoutRecipe(State_Web_Cooking state, ConfigManager config, TalentInputs talents, out int floor, out string inputs)
         {
             floor = config.Get_Config_CookingLv(state.CookingLevel)?.QualityFloor ?? 0;
