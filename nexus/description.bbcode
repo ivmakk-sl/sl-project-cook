@@ -1,29 +1,29 @@
-The cooking window tells you which dish you can make, but not how good it will be. Project Cook adds a preview to each dish card in the "THIS POT" panel: the possible quality levels, their chances, the dish stats, and the portion count. Compare ingredients and seasonings before you use them.
+The cooking window tells you which dish you get, but not how good it will be. Project Cook adds the numbers. Each dish card of the "THIS POT" panel shows one line for each quality level that can occur, with the chance of that level and what the dish gives at that level. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
 
 With the default settings, Project Cook only changes what the cooking window shows. It does not change the cooking result, the recipes, or your save.
 
 [size=5]Main features[/size]
 [list]
 [*][b]Quality chances.[/b] One line for each quality level (Perfect, Good, Average, Failed) with its chance in percent. Levels that cannot occur do not show.[/*]
-[*][b]Dish stats for each quality level.[/b] See how much Satiety, Morale, Stamina, Health, and Life the dish gives.[/*]
+[*][b]Dish stats for each level.[/b] Satiety, morale, stamina, health, and life of the dish at that quality.[/*]
 [*][b]Portion count.[/b] Shows when the dish splits into more than one portion.[/*]
 [*][b]Talents included.[/b] The chances include the cooking talents of your character, for example "Practice Makes Perfect".[/*]
-[*][b]Dish card tooltip.[/b] Hover over a dish card to see its tier, the cooking XP you will earn, and its base trade value at each quality level. Any talent bonuses that apply when you eat the dish are listed separately from the dish stats.[/*]
-[*][b]Ingredient tooltips.[/b] Hover over an ingredient in the cooking window to see its tier (High-end, Mid-tier, Low-grade), its base trade value, and its stats before cooking.[/*]
-[*][b]Tier badge.[/b] An ingredient's food badge turns gold with an upward triangle for High-end, or grey with a downward triangle for Low-grade. A green badge means Mid-tier or no tier.[/*]
+[*][b]Dish card tooltip.[/b] Point at a dish card to see the tier of the dish, the cooking XP for that dish, and its base trade value at each quality level. It also shows talent bonuses that apply when you eat the dish, if you have them. These bonuses are shown separately from the dish stats.[/*]
+[*][b]Ingredient tooltips.[/b] Point at an ingredient in the cooking window to see its tier (High-end, Mid-tier, Low-grade), its base trade value, and its raw stats.[/*]
+[*][b]Tier badge.[/b] The food badge of an ingredient shows its tier: gold with a triangle up is High-end, grey with a triangle down is Low-grade. The unchanged green badge means Mid-tier or no tier.[/*]
 [*][b]Drink previews.[/b] The Juicer and Coffee Machine show quality chances, drink stats, portion counts, tooltips, and ingredient tier badges.[/*]
 [*][b]English and Chinese.[/b] Added text follows the game language.[/*]
 [/list]
 
-Base trade values do not include changes from trader demand or trading talents, so the value offered in a trade may differ.
+Base trade values are shown before trader demand and trading talent modifiers.
 
-[size=5]Quality and tier explained[/size]
-[b]Quality and tier are separate.[/b] Quality is Perfect, Good, Average, or Failed. Tier is High-end, Mid-tier, or Low-grade. A High-end dish can still turn out Failed, and a Low-grade dish can turn out Perfect. Project Cook shows the dish tier and the chance of each quality level.
+[size=5]How the ingredient tier works[/size]
+[b]Quality and tier are separate.[/b] Quality is the cooking result: Perfect, Good, Average, or Failed. Tier is High-end, Mid-tier, or Low-grade and matters for recipes that use ingredient types, such as Meat + Vegetables. A High-end dish can still turn out Failed, and a Low-grade dish can turn out Perfect. Project Cook shows the dish tier and the chance of each quality.
 [list]
 [*]The tier matters only for a recipe that asks for ingredient types (for example Meat + Vegetables). A recipe that asks for specific items has fixed stats and ignores the tier.[/*]
 [*]The dish gets the tier of the highest-tier ingredient used by the recipe. One High-end ingredient is enough; more of them add nothing to the tier. Cooking talents can also raise the dish tier.[/*]
-[*]The tier multiplies the ingredients' total Satiety, Health, and Life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and Satiety also gets a flat bonus per ingredient. The tier also determines which dish you make (for example Eight-Treasure Stew, Stew, or Simple Stew) and its base trade value.[/*]
-[*]A higher tier does not always mean better stats. Replacing an ingredient with a High-end ingredient that has weaker stats (for example Enoki Mushrooms) can raise the dish tier and trade value while lowering the final stats. Compare the previews to see whether the swap helps.[/*]
+[*]The tier multiplies the ingredient totals for satiety, health, and life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.[/*]
+[*]The multiplier works on the sum of the ingredient stats. A High-end ingredient with weak stats (for example Enoki Mushrooms) can raise the tier and the trade value, and still lower the stats. The dish card shows the final numbers, so compare there.[/*]
 [*]The tier of an ingredient comes from its price. Staple food, snacks, and drinks have no tier.[/*]
 [/list]
 
