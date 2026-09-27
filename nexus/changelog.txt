@@ -1,8 +1,7 @@
 v1.1.1 - 2026-09-27
-Changed: Much less work for the game's UI browser, also in long play sessions.
-Changed: Wide preview lines of a dish card are no longer cut by the game's one-line card hint.
-Fixed: The portion count of a dish with a satiety just above the portion limit now matches the game (for example 2 portions, not 1).
-Note: The Juicer and the Coffee Machine also get the preview lines, the tooltips, and the tier badges.
+Changed: Updating cooking previews requires less processing when you change ingredients.
+Fixed: Long preview lines on dish cards are no longer cut off.
+Fixed: The preview no longer shows too few portions when a dish's Satiety is just above the amount for one portion (for example, 40.3 Satiety with 40 per portion now correctly shows 2 portions).
 
 v1.1.0 - 2026-09-21
 Changed: Quality chances now include the cooking talents of your character.
