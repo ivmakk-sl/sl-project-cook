@@ -1,3 +1,9 @@
+v1.1.1 - 2026-09-27
+Changed: Much less work for the game's UI browser, also in long play sessions.
+Changed: Wide preview lines of a dish card are no longer cut by the game's one-line card hint.
+Fixed: The portion count of a dish with a satiety just above the portion limit now matches the game (for example 2 portions, not 1).
+Note: The Juicer and the Coffee Machine also get the preview lines, the tooltips, and the tier badges.
+
 v1.1.0 - 2026-09-21
 Changed: Quality chances now include the cooking talents of your character.
 Added: Point at a dish card to see the tier of the dish, the cooking XP for that dish, and its base trade value at each quality level. Talent bonuses that apply when you eat the dish are shown separately from the dish stats.

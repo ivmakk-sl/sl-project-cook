@@ -386,12 +386,24 @@ public class TipLinesTierTests
 public class PortionsTests
 {
     [Theory]
-    [InlineData(221, 32, 7)]
-    [InlineData(32, 32, 1)]
-    [InlineData(33, 32, 2)]
-    [InlineData(10, 32, 1)]
-    [InlineData(0, 32, 1)]
-    public void CeilAboveTheThreshold(int satiety, int threshold, int expected)
+    [InlineData(221f, 32f, 7)]
+    [InlineData(32f, 32f, 1)]
+    [InlineData(33f, 32f, 2)]
+    [InlineData(10f, 32f, 1)]
+    [InlineData(0f, 32f, 1)]
+    public void CeilAboveTheThreshold(float satiety, float threshold, int expected)
+    {
+        Assert.Equal(expected, PreviewLogic.Portions(satiety, threshold));
+    }
+
+    // The game compares the satiety before it is rounded for the display.
+    [Theory]
+    [InlineData(40.3f, 40f, 2)]
+    [InlineData(40f, 40f, 1)]
+    [InlineData(80.2f, 40f, 3)]
+    [InlineData(10f, 0f, 1)]
+    [InlineData(31f, 30.5f, 2)]
+    public void UsesTheUnroundedSatiety(float satiety, float threshold, int expected)
     {
         Assert.Equal(expected, PreviewLogic.Portions(satiety, threshold));
     }

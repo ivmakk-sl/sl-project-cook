@@ -1,0 +1,75 @@
+/* The rules of the page script in the Cooking frame: the preview grid of a dish card, the dish card
+   tooltip, the ingredient tooltip, and the tier badges of the bag items. The script sets the column count
+   of a grid as the custom property --pc-cols; these rules read it. */
+
+/* The preview grid, below the name line of a dish card. It has the font of the game's .pot-hint but not
+   its one-line cut, so the game cannot cut a wide grid. */
+.projectcook-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pc-cols, 1), max-content);
+  column-gap: 8px;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--pc-grid-text);
+  white-space: nowrap;
+}
+
+/* The grid of the dish card tooltip: a label column, then one column for each quality level. */
+.projectcook-tip-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--pc-cols, 1), max-content);
+  column-gap: 12px;
+  white-space: nowrap;
+}
+
+/* The percent column of the preview grid and the value columns of the tooltip grid. */
+.projectcook-cell-num {
+  text-align: right;
+}
+
+/* A quality name, in the quality color of the cooking window. Average keeps the text color. */
+.projectcook-q-3 {
+  color: var(--pc-q-perfect);
+}
+
+.projectcook-q-2 {
+  color: var(--pc-q-good);
+}
+
+.projectcook-q-0 {
+  color: var(--pc-q-fail);
+}
+
+/* A tier name in a tooltip. Mid keeps the text color. */
+.projectcook-tier-1 {
+  color: var(--pc-tier-high);
+}
+
+.projectcook-tier-3 {
+  color: var(--pc-tier-low);
+}
+
+/* A signed value of the ingredient tooltip, in the value colors of the item window. */
+.projectcook-value-pos {
+  color: var(--pc-value-pos);
+}
+
+.projectcook-value-neg {
+  color: var(--pc-value-neg);
+}
+
+/* The game's hint line of a dish card that has preview lines. */
+.projectcook-hide {
+  display: none !important;
+}
+
+/* The tier mark is the game's food badge (.item.is-food::after) with another picture: a triangle that
+   points up on the gold of the cook button for High, and a triangle that points down on the mod's grey
+   for Low. Mid keeps the game's badge. */
+.item.is-food.projectcook-bag-tier-1::after {
+  background-image: var(--pc-badge-up), linear-gradient(135deg, var(--pc-tier-high), var(--pc-tier-high-end));
+}
+
+.item.is-food.projectcook-bag-tier-3::after {
+  background-image: var(--pc-badge-down), linear-gradient(135deg, var(--pc-tier-low), var(--pc-tier-low-end));
+}

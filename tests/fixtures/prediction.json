@@ -1,0 +1,12 @@
+[
+  {
+    "RecipeId": 7008,
+    "Tier": 1,
+    "Level": 3,
+    "IsExact": false,
+    "Icon": "",
+    "Name": "Test Stew",
+    "Preview": "3|Perfect|42%|🍖40|⚡6|x2\n2|Good|33%|🍖29|⚡3|x1\n1|Average|25%|🍖21|⚡0|x1",
+    "PreviewTip": "T1|Tier|High-tier\nCooking XP: +12\n|3:Perfect|2:Good|1:Average\nTrade value|30|24|18"
+  }
+]

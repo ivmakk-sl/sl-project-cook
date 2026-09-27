@@ -1,0 +1,26 @@
+/* The colors and pictures of Project Cook, once. The page script puts this file before page.css in the
+   Cooking frame. A rule uses a token, never a raw color (stylelint checks it). The quality colors and the
+   gold fall back to the variables of Cooking.html, the frame of the style node. */
+:root {
+  /* The quality colors of the cooking window. */
+  --pc-q-perfect: var(--q-perfect, #ffc107);
+  --pc-q-good: var(--q-good, #b988e6);
+  --pc-q-fail: var(--q-fail, #707070);
+
+  /* High tier: the gold of the cook button. Low tier: the grey of the mod. */
+  --pc-tier-high: var(--warm-gold, #fbb034);
+  --pc-tier-high-end: var(--warm-orange, #ff9500);
+  --pc-tier-low: #9a9a9a;
+  --pc-tier-low-end: #5e5e5e;
+
+  /* The value colors of the item window (ItemDetailPopup.html), which the Cooking frame does not have. */
+  --pc-value-pos: #66bb6a;
+  --pc-value-neg: #ef5350;
+
+  /* The text of the preview grid. */
+  --pc-grid-text: #e8dcc8;
+
+  /* The pictures of the tier badges: a triangle that points up (High) or down (Low). */
+  --pc-badge-up: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 3 22 20H2z' fill='white'/></svg>");
+  --pc-badge-down: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21 2 4h20z' fill='white'/></svg>");
+}

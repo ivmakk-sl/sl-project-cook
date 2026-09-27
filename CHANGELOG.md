@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-09-27
+
+The Juicer and the Coffee Machine open the same cooking window as a stove, so their drinks get the same preview lines, dish card tooltip, ingredient tooltips, and tier badges. This worked in 1.1.0 too; the README and the Nexus page now say so.
+
+### Changed
+
+- Much less work for the game's UI browser: the mod sends its page script to the browser once, and a change of the ingredients sends only a short call. The ingredient tooltips go again only after a change of the game language.
+- The preview lines of a dish card have their own style, so the game's one-line cut of the card hint does not apply to them.
+
+### Fixed
+
+- Portion count of a dish with a satiety just above the portion threshold. A satiety of 40.3 with a threshold of 40 now shows 2 portions, as the game gives, not 1.
+
 ## [1.1.0] - 2026-09-21
 
 ### Added
