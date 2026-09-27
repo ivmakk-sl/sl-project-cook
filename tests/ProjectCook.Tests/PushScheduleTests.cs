@@ -1,0 +1,173 @@
+using ProjectCook;
+using Xunit;
+
+public class PushScheduleTests
+{
+    // A build function that counts its calls and gives the JSON that the test sets.
+    private sealed class Data
+    {
+        public string Json = "{\"a\":1}";
+        public int Calls;
+        public string Build() { Calls++; return Json; }
+    }
+
+    [Fact]
+    public void No_request_sends_nothing_and_builds_nothing()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10f, d.Build).Kind);
+        Assert.Equal(0, d.Calls);
+    }
+
+    [Fact]
+    public void Three_refreshes_in_one_frame_make_one_send()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.Request(10f);
+        s.Request(10f);
+        s.Request(10f);
+
+        Assert.Equal(PushSchedule.Kind.SetData, s.Tick(10f, d.Build).Kind);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.02f, d.Build).Kind);
+    }
+
+    // Sends the data once and gives the page answer, then makes the next refresh.
+    private static PushSchedule.Step SendAndAnswer(PushSchedule s, Data d, float now, string answer)
+    {
+        s.Request(now);
+        var step = s.Tick(now, d.Build);
+        s.OnResult(step, answer, now + 0.05f);
+        return step;
+    }
+
+    [Fact]
+    public void The_same_data_as_the_confirmed_data_goes_as_Apply_and_new_data_as_SetData()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, "installed");
+
+        s.Request(20f);
+        var same = s.Tick(20f, d.Build);
+        Assert.Equal(PushSchedule.Kind.Apply, same.Kind);
+        Assert.Equal("{\"a\":1}", same.Json);
+        s.OnResult(same, "already installed", 20.05f);
+
+        d.Json = "{\"a\":2}";
+        s.Request(30f);
+        var changed = s.Tick(30f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetData, changed.Kind);
+        Assert.Equal("{\"a\":2}", changed.Json);
+    }
+
+    // setData stores the data before its pass, also when no Cooking frame is there or the pass fails (a
+    // rebuilt browser blocks the frame), so each answer confirms the data, except an answer that shows that the
+    // data did not arrive.
+    [Theory]
+    [InlineData("installed", PushSchedule.Kind.Apply)]
+    [InlineData("already installed", PushSchedule.Kind.Apply)]
+    [InlineData("no Cooking frame", PushSchedule.Kind.Apply)]
+    [InlineData("installed; missing: tierMark(pot.getConfig)", PushSchedule.Kind.Apply)]
+    [InlineData("already installed; errors: preview: x", PushSchedule.Kind.Apply)]
+    [InlineData("error: SecurityError: Blocked a frame", PushSchedule.Kind.Apply)]
+    [InlineData("no script", PushSchedule.Kind.SetData)]
+    [InlineData(null, PushSchedule.Kind.SetData)]
+    public void The_answer_of_a_SetData_send_decides_if_the_data_is_confirmed(string answer, PushSchedule.Kind next)
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, answer);
+
+        s.Request(20f);
+        Assert.Equal(next, s.Tick(20f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void After_no_script_the_next_send_carries_the_data()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, "installed");
+        SendAndAnswer(s, d, 20f, "no script");
+
+        s.Request(30f);
+        Assert.Equal(PushSchedule.Kind.SetData, s.Tick(30f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void No_Cooking_frame_gives_a_retry_one_real_second_later_as_Apply_after_confirmed_data()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        var first = SendAndAnswer(s, d, 10f, "no Cooking frame");
+        Assert.False(first.Retry);
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.5f, d.Build).Kind);
+        var retry = s.Tick(11.05f, d.Build);
+        Assert.Equal(PushSchedule.Kind.Apply, retry.Kind);
+        Assert.True(retry.Retry);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(11.1f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_missing_result_counts_as_no_Cooking_frame()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, null);
+
+        var retry = s.Tick(11.05f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetData, retry.Kind);
+        Assert.True(retry.Retry);
+    }
+
+    [Fact]
+    public void The_retries_stop_once_the_request_is_3_real_seconds_old()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, "no Cooking frame");
+
+        var retry1 = s.Tick(11.05f, d.Build);
+        s.OnResult(retry1, "no Cooking frame", 11.1f);
+        var retry2 = s.Tick(12.1f, d.Build);
+        Assert.True(retry2.Retry);
+        s.OnResult(retry2, "no Cooking frame", 12.15f);
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(13.15f, d.Build).Kind);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(20f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_refresh_during_a_retry_wait_sends_at_once_and_starts_the_3_seconds_again()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, "no Cooking frame");
+
+        s.Request(12.9f);
+        var step = s.Tick(12.9f, d.Build);
+        Assert.Equal(PushSchedule.Kind.Apply, step.Kind);
+        Assert.False(step.Retry);
+        s.OnResult(step, "no Cooking frame", 12.95f);
+
+        Assert.True(s.Tick(13.95f, d.Build).Retry);
+    }
+
+    [Fact]
+    public void A_build_that_throws_is_tried_again_one_real_second_later()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.Request(10f);
+        Assert.Throws<InvalidOperationException>(() => s.Tick(10f, () => throw new InvalidOperationException()));
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.5f, d.Build).Kind);
+        var retry = s.Tick(11f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetData, retry.Kind);
+        Assert.True(retry.Retry);
+    }
+}

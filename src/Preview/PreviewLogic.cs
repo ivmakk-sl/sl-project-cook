@@ -143,10 +143,11 @@ namespace ProjectCook
         }
 
         // The game splits a dish into portions when its satiety is above the threshold. Total satiety stays the same.
-        public static int Portions(int satiety, int threshold)
+        // It compares the satiety before the display rounds it, so 40.3 over a threshold of 40 gives 2 portions.
+        public static int Portions(float satiety, float threshold)
         {
             if (threshold <= 0 || satiety <= threshold) return 1;
-            return (satiety + threshold - 1) / threshold;
+            return (int)Math.Ceiling(satiety / threshold);
         }
 
         public sealed class Entry

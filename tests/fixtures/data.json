@@ -1,0 +1,10 @@
+{
+  "tips": {
+    "555": "T1|Tier|High-tier\nTrade value: 12",
+    "556": "T3|Tier|Low \"raw\" \\ tier\nTrade value: 2"
+  },
+  "tiers": {
+    "555": 1,
+    "556": 3
+  }
+}

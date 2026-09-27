@@ -1,3 +1,8 @@
+v1.1.1 - 2026-09-27
+Changed: Updating cooking previews requires less processing when you change ingredients.
+Fixed: Long preview lines on dish cards are no longer cut off.
+Fixed: The preview no longer shows too few portions when a dish's Satiety is just above the amount for one portion (for example, 40.3 Satiety with 40 per portion now correctly shows 2 portions).
+
 v1.1.0 - 2026-09-21
 Changed: Quality chances now include the cooking talents of your character.
 Added: Point at a dish card to see the tier of the dish, the cooking XP for that dish, and its base trade value at each quality level. Talent bonuses that apply when you eat the dish are shown separately from the dish stats.

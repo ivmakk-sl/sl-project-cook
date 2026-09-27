@@ -2,13 +2,15 @@
 
 A mod for the Steam game *Survival Log* that shows what a dish will be before you cook it. In the cooking window, each dish card of the "THIS POT" panel gets one line for each quality level that can occur: the chance of that level, the stats of the dish at that level (satiety, morale, stamina, health, life), and the portion count. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
 
+The Juicer and the Coffee Machine open the same cooking window, so their drinks get the same preview lines, dish card tooltip, ingredient tooltips, and tier badges as the dishes of a stove.
+
 Point at a dish card to see more: the tier of the dish, the cooking XP for that dish, and its base trade value at each quality level. If the character has a talent that raises the recovery from its own dishes, or one that gives morale for a Perfect dish, the tooltip shows that bonus too. These two bonuses apply when the character eats the dish, so they are not part of the stats on the card.
 
 Ingredient tooltips in the cooking window also show the tier of the ingredient (High-end, Mid-tier, Low-grade), its base trade value, and its raw stats. Base trade values are shown before trader demand and trading talent modifiers. The food badge of an ingredient shows its tier at a glance: a gold badge with a triangle that points up is High-end, a grey badge with a triangle that points down is Low-grade, and the game's green badge is Mid-tier or no tier.
 
 The added text follows the game language, English and Chinese. The quality, tier, and stat names are the game's own words, so they are equal to the rest of the window.
 
-With the default settings, Project Cook only changes what the cooking window displays. It does not change the cooking result, the recipes, or the save. The stats and the portion count come from the game's own formula. Talent bonuses that apply when you eat the dish are shown separately. The chances use the same inputs as the game's quality roll: cooking level, cook furniture, fresh or rotten ingredients, seasonings, exact recipe, and the cooking talents of the character. Hot pot mode has no preview.
+With the default settings, Project Cook only changes what the cooking window displays. It does not change the cooking result, the recipes, or the save. The stats and the portion count come from the game's own formula. Talent bonuses that apply when you eat the dish are shown separately. The chances use the same inputs as the game's quality roll: cooking level, cook furniture, fresh or expired ingredients, seasonings, exact recipe, and the cooking talents of the character. Hot pot mode has no preview.
 
 Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
@@ -40,24 +42,29 @@ The mod was verified on the Steam build `25366138` of the game with BepInEx `6.0
 
 This is a BepInEx 6 IL2CPP plugin. It compiles against the game's IL2CPP interop assemblies, so a game install with BepInEx set up and started once is required. Those assemblies are game-derived and are not part of this repo. The .NET 8 SDK is required.
 
+The build also builds the page script (TypeScript and CSS in `src/Web/`) with Vite, so Node is required too. The mod root has a `mise.toml` for Node, and the npm packages install once after a clone:
+
 ```
+mise trust
+npm ci
 dotnet build src/ProjectCook.csproj -c Release
 ```
 
 `Directory.Build.props` sets `GameDir` to the default Steam install path. If the game is in another place, override it without an edit of the file: set a `GameDir` environment variable, or pass `-p:GameDir=...` on the build. The output DLL is at `src\bin\Release\ProjectCook.dll`.
 
-The preview math and the text of the lines are game-free code (`src/PreviewLogic.cs`, `src/FlatJson.cs`) with unit tests. The tests do not need the game:
+The preview math, the text of the lines, the JSON for the page script, and the send schedule are game-free code (`src/Preview/PreviewLogic.cs`, `src/Preview/FlatJson.cs`, `src/Web/PageJson.cs`, `src/Web/PushSchedule.cs`) with unit tests. The tests do not need the game:
 
 ```
 dotnet test tests/ProjectCook.Tests
 ```
 
-The page script `src/page.js` has its own test, which runs it against the real `Cooking.html` of the installed game (Node with jsdom). Run it after a game update. It needs the game install, and `SL_GAME_DIR` overrides the default Steam path:
+The page script has its own tests, which run the built script against the real `Cooking.html` of the installed game (Vitest with jsdom). Run them after a game update. They need the game install, and `SL_GAME_DIR` overrides the default Steam path. The other page checks run at the mod root too:
 
 ```
-cd tests/page
-npm install
-npm test
+npm test            # builds the page script, then runs the page tests
+npm run lint        # stylelint on the CSS files
+npm run typecheck   # TypeScript check of the page script and its tests
+npm run dev         # the game's cooking window in a browser with the page script and fake data
 ```
 
 ## Package
