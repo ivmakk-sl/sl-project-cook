@@ -15,6 +15,7 @@ namespace ProjectCook
         private static string script;
         private static readonly HashSet<string> loggedMissing = new HashSet<string>();
         private static readonly HashSet<string> loggedErrors = new HashSet<string>();
+        private static readonly HashSet<string> loggedOther = new HashSet<string>();
         private static bool webViewWarned;
 
         // The Vite bundle, embedded by ProjectCook.csproj under this name.
@@ -52,7 +53,7 @@ namespace ProjectCook
                 return;
             }
             string command = step.Kind == PushSchedule.Kind.Apply ? PageJson.ApplyCommand : PageJson.SetDataCommand(step.Json);
-            webView.ExecuteJavaScript(command, (Il2CppSystem.Action<string>)(r =>
+            if (!Execute(webView, command, r =>
             {
                 try
                 {
@@ -65,7 +66,8 @@ namespace ProjectCook
                     SendWithScript(new PushSchedule.Step(PushSchedule.Kind.SetData, step.Json, step.Retry));
                 }
                 catch (Exception e) { Plugin.Log.LogError($"Project Cook send failed: {e}"); }
-            }));
+            }))
+                Done(step, null);
         }
 
         private static void SendWithScript(PushSchedule.Step step)
@@ -80,7 +82,7 @@ namespace ProjectCook
             fullSendAt = now;
             int id = ++fullSendId;
             if (Plugin.Verbose.Value) Plugin.Log.LogDebug("ProjectCook page script: sent");
-            webView.ExecuteJavaScript(PageJson.SetDataWithScriptCommand(Script(), step.Json), (Il2CppSystem.Action<string>)(r =>
+            if (!Execute(webView, PageJson.SetDataWithScriptCommand(Script(), step.Json), r =>
             {
                 try
                 {
@@ -88,7 +90,27 @@ namespace ProjectCook
                     Done(step, r);
                 }
                 catch (Exception e) { Plugin.Log.LogError($"Project Cook send failed: {e}"); }
-            }));
+            }))
+            {
+                fullSendAt = float.NegativeInfinity;
+                Done(step, null);
+            }
+        }
+
+        // A web view that is being built again or disposed can throw at the call itself. The caller then counts
+        // the send as one with no result, so the schedule tries again. Each distinct text logs once.
+        private static bool Execute(Vuplex.WebView.IWebView webView, string js, Action<string> callback)
+        {
+            try
+            {
+                webView.ExecuteJavaScript(js, (Il2CppSystem.Action<string>)callback);
+                return true;
+            }
+            catch (Exception e)
+            {
+                if (loggedOther.Add(e.Message)) Plugin.Log.LogWarning($"Project Cook send failed: {e.Message}");
+                return false;
+            }
         }
 
         // No result means the call did not run (for example a browser crash).
