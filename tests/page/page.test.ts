@@ -203,6 +203,16 @@ if (!gameFilesExist) {
     assert.ok(storage.document.getElementById('projectcook-style'), 'the storage window has no style node');
   });
 
+  test('interface: an error of the storage pass goes to the errors part of the result, which C# logs', async (t) => {
+    const root = rootWithoutFrame();
+    const storage = await storageWindow(t);
+    storage.document.head.appendChild = () => { throw new Error('boom'); };
+    withFrames(root, [storage]);
+
+    const result = root.__projectCook.apply();
+    assert.match(result, /^storage: failed; errors: .*boom/);
+  });
+
   test('interface: a pass with both windows answers the cooking result first', async (t) => {
     const cookingWindow = await loadCookingWindow(t);
     const root = rootWithoutFrame();

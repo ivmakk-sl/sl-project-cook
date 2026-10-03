@@ -88,7 +88,8 @@ namespace ProjectCook
     }
 
     // TryGetPutRank reads the rule from TagIds of the component, so the Prefix swaps the list for the call and the
-    // Postfix puts the saved list back.
+    // Finalizer puts the saved list back, also when the call throws (a Postfix would not run then, and the storage
+    // would keep the list without the cooking tag). It returns nothing, so the exception goes on to the game.
     [HarmonyPatch(typeof(FurnitureTagComponent), nameof(FurnitureTagComponent.TryGetPutRank))]
     internal static class TagMatchOnTryGetPutRank
     {
@@ -106,7 +107,7 @@ namespace ProjectCook
             catch (Exception e) { TagMatch.Warn("TryGetPutRank", e); }
         }
 
-        private static void Postfix(FurnitureTagComponent __instance, Il2CppList __state)
+        private static void Finalizer(FurnitureTagComponent __instance, Il2CppList __state)
         {
             if (__state == null) return;
             try { __instance.TagIds = __state; }

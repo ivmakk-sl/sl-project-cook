@@ -107,7 +107,11 @@ function runStorage(w: StorageWindow): string | null {
     if (missing) result += '; missing: ' + missing;
     const errors = newErrorsText(w);
     if (errors) result += '; errors: ' + errors;
-  } catch (e) { result = 'error: ' + e; }
+  } catch (e) {
+    // The errors part, not "error: ": C# reads "error: " only at the start of the whole result, and this one starts
+    // with "storage: ".
+    result = 'failed; errors: ' + e;
+  }
   return result;
 }
 

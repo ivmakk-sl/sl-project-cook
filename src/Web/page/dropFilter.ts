@@ -2,8 +2,8 @@
 // createWebUICore, which calls window.parent.postMessage({ type, data, sourcePageId }): the postMessage of the root
 // page, where this script runs. While a sort is on, the cells of each sorted grid show page places, not real ones:
 // - a move inside a sorted grid is dropped, so no item moves in it;
-// - a move into it from another owner gets the first free real cell that fits the item (or goes unchanged when no
-//   cell fits, and the game does what it does for a full storage).
+// - a move into it from another owner gets the first free real cell that fits the item; with no such cell it is
+//   dropped, because its place is a sorted one and could name another real item.
 // Each other message passes unchanged.
 
 export interface GridPlace { id: string; x: number; y: number; w: number; h: number }
@@ -59,7 +59,7 @@ export function filterMove(message: PageMessage, grids: SortedGrid[]): PageMessa
   // A ground item has no size in the message; the ground dock gives one cell to each item.
   const size = (m.item && grid.sizeOf(m.item)) || [1, 1];
   const cell = firstFree(grid.items, grid.cols, grid.rows, size[0], size[1]);
-  if (!cell) return message;
+  if (!cell) return null;
   const data: Record<string, unknown> = { ...message.data, x: cell[0], y: cell[1] };
   if ('cursorCol' in data) data.cursorCol = cell[0];
   if ('cursorRow' in data) data.cursorRow = cell[1];

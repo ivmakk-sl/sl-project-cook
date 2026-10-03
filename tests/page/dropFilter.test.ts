@@ -34,9 +34,9 @@ test('storage window: a drag from the bag into the sorted storage gets a free re
   assert.equal(out.data.itemId, 9);
 });
 
-test('a move into the sorted storage that fits no free cell goes unchanged', () => {
+test('a move into the sorted storage that fits no free cell is dropped, so its sorted place never reaches the game', () => {
   const msg = { type: 'DRAG_ITEM', sourcePageId: 'Backpack', data: { itemId: 8, srcOwnerId: 5, dstOwnerId: 42, x: 0, y: 1 } };
-  assert.equal(filterMove(msg, [grid()]), msg);
+  assert.equal(filterMove(msg, [grid()]), null);
 });
 
 test('cooking window: a move inside the sorted tab is dropped, a move from the workbench gets a free cell', () => {

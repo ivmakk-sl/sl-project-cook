@@ -266,6 +266,42 @@ public class PushScheduleTests
     }
 
     [Fact]
+    public void A_sort_send_whose_answer_never_comes_is_sent_again_after_the_wait()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+        var first = s.Tick(10f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, first.Kind);
+
+        // No OnResult: a browser crash dropped the callback.
+        s.RequestSort(Sort);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(11f, d.Build).Kind);
+        var again = s.Tick(15.1f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, again.Kind);
+        Assert.Equal(Sort, again.SortJson);
+
+        // The late answer of the first send does not free the second one.
+        s.OnResult(first, null, 15.2f);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(16.5f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_sort_only_build_that_throws_waits_one_real_second()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+        Assert.Throws<InvalidOperationException>(() => s.Tick(10f, () => throw new InvalidOperationException()));
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.02f, d.Build).Kind);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.9f, d.Build).Kind);
+        var again = s.Tick(11.05f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, again.Kind);
+        Assert.Equal(Sort, again.SortJson);
+    }
+
+    [Fact]
     public void A_build_that_throws_is_tried_again_one_real_second_later()
     {
         var s = new PushSchedule();

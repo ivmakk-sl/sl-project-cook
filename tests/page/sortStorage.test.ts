@@ -86,6 +86,20 @@ test('storage sort: the Backpack side gets the dropdown and the sort when the so
   assert.equal(storageGrids(w).length, 0);
 });
 
+test('storage sort: an ordinary storage after a sortable one keeps the Backpack side unsorted', () => {
+  const w = storageWindow();
+  // The sort data of the last sortable storage (42) still names the Backpack, but the open storage is another one.
+  view.sort = sortData('42', '5');
+  w.__bagB.ownerId = 77;
+  view.choice = 1;
+  applyStorageSort(w);
+  assert.equal(toolbarA(w).querySelector('.projectcook-sort'), null);
+  assert.equal(toolbarB(w).querySelector('.projectcook-sort'), null);
+  assert.deepEqual(placeA(w, 11), [0, 0]);
+  assert.equal(w.document.querySelector('.bag-panel:not(.is-storage) .projectcook-sort-badge'), null);
+  assert.equal(storageGrids(w).length, 0);
+});
+
 test('storage sort: without the Backpack in the sort data, its side has no dropdown and keeps its places', () => {
   const w = storageWindow();
   view.sort = sortData('42');

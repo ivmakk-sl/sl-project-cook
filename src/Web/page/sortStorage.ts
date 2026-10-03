@@ -38,13 +38,13 @@ function bagOf(state: SetupState, side: Side): Bag | undefined {
   return side === 'A' ? state.bagA : state.bagB;
 }
 
-// The sort data of a side, or null when the side is not sortable (the data names another owner).
+// The sort data of a side, or null when the side is not sortable. The data must name the open storage: after an
+// ordinary storage C# sends no data, and the data of the last sortable storage still names the Backpack.
 function sortOf(state: SetupState, side: Side) {
   const sort = view.sort;
   const bag = bagOf(state, side);
-  if (!sort || !bag || !state.isDualBag) return null;
-  const owner = side === 'B' ? sort.owner : sort.bag;
-  return owner === String(bag.ownerId) ? sort : null;
+  if (!sort || !bag || !state.isDualBag || !state.bagB || sort.owner !== String(state.bagB.ownerId)) return null;
+  return side === 'B' || sort.bag === String(bag.ownerId) ? sort : null;
 }
 
 // Gives the items of a side the places of the choice: the packed places, or the real places with Default, with no
