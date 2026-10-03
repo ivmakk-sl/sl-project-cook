@@ -44,12 +44,13 @@ namespace ProjectCook
             {
                 if (items == null) return;
                 bool workbench = !IsSortable(ownerId, true);
-                if (workbench && cookingTabNumbers == null) return;
                 var numbers = Numbers(items, currentHours, out string eatLog);
                 List<KeyValuePair<long, SortLogic.Numbers>> send;
                 if (workbench)
                 {
+                    // Kept also with no tab numbers yet (an empty tab at the open), so the next tab send holds them.
                     workbenchNumbers = numbers;
+                    if (cookingTabNumbers == null) return;
                     send = SortLogic.Merge(cookingTabNumbers, workbenchNumbers);
                 }
                 else
