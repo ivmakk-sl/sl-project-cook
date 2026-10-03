@@ -1,7 +1,7 @@
 v1.2.0 - 2026-10-03
 Added: Food sort for fridges and home storages tagged Cooking or Food, in the storage window and cooking window. The Backpack can also be sorted in the cooking window, and while one of these storages is open in the storage window. Sort by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date without moving the stored items.
 Added: Numbers on sorted items and cooking workbench ingredients: eat values per use, trade value per stack, or days left. Rotten and expired food come first when sorting by Expiration Date.
-Added: Cooking tag in a home storage's "What goes in here" settings. Storages tagged Cooking or Food become cooking window tabs, usable from cooking level 2. Cooking keeps the other tags' robot rules; used alone, it works like Food.
+Added: Cooking tag in a home storage's Tags panel. Storages tagged Cooking or Food become cooking window tabs, usable from cooking level 2. Cooking keeps the other tags' robot rules; used alone, it works like Food.
 Added: Config switches to turn off each feature (dish preview, food sort, cooking storages). All are on by default.
 Changed: Dish card stats now show eat values for the whole dish, including fixed eat talents and the difficulty's Life factor. Temporary buffs, random talent extras, being tired of a food, and stat maximums are excluded. Fitness is no longer shown because eating does not change it.
 Changed: Trade values in the tooltips include your appraisal talents.
