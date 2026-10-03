@@ -85,7 +85,7 @@ namespace ProjectCook
                 var key = SortLogic.DaysKey(days);
                 sb.Append(key.HasValue ? key.Value.ToString("0.###", CultureInfo.InvariantCulture) : "null");
                 sb.Append("],\"d\":");
-                sb.Append(days.IsRotten ? Str(words.Rotten) : days.HasNumber ? Str(SortLogic.DaysText(days.Days)) : days.IsExpired ? Str(words.Expired) : "null");
+                sb.Append(days.IsRotten ? Str(words.Rotten) : days.HasNumber ? Str(SortLogic.DaysText(days.Days, words.DayUnit)) : days.IsExpired ? Str(words.Expired) : "null");
                 sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));
                 sb.Append('}');
             }

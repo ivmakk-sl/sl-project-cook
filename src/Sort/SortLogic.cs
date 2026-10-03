@@ -82,6 +82,9 @@ namespace ProjectCook
             public string Expired, Rotten;
             // The text of the dropdown button with Default.
             public string Sort;
+            // The unit of the days on a badge: d in English, 天 in Chinese, as the game writes the shelf life
+            // ({0}d, {0}天 in SR_UI_ItemTips_6).
+            public string DayUnit;
         }
 
         // oneUse holds the values of one use of the item: the instance values of a cooked dish, else the config
@@ -113,12 +116,14 @@ namespace ProjectCook
             return (float)useTimes / max * uses;
         }
 
-        // The badge of the days left: whole days with a "d", or one decimal under one day (at least 0.1).
-        public static string DaysText(float days)
+        // The badge of the days left: whole days with the day unit (d when none is given), or one decimal under one day
+        // (at least 0.1).
+        public static string DaysText(float days, string unit = null)
         {
-            if (days >= 1f) return ((int)Math.Floor(days)).ToString(CultureInfo.InvariantCulture) + "d";
+            if (string.IsNullOrEmpty(unit)) unit = "d";
+            if (days >= 1f) return ((int)Math.Floor(days)).ToString(CultureInfo.InvariantCulture) + unit;
             var tenths = Math.Max(0.1, Math.Round(days, 1, MidpointRounding.AwayFromZero));
-            return tenths.ToString("0.0", CultureInfo.InvariantCulture) + "d";
+            return tenths.ToString("0.0", CultureInfo.InvariantCulture) + unit;
         }
 
         // The words of the dropdown: the game's Default text (SR_Web_EventChoice_DefaultTag), the game's stat names,
@@ -138,6 +143,7 @@ namespace ProjectCook
                     string.IsNullOrEmpty(expirationText) ? (chinese ? "保质期" : "Expiration Date") : expirationText,
                 },
                 Sort = chinese ? "排序" : "Sort",
+                DayUnit = chinese ? "天" : "d",
                 Expired = string.IsNullOrEmpty(expiredText) ? (chinese ? "已过期" : "Expired") : expiredText,
                 Rotten = string.IsNullOrEmpty(rottenText) ? (chinese ? "已腐败" : "Rotten") : rottenText,
             };

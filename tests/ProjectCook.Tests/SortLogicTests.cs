@@ -58,6 +58,14 @@ public class SortLogicTests
     }
 
     [Fact]
+    public void DaysText_TheDayUnitOfTheLanguage()
+    {
+        Assert.Equal("3天", SortLogic.DaysText(3.9f, "天"));
+        Assert.Equal("0.5天", SortLogic.DaysText(0.5f, "天"));
+        Assert.Equal("3d", SortLogic.DaysText(3.9f, null));
+    }
+
+    [Fact]
     public void DaysLeft_Kinds()
     {
         Assert.True(SortLogic.DaysLeft.Expired.IsExpired);
@@ -122,6 +130,17 @@ public class SortDataJsonTests
     }
 
     [Fact]
+    public void TheDaysUseTheDayUnitOfTheWords()
+    {
+        var items = new List<KeyValuePair<long, SortLogic.Numbers>>
+        {
+            new KeyValuePair<long, SortLogic.Numbers>(1, new SortLogic.Numbers { ConfigId = 5, Stats = new int?[4], Days = SortLogic.DaysLeft.Spoils(12.4f) }),
+        };
+        var chinese = new SortLogic.Words { Choices = Words.Choices, Expired = "已过期", Sort = "排序", DayUnit = "天" };
+        Assert.Contains("\"d\":\"12天\"", PageJson.SortDataJson(1, items, chinese));
+    }
+
+    [Fact]
     public void TheBagOwnerOfTheStorageWindow_FollowsTheOwner()
     {
         var json = PageJson.SortDataJson(42, new List<KeyValuePair<long, SortLogic.Numbers>>(), Words, 5);
@@ -139,6 +158,7 @@ public class SortWordsTests
         Assert.Equal(new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date" }, w.Choices);
         Assert.Equal("Expired", w.Expired);
         Assert.Equal("Sort", w.Sort);
+        Assert.Equal("d", w.DayUnit);
     }
 
     [Fact]
@@ -149,6 +169,7 @@ public class SortWordsTests
         Assert.Equal("保质期", w.Choices[6]);
         Assert.Equal("已过期", w.Expired);
         Assert.Equal("排序", w.Sort);
+        Assert.Equal("天", w.DayUnit);
     }
 
     [Fact]
