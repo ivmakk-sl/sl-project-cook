@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Food sort for a fridge and a storage with the Cooking tag or the tag Food, in the storage window and in the container tabs of the cooking window (the Backpack too, in both windows): Default, Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, each with an icon. The items show in the order of the choice, with a number at the top left of each cell (stats in green or red, the trade value in gold). While a sort is on, the dropdown shows the choice in gold, and the workbench of the cooking window shows the numbers too. Expired food comes first, with the days until it spoils in red. The sort does not move the items in the storage, and one choice applies to both windows until you quit the game.
+- Settings to turn off each feature (`DishPreview`, `FoodSort`, `CookingStorages` in the `[Features]` section of the config file), for example when another mod conflicts with it. All are on by default.
 - Cooking tag in the Status row of the tag rule. A storage with this tag or with the game's tag Food shows as a container tab in the cooking window, so you can cook with its items. The tag does not change what the robot puts in or takes out, or how fast food spoils.
 
 ### Changed

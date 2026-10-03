@@ -49,6 +49,14 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 2. Extract this mod's zip into the game folder (the folder with the game .exe). The DLL lands in `BepInEx\plugins`. Full path example:
    - Steam: `C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\ProjectCook.dll`
 
+## Settings
+
+The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it, then restart the game.
+
+- `DishPreview` - the preview lines and the tooltip of the dish cards, and the added ingredient lines and tier marks.
+- `FoodSort` - the food sort in the storage window and the cooking window.
+- `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
+
 ## Uninstall
 
 Delete `ProjectCook.dll` from the `BepInEx\plugins` folder. The game then drops the Cooking tag from each storage, and keeps the items and the other tags. A storage with only the Cooking tag loses its rule, and the robot no longer puts items in it. Before you uninstall, give such a storage a tag of the game (for example Food).

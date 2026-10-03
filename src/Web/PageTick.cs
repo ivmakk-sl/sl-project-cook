@@ -25,11 +25,17 @@ namespace ProjectCook
         public static void OnResult(PushSchedule.Step step, string result) =>
             schedule.OnResult(step, result, Time.realtimeSinceStartup);
 
+        private static readonly string NoIngredientData = PageJson.DataJson(
+            new System.Collections.Generic.KeyValuePair<int, string>[0], new System.Collections.Generic.KeyValuePair<int, int>[0]);
+
         private static void Postfix()
         {
             try
             {
-                var step = schedule.Tick(Time.realtimeSinceStartup, () => IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal()));
+                // With the dish preview off the page gets no ingredient data, and still its script for the food sort.
+                var step = schedule.Tick(Time.realtimeSinceStartup, () => Plugin.DishPreview.Value
+                    ? IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal())
+                    : NoIngredientData);
                 if (step.Kind != PushSchedule.Kind.None) PageScript.Send(step);
             }
             catch (Exception e)

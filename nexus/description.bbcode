@@ -47,6 +47,14 @@ Trade values include your appraisal talents, and not the demand of a trader.
 [/*]
 [/list]
 
+[size=5]Settings[/size]
+The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] has a switch for each feature in its [font=Courier New][Features][/font] section, all on by default. Set one to [font=Courier New]false[/font] and restart the game to turn that feature off, for example when another mod conflicts with it:
+[list]
+[*][font=Courier New]DishPreview[/font] - the dish card lines and tooltip, and the ingredient lines and tier marks.[/*]
+[*][font=Courier New]FoodSort[/font] - the food sort in the storage window and the cooking window.[/*]
+[*][font=Courier New]CookingStorages[/font] - the Cooking tag and the tabs of Cooking and Food storages. Off works like an uninstall of this part: the game drops the Cooking tag on the next save.[/*]
+[/list]
+
 [size=5]Uninstall[/size]
 Delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
 

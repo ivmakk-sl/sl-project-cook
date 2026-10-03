@@ -35,6 +35,7 @@ This repo is a BepInEx 6 (IL2CPP) Harmony mod for *Survival Log*. Plugins derive
 
 ## Release and config hygiene
 
+- **Feature switches.** `Features` / `DishPreview`, `FoodSort`, and `CookingStorages` (all default `true`) decide in `Plugin.Load` which patches attach. A patch of a feature goes into the list of its switch, and code that a switch turns off must not run through another path (for example the sort of a Food storage checks `CookingStorages`). Flag a new patch of a feature that is attached with no regard to its switch.
 - **Verbose ships off.** The `Verbose` config binds with default `false`. Diagnostic tracing goes on `LogDebug` behind it; `LogInfo` stays quiet apart from the load line.
 - **The plugin GUID never changes.** It is `com.ivmakk.survivallog.projectcook`, the BepInEx identity and the config file name. Flag any edit to it.
 - **The version is in two places that must agree:** `<Version>` in the csproj and the `BepInPlugin` attribute.
