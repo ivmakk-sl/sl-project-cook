@@ -156,11 +156,12 @@ public class LinesTests
     }
 
     [Fact]
-    public void AllStatsAndPortions()
+    public void AllStatsButFitness_AndPortions()
     {
+        // Eating does not change Fitness, so the lines never show it.
         var stats = Stats(new int[5], new int[5], new int[5], new[] { 221, 10, -4, 6, 2 });
         var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, stats, new[] { 1, 1, 1, 7 }, PreviewLogic.EnglishWords);
-        Assert.Equal(new[] { "3|Perfect|100%|🍖221|🧠10|⚡-4|💚6|❤️2|x7" }, lines);
+        Assert.Equal(new[] { "3|Perfect|100%|🍖221|🧠10|⚡-4|❤️2|x7" }, lines);
     }
 
     [Fact]
@@ -250,12 +251,10 @@ public class WordsTests
         var english = PreviewLogic.WordsOrEnglish(Keys, null, false, out _);
         Assert.Equal("Trade value", english.TradeLabel);
         Assert.Equal("Cooking XP", english.ExpLabel);
-        Assert.Equal("Recovery when eaten", english.RecoveryLabel);
 
         var chinese = PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _);
         Assert.Equal("交易价值", chinese.TradeLabel);
         Assert.Equal("烹饪熟练度", chinese.ExpLabel);
-        Assert.Equal("食用恢复", chinese.RecoveryLabel);
     }
 
     [Fact]
@@ -301,7 +300,7 @@ public class TipLinesTests
     [Fact]
     public void ExpLineThenQualityHeaderAndTradeRow_HighestFirst_ZeroChanceOmitted()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 28.0, 72.0 }, new[] { 20, 50, 90, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 28.0, 72.0 }, new[] { 20, 50, 90, 200 }, 79, 0, PreviewLogic.EnglishWords);
         Assert.Equal(new[]
         {
             "Cooking XP: +79",
@@ -313,7 +312,7 @@ public class TipLinesTests
     [Fact]
     public void ExpLineNamesTheZeroOfAFailedDish()
     {
-        var lines = PreviewLogic.TipLines(new[] { 20.0, 0, 0, 80.0 }, new[] { 5, 0, 0, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 20.0, 0, 0, 80.0 }, new[] { 5, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
         Assert.Equal(new[]
         {
             "Cooking XP: +79 (Failed 0)",
@@ -323,35 +322,20 @@ public class TipLinesTests
     }
 
     [Fact]
-    public void NourishRatioAddsARecoveryLine_ZeroRatioAddsNone()
+    public void OneLevelGivesPlainLines_WithNoTalentsLine()
     {
-        var withRatio = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0.05f, 0, PreviewLogic.EnglishWords);
-        Assert.Contains("Recovery when eaten: +5%", withRatio);
-
-        var noRatio = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0f, 0, PreviewLogic.EnglishWords);
-        Assert.DoesNotContain(noRatio, l => l.Contains("Recovery"));
-    }
-
-    [Fact]
-    public void PerfectMoraleLineOnlyWhenPerfectCanOccur()
-    {
-        var withPerfect = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0, 3, PreviewLogic.EnglishWords);
-        Assert.Contains("Perfect 🧠 Morale: +3", withPerfect);
-
-        var noPerfect = PreviewLogic.TipLines(new[] { 0, 0, 100.0, 0 }, new[] { 0, 0, 90, 0 }, 60, 0, 0, 3, PreviewLogic.EnglishWords);
-        Assert.DoesNotContain(noPerfect, l => l.Contains("Morale"));
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
+        Assert.Equal(new[] { "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 
     [Fact]
     public void OneLevelGivesPlainLines_ChineseWordsGiveChineseLabels()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0.05f, 3, WordsTests.Chinese());
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, WordsTests.Chinese());
         Assert.Equal(new[]
         {
             "烹饪熟练度: +79",
             "交易价值: 200",
-            "食用恢复: +5%",
-            "完美 🧠 心态: +3",
         }, lines);
     }
 }
@@ -361,7 +345,7 @@ public class TipLinesOnlyFailTests
     [Fact]
     public void OnlyFailedCanOccur_ExpIsAPlainZero()
     {
-        var lines = PreviewLogic.TipLines(new[] { 100.0, 0, 0, 0 }, new[] { 5, 0, 0, 0 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 100.0, 0, 0, 0 }, new[] { 5, 0, 0, 0 }, 79, 0, PreviewLogic.EnglishWords);
         Assert.Equal(new[] { "Cooking XP: 0", "Trade value: 5" }, lines);
     }
 }
@@ -371,14 +355,14 @@ public class TipLinesTierTests
     [Fact]
     public void TierLineComesFirst_InTheFormatOfTheIngredientTip()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 2, 0, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 2, PreviewLogic.EnglishWords);
         Assert.Equal(new[] { "T2|Tier|Mid-tier", "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 
     [Fact]
     public void DishWithNoTierHasNoTierLine()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, 0, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
         Assert.Equal(new[] { "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 }
@@ -406,5 +390,22 @@ public class PortionsTests
     public void UsesTheUnroundedSatiety(float satiety, float threshold, int expected)
     {
         Assert.Equal(expected, PreviewLogic.Portions(satiety, threshold));
+    }
+}
+
+public class TradeValueTests
+{
+    [Theory]
+    // Shrewd Appraisal I: 22 x 1.15 = 25.3
+    [InlineData(22, 0.15f, 25)]
+    // Shrewd Appraisal I and Bargaining I: 73 x 1.25 = 91.25
+    [InlineData(73, 0.25f, 91)]
+    // A half rounds up: 10 x 1.25 = 12.5
+    [InlineData(10, 0.25f, 13)]
+    [InlineData(40, 0f, 40)]
+    [InlineData(0, 0.3f, 0)]
+    public void ConfigValueTimesOnePlusAppraisal_HalfUp(int configValue, float appraisal, int expected)
+    {
+        Assert.Equal(expected, PreviewLogic.TradeValue(configValue, appraisal));
     }
 }

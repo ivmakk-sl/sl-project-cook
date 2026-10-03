@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace ProjectCook
@@ -37,17 +38,61 @@ namespace ProjectCook
         // the game built again after a browser crash.
         public const string NoScript = "no script";
 
+        // The start of the result of a pass that found a storage window and no Cooking frame (install.ts). The
+        // storage window shows by itself, so such a pass needs no retry.
+        public const string StorageResultPrefix = "storage: ";
+
         // One pass with the data that the page script already has: sent at a prediction refresh when the
         // data did not change.
         public const string ApplyCommand = "window.__projectCook?window.__projectCook.apply():'" + NoScript + "'";
 
         // The push of the data when the page script is already in the root page.
-        public static string SetDataCommand(string json) =>
-            "window.__projectCook?window.__projectCook.setData(" + json + "):'" + NoScript + "'";
+        // With sort data, setData stores it too, before its one pass.
+        public static string SetDataCommand(string json, string sortJson = null) =>
+            "window.__projectCook?window.__projectCook.setData(" + json + (sortJson == null ? "" : "," + sortJson) + "):'" + NoScript + "'";
+
+        // The push of the numbers of the food sort alone: no page script and no ingredient data.
+        public static string SetSortDataCommand(string sortJson) =>
+            "window.__projectCook?window.__projectCook.setSortData(" + sortJson + "):'" + NoScript + "'";
 
         // The page script, then the push of the data: sent only when a command gave NoScript.
-        public static string SetDataWithScriptCommand(string script, string json) =>
-            script + ";window.__projectCook.setData(" + json + ");";
+        public static string SetDataWithScriptCommand(string script, string json, string sortJson = null) =>
+            script + ";window.__projectCook.setData(" + json + (sortJson == null ? "" : "," + sortJson) + ");";
+
+        // The data of setSortData: the owner of the open storage, the words of the dropdown, and the numbers of each
+        // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, and the sort key of the days
+        // (SortLogic.DaysKey: below 0 for an expired item), with null for no number. "d" is the text of the days
+        // badge: the days left, or for an expired item the days until it spoils, the expired word, or the rotten word.
+        // "c" is the config id: a tie of the numbers groups the same items. "bag" is the owner of the Backpack side of
+        // the storage window, whose items are in "items" too (none in the cooking window).
+        public static string SortDataJson(long owner, IEnumerable<KeyValuePair<long, SortLogic.Numbers>> items, SortLogic.Words words, long bag = 0)
+        {
+            var sb = new StringBuilder("{\"owner\":").Append(Str(owner.ToString(CultureInfo.InvariantCulture)));
+            if (bag != 0) sb.Append(",\"bag\":").Append(Str(bag.ToString(CultureInfo.InvariantCulture)));
+            sb.Append(",\"words\":{\"choices\":[");
+            for (int i = 0; i < words.Choices.Length; i++) sb.Append(i == 0 ? "" : ",").Append(Str(words.Choices[i]));
+            sb.Append("],\"expired\":").Append(Str(words.Expired)).Append(",\"sort\":").Append(Str(words.Sort)).Append("},\"items\":{");
+            bool first = true;
+            foreach (var kv in items)
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                var n = kv.Value;
+                sb.Append('"').Append(kv.Key.ToString(CultureInfo.InvariantCulture)).Append("\":{\"n\":[");
+                foreach (var stat in n.Stats) sb.Append(Num(stat)).Append(',');
+                sb.Append(Num(n.Trade)).Append(',');
+                var days = n.Days;
+                var key = SortLogic.DaysKey(days);
+                sb.Append(key.HasValue ? key.Value.ToString("0.###", CultureInfo.InvariantCulture) : "null");
+                sb.Append("],\"d\":");
+                sb.Append(days.IsRotten ? Str(words.Rotten) : days.HasNumber ? Str(SortLogic.DaysText(days.Days, words.DayUnit)) : days.IsExpired ? Str(words.Expired) : "null");
+                sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));
+                sb.Append('}');
+            }
+            return sb.Append("}}").ToString();
+        }
+
+        private static string Num(int? value) => value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "null";
 
         // A JSON string literal, with its quotes. Also a JavaScript string literal.
         internal static string Str(string s)

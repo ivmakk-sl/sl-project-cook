@@ -1,1 +1,1 @@
-Preview dish quality chances, stats, and portions before you cook.
+Cooking previews, food sorting, and direct access to ingredients in home storages.

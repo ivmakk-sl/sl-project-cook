@@ -9,7 +9,7 @@ namespace ProjectCook
     // so the mod sends the preview text in a "Preview" field and the page script adds it to the card as extra lines.
     // The page script (the Vite bundle of src/Web/page) goes to the root page only when the root page does not have
     // it (a new root page, or one that the game built again after a browser crash); each other send holds only the
-    // apply call or the ingredient data.
+    // apply call, the ingredient data, or the numbers of the food sort.
     internal static class PageScript
     {
         private static string script;
@@ -52,7 +52,10 @@ namespace ProjectCook
                 Done(step, null);
                 return;
             }
-            string command = step.Kind == PushSchedule.Kind.Apply ? PageJson.ApplyCommand : PageJson.SetDataCommand(step.Json);
+            // setSortData and setData each run one pass, so an apply with sort data is setSortData alone.
+            string command = step.Kind == PushSchedule.Kind.SetData ? PageJson.SetDataCommand(step.Json, step.SortJson)
+                : step.SortJson != null ? PageJson.SetSortDataCommand(step.SortJson)
+                : PageJson.ApplyCommand;
             if (!Execute(webView, command, r =>
             {
                 try
@@ -63,7 +66,7 @@ namespace ProjectCook
                         return;
                     }
                     PageTick.OnResult(step, r);
-                    SendWithScript(new PushSchedule.Step(PushSchedule.Kind.SetData, step.Json, step.Retry));
+                    SendWithScript(new PushSchedule.Step(PushSchedule.Kind.SetData, step.Json, step.Retry, step.SortJson));
                 }
                 catch (Exception e) { Plugin.Log.LogError($"Project Cook send failed: {e}"); }
             }))
@@ -82,7 +85,7 @@ namespace ProjectCook
             fullSendAt = now;
             int id = ++fullSendId;
             if (Plugin.Verbose.Value) Plugin.Log.LogDebug("ProjectCook page script: sent");
-            if (!Execute(webView, PageJson.SetDataWithScriptCommand(Script(), step.Json), r =>
+            if (!Execute(webView, PageJson.SetDataWithScriptCommand(Script(), step.Json, step.SortJson), r =>
             {
                 try
                 {

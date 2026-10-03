@@ -22,7 +22,7 @@ namespace ProjectCook
             var config = ConfigManager.Instance;
 
             var talents = TalentInputs.Read();
-            int perfectMorale = (int)Math.Round((double)talents.EatPerfectMorale);
+            var eat = EatInputs.Read(out string eatLog);
             int qualityBase = QualityBonusWithoutRecipe(state, config, talents, out int floor, out string inputs);
 
             // The interop layer reads the value tuples of PreMatchRecipes and CalcSplit wrongly, so the mod takes
@@ -41,6 +41,7 @@ namespace ProjectCook
 
                 int[] productIds = { recipe.FailItemID, recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID };
                 var stats = new int[4][];
+                var baseSatiety = new int[4];
                 var rawSatiety = new float[4];
                 var portions = new int[4];
                 var tradeValues = new int[4];
@@ -51,12 +52,27 @@ namespace ProjectCook
                     for (int level = 0; level < 4; level++)
                     {
                         var vd = CookingFormula.CalcProductVD(participated, (CookingFormula.CookingTier)entry.Tier, FormulaQualityTier[level], productIds[level], entry.IsExact);
-                        stats[level] = new int[vd.Length];
-                        for (int i = 0; i < vd.Length; i++) stats[level][i] = (int)Math.Round(vd[i]);
+                        var values = new float[vd.Length];
+                        for (int i = 0; i < vd.Length; i++) values[i] = vd[i];
                         // The game splits by the satiety before it is rounded for the display.
                         rawSatiety[level] = vd.Length > 0 ? vd[0] : 0f;
+                        baseSatiety[level] = (int)Math.Round(rawSatiety[level]);
                         portions[level] = PreviewLogic.Portions(rawSatiety[level], recipe.SatietyStandard > 0 ? recipe.SatietyStandard : FloatSetting(config, "CookingSatiety_SplitThreshold"));
-                        tradeValues[level] = config.Get_Config_Item(productIds[level])?.TradeValue ?? 0;
+                        var product = config.Get_Config_Item(productIds[level]);
+                        // A cooked dish has its own values (the vd), so the nourish factor applies. The eat values
+                        // are those of the whole dish, all portions together.
+                        var dish = new EatLogic.Dish
+                        {
+                            Values = values,
+                            HasInstanceValues = true,
+                            SubCategory = product?.SubCategory ?? 0,
+                            IsStaple = product != null && product.Category == 1 && product.SubCategory == 1,
+                            IsPerfect = level == PreviewLogic.Perfect,
+                            Portions = portions[level],
+                        };
+                        var eatValues = EatLogic.EatValues(dish, eat);
+                        stats[level] = Array.ConvertAll(eatValues, v => (int)Math.Round(v));
+                        tradeValues[level] = PreviewLogic.TradeValue(product?.TradeValue ?? 0, talents.Appraisal);
                         exps[level] = PreviewLogic.CookExp(recipe.CookExp, talents.ExpRatio, level);
                     }
                 }
@@ -67,9 +83,9 @@ namespace ProjectCook
 
                 var lines = PreviewLogic.Lines(chances, stats, portions, words);
                 result[recipeId] = string.Join("\n", lines);
-                var tipLines = PreviewLogic.TipLines(chances, tradeValues, exps[PreviewLogic.Perfect], entry.Tier, talents.DishNourish, perfectMorale, words);
+                var tipLines = PreviewLogic.TipLines(chances, tradeValues, exps[PreviewLogic.Perfect], entry.Tier, words);
                 tips[recipeId] = string.Join("\n", tipLines);
-                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents perfect={talents.PerfectQuality} tag={talents.TagQuality} rotten={talents.RottenReduce} exp={talents.ExpRatio} nourish={talents.DishNourish} perfectMorale={talents.EatPerfectMorale} | {string.Join(" | ", lines)} | all levels F/N/G/P sat={stats[0][0]}/{stats[1][0]}/{stats[2][0]}/{stats[3][0]} satRaw={string.Join("/", Array.ConvertAll(rawSatiety, v => v.ToString("0.###")))} portions={string.Join("/", portions)} trade={tradeValues[0]}/{tradeValues[1]}/{tradeValues[2]}/{tradeValues[3]} exp={exps[0]}/{exps[1]}/{exps[2]}/{exps[3]}");
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents perfect={talents.PerfectQuality} tag={talents.TagQuality} rotten={talents.RottenReduce} exp={talents.ExpRatio} appraisal={talents.Appraisal} | eat {eatLog} | {string.Join(" | ", lines)} | all levels F/N/G/P sat={baseSatiety[0]}/{baseSatiety[1]}/{baseSatiety[2]}/{baseSatiety[3]} eat={string.Join("/", Array.ConvertAll(stats, l => string.Join(",", l)))} satRaw={string.Join("/", Array.ConvertAll(rawSatiety, v => v.ToString("0.###")))} portions={string.Join("/", portions)} trade={tradeValues[0]}/{tradeValues[1]}/{tradeValues[2]}/{tradeValues[3]} exp={exps[0]}/{exps[1]}/{exps[2]}/{exps[3]}");
             }
             return result;
         }

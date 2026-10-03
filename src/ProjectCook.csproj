@@ -4,7 +4,7 @@
        This file names the plugin and adds the assemblies that only this mod uses. -->
   <PropertyGroup>
     <AssemblyName>ProjectCook</AssemblyName>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <!-- The page script is built from src/Web/ by Vite (package.json at the mod root) into one file,
@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PageSource Include="Web\**\*.ts;Web\**\*.js;Web\**\*.css" />
+    <PageSource Include="Web\**\*.ts;Web\**\*.js;Web\**\*.css;Web\**\*.svg" />
     <PageSource Include="$(ModRoot)\package.json;$(ModRoot)\package-lock.json;$(ModRoot)\vite.config.ts" />
     <EmbeddedResource Include="$(PageBundle)" LogicalName="ProjectCook.page.js" />
   </ItemGroup>

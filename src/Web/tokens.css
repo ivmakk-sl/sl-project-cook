@@ -1,5 +1,5 @@
 /* The colors and pictures of Project Cook, once. The page script puts this file before page.css in the
-   Cooking frame. A rule uses a token, never a raw color (stylelint checks it). The quality colors and the
+   Cooking frame and in the storage window frame. A rule uses a token, never a raw color (stylelint checks it). The quality colors and the
    gold fall back to the variables of Cooking.html, the frame of the style node. */
 :root {
   /* The quality colors of the cooking window. */
@@ -19,6 +19,17 @@
 
   /* The text of the preview grid. */
   --pc-grid-text: #e8dcc8;
+
+  /* The food sort: the badge of a cell and the dropdown, in the look of the badges of Better Trade. */
+  --pc-white: #fff;
+  --pc-black: #000;
+  --pc-sort-gold: var(--warm-gold, #fbb034);
+  --pc-badge-bg: rgb(from var(--pc-black) r g b / 72%);
+  /* The open menu of the dropdown: solid, so its words read well over the items. */
+  --pc-menu-bg: #1d1e22;
+  /* The drawn icon of Expiration Date in the dropdown (the stats have the game's glyphs). */
+  --pc-ico-days: #9fd18b;
+  --pc-text-shadow: 1px 1px 2px var(--pc-black);
 
   /* The pictures of the tier badges: a triangle that points up (High) or down (Low). */
   --pc-badge-up: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 3 22 20H2z' fill='white'/></svg>");

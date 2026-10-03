@@ -22,7 +22,7 @@ namespace ProjectCook
             // The label before the tier name. The game has no text for it, so it is the one word that the mod translates.
             public string TierLabel;
             // The labels of the dish card tooltip. The game has no text for them either, so the mod translates them too.
-            public string TradeLabel, ExpLabel, RecoveryLabel;
+            public string TradeLabel, ExpLabel;
 
             public bool SameAs(Words other)
             {
@@ -30,7 +30,6 @@ namespace ProjectCook
                     && TierLabel == other.TierLabel
                     && TradeLabel == other.TradeLabel
                     && ExpLabel == other.ExpLabel
-                    && RecoveryLabel == other.RecoveryLabel
                     && string.Join("|", Quality) == string.Join("|", other.Quality)
                     && string.Join("|", Tier) == string.Join("|", other.Tier)
                     && string.Join("|", Stat) == string.Join("|", other.Stat);
@@ -46,7 +45,6 @@ namespace ProjectCook
             TierLabel = "Tier",
             TradeLabel = "Trade value",
             ExpLabel = "Cooking XP",
-            RecoveryLabel = "Recovery when eaten",
         };
 
         // Builds the words from the game texts. keys and texts have the order: quality Fail..Perfect, tier High..Low,
@@ -79,7 +77,6 @@ namespace ProjectCook
                 TierLabel = chinese ? "档次" : EnglishWords.TierLabel,
                 TradeLabel = chinese ? "交易价值" : EnglishWords.TradeLabel,
                 ExpLabel = chinese ? "烹饪熟练度" : EnglishWords.ExpLabel,
-                RecoveryLabel = chinese ? "食用恢复" : EnglishWords.RecoveryLabel,
             };
         }
 
@@ -227,6 +224,7 @@ namespace ProjectCook
 
         // Same icons as the item tooltip of the game. Order of the game's stat array: satiety, morale, stamina, health, life.
         private static readonly string[] StatIcons = { "🍖", "🧠", "⚡", "💚", "❤️" };
+        private const int FitnessStat = 3;
 
         // Tooltip lines of an ingredient: the ingredient tier (the game's tier number: 0 none, 1 High, 2 Mid, 3 Low),
         // then each stat of the raw item that is not 0, with its sign as in the item window of the game.
@@ -242,6 +240,11 @@ namespace ProjectCook
             return lines.Count > 0 ? string.Join("\n", lines) : null;
         }
 
+        // The trade value with the appraisal talents of the character (Buff/AE_StrangerTradeAppraisalBonus), rounded
+        // to the nearest whole number with a half up, as the trade window of Better Trade shows it.
+        public static int TradeValue(int configValue, float appraisal) =>
+            (int)Math.Round(configValue * (1.0 + appraisal), MidpointRounding.AwayFromZero);
+
         private static string TierLine(int tier, Words words) => "T" + tier + "|" + words.TierLabel + "|" + words.Tier[tier];
 
         // Lines of the dish card tooltip: the tier line of the dish in the format of IngredientTip (none for a dish
@@ -251,7 +254,7 @@ namespace ProjectCook
         // is a plain line also, because the card already names the level. With more levels it is a grid: a header
         // row with an empty label cell and "<level>:<quality name>" cells (highest first), so the page can color
         // each name, then a row with the label and one value for each level. Only the grid rows have '|' cells.
-        public static List<string> TipLines(double[] chances, int[] tradeValues, int exp, int tier, float nourishRatio, int perfectMorale, Words words)
+        public static List<string> TipLines(double[] chances, int[] tradeValues, int exp, int tier, Words words)
         {
             var header = new StringBuilder();
             var trade = new StringBuilder(words.TradeLabel);
@@ -275,17 +278,15 @@ namespace ProjectCook
                 lines.Add(trade.ToString());
             }
             else lines.Add($"{words.TradeLabel}: {tradeValues[onlyLevel]}");
-            if (nourishRatio > 0)
-                lines.Add($"{words.RecoveryLabel}: +{(int)Math.Round(nourishRatio * 100)}%");
-            if (perfectMorale > 0 && chances[Perfect] > 0)
-                lines.Add($"{words.Quality[Perfect]} {StatIcons[1]} {words.Stat[1]}: +{perfectMorale}");
             return lines;
         }
 
         // One line for each quality level that can occur, highest level first. stats[level] is the stat array of that level.
         // A line is cells with '|' between them, and all lines have the same cells, so the page can align them as columns.
-        // A stat or the portion count gets a cell when any shown level has a value for it.
-        // The first cell is the quality level number, for the color of the name. The page does not show it.
+        // A stat or the portion count gets a cell when any shown level has a value for it. Fitness never gets a cell,
+        // because eating does not change it.
+        // The first cell is the quality level number, for the color of the chance. The second cell, the quality name,
+        // is the label of the chance; the page does not show it, so the line fits the card.
         public static List<string> Lines(double[] chances, int[][] stats, int[] portions, Words words)
         {
             var statUsed = new bool[StatIcons.Length];
@@ -294,7 +295,7 @@ namespace ProjectCook
             {
                 if (chances[level] <= 0) continue;
                 for (int i = 0; i < StatIcons.Length && i < stats[level].Length; i++)
-                    if (stats[level][i] != 0) statUsed[i] = true;
+                    if (stats[level][i] != 0 && i != FitnessStat) statUsed[i] = true;
                 if (portions[level] > 1) portionsUsed = true;
             }
 
