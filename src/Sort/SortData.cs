@@ -32,7 +32,7 @@ namespace ProjectCook
             var cfg = ConfigManager.Instance.Get_Config_Furniture(furniture.AgentConfigId);
             bool isFridge = cfg != null && cfg.IsElectrical && cfg.ElectricalType == 1 && cfg.ColdRate > 0;
             var tags = AgentTools.GetAgentComponent<FurnitureTagComponent>(furniture)?.TagIds;
-            return SortLogic.IsSortable(isFridge, CookingTabs.LinksToCooking(tags), false);
+            return SortLogic.IsSortable(isFridge, Plugin.CookingStorages.Value && CookingTabs.LinksToCooking(tags), false);
         }
 
         // The cooking window: reads the items of one grid and requests a send. The window has two grids: the
@@ -68,23 +68,30 @@ namespace ProjectCook
             }
         }
 
-        // The storage window: with a sortable storage open (side B), the numbers of its items and of the items of the
-        // Backpack side (side A), which shows the same sort. The send names both owners.
+        // The storage window: with a sortable storage open, the numbers of its items, and in a window of two grids
+        // also of the items of the Backpack side, which shows the same sort. RA_OpenUI puts the first bag of the window
+        // on side A: a window of two grids has the Backpack on A and the storage on B, and a storage opened alone (the
+        // Use of a storage) is on A, while B keeps the storage of an earlier window. The send names the storage and,
+        // with two grids, the Backpack.
         public static void RequestStorage(State_Web_BackpackUI state, float currentHours)
         {
             try
             {
-                if (state == null || state.ItemDataList_B == null || !IsSortable(state.OwnerId_B, false)) return;
+                if (state == null) return;
+                bool dual = state.IsDualBag;
+                long owner = dual ? state.OwnerId_B : state.OwnerId_A;
+                var items = dual ? state.ItemDataList_B : state.ItemDataList_A;
+                if (items == null || !IsSortable(owner, false)) return;
                 cookingTabNumbers = null;
                 workbenchNumbers = null;
-                var numbers = Numbers(state.ItemDataList_B, currentHours, out string eatLog);
-                long bag = state.OwnerId_A;
+                var numbers = Numbers(items, currentHours, out string eatLog);
+                long bag = dual ? state.OwnerId_A : 0;
                 var send = numbers;
                 if (bag != 0 && state.ItemDataList_A != null)
                     send = SortLogic.Merge(numbers, Numbers(state.ItemDataList_A, currentHours, out _));
                 else bag = 0;
-                PageTick.RequestSort(PageJson.SortDataJson(state.OwnerId_B, send, Words(), bag));
-                Log($"storage {state.OwnerId_B} bag={bag} items={numbers.Count} sent={send.Count}", eatLog);
+                PageTick.RequestSort(PageJson.SortDataJson(owner, send, Words(), bag));
+                Log($"storage {owner}{(dual ? "" : " alone")} bag={bag} items={numbers.Count} sent={send.Count}", eatLog);
             }
             catch (Exception e)
             {

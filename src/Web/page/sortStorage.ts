@@ -39,11 +39,14 @@ function bagOf(state: SetupState, side: Side): Bag | undefined {
 }
 
 // The sort data of a side, or null when the side is not sortable. The data must name the open storage: after an
-// ordinary storage C# sends no data, and the data of the last sortable storage still names the Backpack.
+// ordinary storage C# sends no data, and the data of the last sortable storage still names the Backpack. A storage
+// opened alone (the Use of a storage, isDualBag false) is the one grid of the window, on side A.
 function sortOf(state: SetupState, side: Side) {
   const sort = view.sort;
   const bag = bagOf(state, side);
-  if (!sort || !bag || !state.isDualBag || !state.bagB || sort.owner !== String(state.bagB.ownerId)) return null;
+  if (!sort || !bag) return null;
+  if (!state.isDualBag) return side === 'A' && sort.owner === String(bag.ownerId) ? sort : null;
+  if (!state.bagB || sort.owner !== String(state.bagB.ownerId)) return null;
   return side === 'B' || sort.bag === String(bag.ownerId) ? sort : null;
 }
 

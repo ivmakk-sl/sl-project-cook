@@ -24,8 +24,8 @@ namespace ProjectCook
         }
     }
 
-    // The Backpack side of the storage window: a change of its items alone (for example its Auto Organize) builds only
-    // side A, so it sends the numbers again.
+    // Side A of the storage window: the Backpack of a window of two grids, or a storage opened alone. A change of its
+    // items alone (for example its Auto Organize) builds only side A, so it sends the numbers again.
     [HarmonyPatch(typeof(Reducer_Web_BackpackUI), "RefreshItems_A")]
     internal static class StorageBagSortOnRefresh
     {

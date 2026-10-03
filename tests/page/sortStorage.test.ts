@@ -86,6 +86,26 @@ test('storage sort: the Backpack side gets the dropdown and the sort when the so
   assert.equal(storageGrids(w).length, 0);
 });
 
+test('storage sort: a storage opened alone (one grid, on side A) gets the dropdown and the sort', () => {
+  const w = storageWindow();
+  const state = w.document.getElementById('app')._vnode.component.setupState;
+  state.isDualBag = false;
+  w.__bagA.ownerId = 42;
+  view.sort = sortData('42', '5');
+  view.choice = 1;
+  applyStorageSort(w);
+  assert.ok(toolbarA(w).querySelector('.projectcook-sort'), 'no dropdown on the single grid');
+  assert.deepEqual(placeA(w, 12), [0, 0]);
+  assert.deepEqual(placeA(w, 11), [1, 0]);
+  assert.deepEqual(storageGrids(w).map((g) => g.owner), ['42']);
+
+  // A storage that is not sortable, opened alone: the sort data names another owner.
+  w.__bagA.ownerId = 77;
+  applyStorageSort(w);
+  assert.equal(toolbarA(w).querySelector('.projectcook-sort'), null);
+  assert.equal(storageGrids(w).length, 0);
+});
+
 test('storage sort: an ordinary storage after a sortable one keeps the Backpack side unsorted', () => {
   const w = storageWindow();
   // The sort data of the last sortable storage (42) still names the Backpack, but the open storage is another one.
