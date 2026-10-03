@@ -19,6 +19,9 @@ namespace ProjectCook
         // A prediction refresh: the next tick sends once, however many refreshes come in the frame.
         public static void Request() => schedule.Request(Time.realtimeSinceStartup);
 
+        // New numbers of the food sort for the open window: the next tick sends them when they changed.
+        public static void RequestSort(string json) => schedule.RequestSort(json);
+
         public static void OnResult(PushSchedule.Step step, string result) =>
             schedule.OnResult(step, result, Time.realtimeSinceStartup);
 
@@ -26,7 +29,7 @@ namespace ProjectCook
         {
             try
             {
-                var step = schedule.Tick(Time.realtimeSinceStartup, () => IngredientData.Json(GameWords.Current()));
+                var step = schedule.Tick(Time.realtimeSinceStartup, () => IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal()));
                 if (step.Kind != PushSchedule.Kind.None) PageScript.Send(step);
             }
             catch (Exception e)
@@ -55,6 +58,25 @@ namespace ProjectCook
             catch (Exception e)
             {
                 Plugin.Log.LogError($"Project Cook page ready failed: {e}");
+            }
+        }
+    }
+
+    // The storage window: the same ready call, so a pass installs the parts of the script in its frame (the icon of
+    // the cooking tag, the food sort). A pass with no Cooking frame and a storage window gets no retry.
+    [HarmonyPatch(typeof(WebUI_BackpackUI), "CallShowAction")]
+    internal static class PageTickOnStorageShow
+    {
+        private static void Postfix()
+        {
+            try
+            {
+                PageTick.Request();
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug("storage window shown, pass requested");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Project Cook storage window ready failed: {e}");
             }
         }
     }

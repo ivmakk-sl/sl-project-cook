@@ -1,3 +1,10 @@
+v1.2.0 - 2026-10-03
+Added: Food sort for fridges and Cooking or Food storages, in the storage window and the cooking window (also the Backpack): sort by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with the number on each item (also on the workbench). Expired food comes first, with the days until it spoils in red. The items do not move in the storage.
+Added: Cooking tag for a storage. Its items show as a tab in the cooking window (a storage with the game's Food tag too), so you can cook with them. It does not change the robot or how fast food spoils.
+Changed: Dish card stats now show what your character gets when eating the dish, with eat talents and the difficulty's Life factor (not temporary buffs). Fitness is no longer shown.
+Changed: Trade values in the tooltips include your appraisal talents.
+Fixed: Dish card lines no longer overflow the card. The chance shows in the color of its quality level, without the name, and the text gets smaller only when needed.
+
 v1.1.1 - 2026-09-27
 Changed: Updating cooking previews requires less processing when you change ingredients.
 Fixed: Long preview lines on dish cards are no longer cut off.

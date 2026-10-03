@@ -28,6 +28,21 @@ public class PageCommandTests
         Assert.EndsWith(";window.__projectCook.setData(" + Json + ");", js);
     }
 
+    private const string Sort = "{\"owner\":\"1\"}";
+
+    [Fact]
+    public void The_setSortData_command_sends_only_the_sort_data()
+    {
+        Assert.Equal("window.__projectCook?window.__projectCook.setSortData(" + Sort + "):'no script'", PageJson.SetSortDataCommand(Sort));
+    }
+
+    [Fact]
+    public void The_setData_command_carries_the_sort_data_when_there_is_some()
+    {
+        Assert.Equal("window.__projectCook?window.__projectCook.setData(" + Json + "," + Sort + "):'no script'", PageJson.SetDataCommand(Json, Sort));
+        Assert.EndsWith(";window.__projectCook.setData(" + Json + "," + Sort + ");", PageJson.SetDataWithScriptCommand(Script, Json, Sort));
+    }
+
     [Fact]
     public void No_command_uses_the_root_globals_of_1_1_0()
     {

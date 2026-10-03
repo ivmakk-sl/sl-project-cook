@@ -1,1 +1,1 @@
-Preview dish quality chances, stats, and portions before you cook.
+Preview dish quality chances, what you get from a dish, and portions before you cook. Sort fridges by stat, trade value, or expiration date, and cook from tagged storages.

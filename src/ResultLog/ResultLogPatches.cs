@@ -63,4 +63,43 @@ namespace ProjectCook
             }
         }
     }
+
+    // Log of what the leading role gets when it eats: one line for each stat change from an item, with the value
+    // that the eat path passes in (after nourish), the change of the stat, and the stat before, after, and its
+    // maximum. The sum of the changes of one eat compares with the eat values of the preview and the food sort.
+    [HarmonyPatch(typeof(AttributeComponent), "CostAttrValue",
+        new[] { typeof(AttrName), typeof(float), typeof(long), typeof(EffectArgsType), typeof(bool), typeof(bool), typeof(VitalityChangeSourceType), typeof(int) })]
+    internal static class ResultLogOnEat
+    {
+        private static void Prefix(AttributeComponent __instance, AttrName attrName, VitalityChangeSourceType sourceType, out float __state)
+        {
+            __state = float.NaN;
+            if (!Plugin.Verbose.Value || sourceType != VitalityChangeSourceType.Item) return;
+            try
+            {
+                if (__instance.ownerInstanceId != BaseSingleton<BattleLogicWorld>.Instance._AgentManager.GetLeadingRoleId()) return;
+                __state = __instance.GetBaseValue_Float(attrName);
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Project Cook eat log failed: {e}");
+            }
+        }
+
+        private static void Postfix(AttributeComponent __instance, AttrName attrName, float value, int configId, float __state)
+        {
+            if (float.IsNaN(__state)) return;
+            try
+            {
+                float after = __instance.GetBaseValue_Float(attrName);
+                // The maximum of a stat is the attribute 100 + the stat (MaxSatiety = 101 ...).
+                int max = __instance.GetTotalValue_Int((AttrName)(100 + (int)attrName));
+                Plugin.Log.LogDebug($"eat {configId} {attrName} in={value:0.##} change={after - __state:0.##} before={__state:0.##} after={after:0.##} max={max}");
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogError($"Project Cook eat log failed: {e}");
+            }
+        }
+    }
 }

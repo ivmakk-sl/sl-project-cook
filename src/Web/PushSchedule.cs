@@ -12,9 +12,13 @@ namespace ProjectCook
     // - An answer "no script" forgets the confirmed data, so the next send carries it.
     // - A build that throws (for example during a save load) counts as a send with no answer, and rethrows
     //   to the caller.
+    // - The numbers of the food sort are a second kind of data. New sort data goes with the send of a request
+    //   in the same frame, or alone as SetSortData, so one change of a window makes at most one send. The same
+    //   sort data as the sent or confirmed one makes no send. A sort send with no answer goes again one real
+    //   second later; an answer "no script" forgets the confirmed sort data, so the next sort data goes again.
     public sealed class PushSchedule
     {
-        public enum Kind { None, Apply, SetData }
+        public enum Kind { None, Apply, SetData, SetSortData }
 
         public readonly struct Step
         {
@@ -24,8 +28,10 @@ namespace ProjectCook
             public readonly string Json;
             // True for a send of the retry, false for the first send of a request.
             public readonly bool Retry;
+            // The sort data that the send carries, or null.
+            public readonly string SortJson;
 
-            public Step(Kind kind, string json, bool retry) { Kind = kind; Json = json; Retry = retry; }
+            public Step(Kind kind, string json, bool retry, string sortJson = null) { Kind = kind; Json = json; Retry = retry; SortJson = sortJson; }
         }
 
         private const float RetrySeconds = 1f;
@@ -36,6 +42,9 @@ namespace ProjectCook
         private float retryAt = float.NaN;
         // The data JSON that the page script has, as its answers confirm; null when it is not known.
         private string confirmedJson;
+        // The last sort data, the one in a send with no answer yet, and the one that the page script has.
+        private string pendingSort, sentSort, confirmedSort;
+        private float sortNotBefore = float.NegativeInfinity;
 
         // A prediction refresh.
         public void Request(float now)
@@ -45,30 +54,49 @@ namespace ProjectCook
             retryAt = float.NaN;
         }
 
+        // New sort data of the open window.
+        public void RequestSort(string json)
+        {
+            pendingSort = json;
+        }
+
         public Step Tick(float now, Func<string> build)
         {
             bool retry = false;
-            if (!requested)
+            bool dataDue = requested;
+            if (!requested && !float.IsNaN(retryAt) && now >= retryAt)
             {
-                if (float.IsNaN(retryAt) || now < retryAt) return new Step(Kind.None, null, false);
                 retryAt = float.NaN;
-                if (now - requestAt >= RequestSeconds) return new Step(Kind.None, null, false);
-                retry = true;
+                if (now - requestAt < RequestSeconds) retry = dataDue = true;
             }
+            bool sortDue = pendingSort != null && pendingSort != confirmedSort && pendingSort != sentSort && now >= sortNotBefore;
+            if (!dataDue && !sortDue) return new Step(Kind.None, null, false);
             requested = false;
             string json;
             try { json = build(); }
             catch
             {
-                SetRetry(now);
+                if (dataDue) SetRetry(now);
                 throw;
             }
-            return new Step(json == confirmedJson ? Kind.Apply : Kind.SetData, json, retry);
+            string sort = sortDue ? pendingSort : null;
+            if (sortDue) sentSort = pendingSort;
+            if (!dataDue) return new Step(Kind.SetSortData, json, false, sort);
+            return new Step(json == confirmedJson ? Kind.Apply : Kind.SetData, json, retry, sort);
         }
 
         // The answer of the page script to a send, or null when the send did not run (a browser crash).
         public void OnResult(Step sent, string result, float now)
         {
+            if (sent.SortJson != null)
+            {
+                if (sent.SortJson == sentSort) sentSort = null;
+                if (result == null) sortNotBefore = now + RetrySeconds;
+                else if (result == PageJson.NoScript) confirmedSort = null;
+                else confirmedSort = sent.SortJson;
+            }
+            if (result == PageJson.NoScript) confirmedSort = null;
+            if (sent.Kind == Kind.SetSortData) return;
             if (result == null || result == PageJson.NoScript)
             {
                 // A root page with no page script has no data either.

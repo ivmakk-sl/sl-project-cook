@@ -25,13 +25,14 @@ const GAME_DIR = process.env.SL_GAME_DIR ||
   'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Survival Log';
 const COOKING_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'Cooking', 'Cooking.html');
 const BAG_JS = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'webui-bag.js');
+const STORAGE_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'BackpackUI', 'BackpackUI.html');
 // The bundle that Vite builds from src/Web/page/ (npm test builds it first).
 const PAGE_JS_PATH = path.join(HERE, '..', '..', 'obj', 'page', 'page.js');
 // The source file with the FEATURES table, in the quotes that the static test parses.
 const FEATURES_PATH = path.join(HERE, '..', '..', 'src', 'Web', 'page', 'core.ts');
 const DATA_JSON_PATH = path.join(HERE, '..', 'fixtures', 'data.json');
 
-const gameFilesExist = fs.existsSync(COOKING_HTML) && fs.existsSync(BAG_JS);
+const gameFilesExist = fs.existsSync(COOKING_HTML) && fs.existsSync(BAG_JS) && fs.existsSync(STORAGE_HTML);
 
 if (!gameFilesExist) {
   test.skip(`page.js against the game page: game files not found under SL_GAME_DIR (${GAME_DIR}); set SL_GAME_DIR to the game folder`, () => {});
@@ -40,7 +41,8 @@ if (!gameFilesExist) {
   const featuresSource = fs.readFileSync(FEATURES_PATH, 'utf8');
   const cookingHtml = fs.readFileSync(COOKING_HTML, 'utf8');
   const bagJs = fs.readFileSync(BAG_JS, 'utf8');
-  const haystack = cookingHtml + '\n' + bagJs;
+  const storageHtml = fs.readFileSync(STORAGE_HTML, 'utf8');
+  const haystack = cookingHtml + '\n' + bagJs + '\n' + storageHtml;
 
   // Pulls the page part names out of the FEATURES table of the page source, so this test never copies the names.
   function featureNames(): string[] {
@@ -62,7 +64,7 @@ if (!gameFilesExist) {
 
   test('static: every FEATURES part name of page.js exists in the game files', () => {
     for (const name of featureNames()) {
-      assert.ok(partIsPresent(name), `page part "${name}" not found in Cooking.html or webui-bag.js`);
+      assert.ok(partIsPresent(name), `page part "${name}" not found in Cooking.html, webui-bag.js, or BackpackUI.html`);
     }
   });
 
@@ -115,6 +117,25 @@ if (!gameFilesExist) {
 
   function withFrame(root: Win, cookingWindow: Win): void {
     root.document.querySelectorAll = (selector: string) => (selector === 'iframe' ? [{ contentWindow: cookingWindow }] : []);
+  }
+
+  function withFrames(root: Win, windows: Win[]): void {
+    root.document.querySelectorAll = (selector: string) => (selector === 'iframe' ? windows.map((w) => ({ contentWindow: w })) : []);
+  }
+
+  // A storage window frame: a page at the URL of BackpackUI.html with the #app node of the game page. The game
+  // page needs the game to render, so the tests of the storage window features give their own Vue component.
+  async function storageWindow(t: TestContext): Promise<Win> {
+    const dom = new JSDOM('<!doctype html><html><head></head><body><div id="app"></div></body></html>', {
+      url: url.pathToFileURL(STORAGE_HTML).href,
+      runScripts: 'dangerously',
+      pretendToBeVisual: true
+    });
+    t.onTestFinished(() => dom.window.close());
+    if (dom.window.document.readyState !== 'complete') {
+      await new Promise<void>((resolve) => dom.window.addEventListener('load', () => resolve()));
+    }
+    return dom.window;
   }
 
   test('interface: setData stores the data and runs one pass, so the item tooltip and the tier mark use it', async (t) => {
@@ -170,6 +191,47 @@ if (!gameFilesExist) {
 
     assert.equal(root.__projectCook.apply(), 'no Cooking frame');
     assert.equal(timers, 0);
+  });
+
+  test('interface: a pass with only a storage window answers its own result, not no Cooking frame', async (t) => {
+    const root = rootWithoutFrame();
+    const storage = await storageWindow(t);
+    withFrames(root, [storage]);
+
+    assert.match(root.__projectCook.apply(), /^storage: installed/);
+    assert.match(root.__projectCook.apply(), /^storage: already installed/);
+    assert.ok(storage.document.getElementById('projectcook-style'), 'the storage window has no style node');
+  });
+
+  test('interface: a pass with both windows answers the cooking result first', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const root = rootWithoutFrame();
+    withFrames(root, [await storageWindow(t), cookingWindow]);
+
+    const result = root.__projectCook.apply();
+    assert.match(result, /^installed/);
+    assert.match(result, /; storage: installed/);
+  });
+
+  const SORT = {
+    owner: '42',
+    words: { choices: ['Default', 'Satiety', 'Morale', 'Stamina', 'Life', 'Trade value', 'Expiration Date'], expired: 'Expired', sort: 'Sort' },
+    items: { '7': { n: [14, null, null, null, 40, 0.5], d: '0.5d' } }
+  };
+
+  test('interface: setSortData stores the sort data and runs one pass', async (t) => {
+    const root = rootWithoutFrame();
+    withFrames(root, [await storageWindow(t)]);
+
+    assert.match(root.__projectCook.setSortData(SORT), /^storage: installed/);
+    assert.equal(root.__projectCook.sortData().owner, '42');
+    assert.match(root.__projectCook.apply(), /^storage: already installed/);
+  });
+
+  test('interface: setData with sort data stores both', () => {
+    const root = rootWithoutFrame();
+    root.__projectCook.setData(fixtureData(), SORT);
+    assert.equal(root.__projectCook.sortData().items['7'].d, '0.5d');
   });
 
   test('interface: a second run of the script keeps the first interface and its data', async (t) => {
@@ -260,11 +322,17 @@ if (!gameFilesExist) {
     const grid = card.querySelector('.projectcook-grid');
     assert.ok(grid, 'the card has no .projectcook-grid');
     assert.equal(grid.classList.contains('pot-hint'), false);
-    assert.equal(grid.style.getPropertyValue('--pc-cols'), '3');
+    assert.equal(grid.style.getPropertyValue('--pc-cols'), '2');
     const cells = grid.children;
-    assert.ok(cells[0].classList.contains('projectcook-q-3'), 'the name cell of Perfect has no projectcook-q-3');
-    assert.ok(cells[3].classList.contains('projectcook-q-2'), 'the name cell of Good has no projectcook-q-2');
-    assert.ok(cells[1].classList.contains('projectcook-cell-num'), 'the percent cell has no projectcook-cell-num');
+    // No quality name: the chance is the first cell, in the color of its quality, with the name as its label.
+    assert.equal(cells[0].textContent, '72%');
+    assert.ok(cells[0].classList.contains('projectcook-cell-num'), 'the percent cell has no projectcook-cell-num');
+    assert.ok(cells[0].classList.contains('projectcook-q-3'), 'the chance of Perfect has no projectcook-q-3');
+    assert.equal(cells[0].getAttribute('title'), 'Perfect');
+    assert.equal(cells[2].textContent, '28%');
+    assert.ok(cells[2].classList.contains('projectcook-q-2'), 'the chance of Good has no projectcook-q-2');
+    assert.equal(cells[2].getAttribute('title'), 'Good');
+    assert.ok(![...cells].some((c) => c.textContent === 'Perfect' || c.textContent === 'Good'), 'a quality name shows');
     for (const hint of card.querySelectorAll('.pot-hint')) assert.ok(hint.classList.contains('projectcook-hide'));
   });
 

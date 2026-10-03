@@ -158,6 +158,114 @@ public class PushScheduleTests
     }
 
     [Fact]
+    public void A_pass_that_finds_only_a_storage_window_gives_no_retry()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, PageJson.StorageResultPrefix + "installed");
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(11.05f, d.Build).Kind);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(12.1f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_storage_window_answer_with_a_missing_part_gives_no_retry()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        SendAndAnswer(s, d, 10f, PageJson.StorageResultPrefix + "installed; missing: tagIcon(#app)");
+
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(11.05f, d.Build).Kind);
+    }
+
+    private const string Sort = "{\"owner\":\"1\"}";
+    private const string Sort2 = "{\"owner\":\"2\"}";
+
+    [Fact]
+    public void Sort_data_alone_goes_as_SetSortData_with_the_sort_data()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+
+        var step = s.Tick(10f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, step.Kind);
+        Assert.Equal(Sort, step.SortJson);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.02f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void The_same_sort_data_as_the_confirmed_one_gives_no_send()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+        var step = s.Tick(10f, d.Build);
+        s.OnResult(step, PageJson.StorageResultPrefix + "installed", 10.05f);
+
+        s.RequestSort(Sort);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(11f, d.Build).Kind);
+        s.RequestSort(Sort2);
+        Assert.Equal(PushSchedule.Kind.SetSortData, s.Tick(12f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_window_change_with_a_refresh_and_sort_data_makes_one_send()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.Request(10f);
+        s.RequestSort(Sort);
+
+        var step = s.Tick(10f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetData, step.Kind);
+        Assert.Equal(Sort, step.SortJson);
+        Assert.Equal(PushSchedule.Kind.None, s.Tick(10.02f, d.Build).Kind);
+    }
+
+    [Fact]
+    public void A_send_without_new_sort_data_carries_none()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.Request(10f);
+        Assert.Null(s.Tick(10f, d.Build).SortJson);
+    }
+
+    [Fact]
+    public void No_script_makes_the_next_send_carry_the_sort_data_again()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+        var first = s.Tick(10f, d.Build);
+        s.OnResult(first, PageJson.StorageResultPrefix + "installed", 10.05f);
+
+        s.Request(20f);
+        var second = s.Tick(20f, d.Build);
+        s.OnResult(second, PageJson.NoScript, 20.05f);
+
+        s.RequestSort(Sort);
+        var third = s.Tick(21f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, third.Kind);
+        Assert.Equal(Sort, third.SortJson);
+    }
+
+    [Fact]
+    public void A_sort_send_with_no_answer_is_sent_again()
+    {
+        var s = new PushSchedule();
+        var d = new Data();
+        s.RequestSort(Sort);
+        var first = s.Tick(10f, d.Build);
+        s.OnResult(first, null, 10.05f);
+
+        var again = s.Tick(11.1f, d.Build);
+        Assert.Equal(PushSchedule.Kind.SetSortData, again.Kind);
+        Assert.Equal(Sort, again.SortJson);
+    }
+
+    [Fact]
     public void A_build_that_throws_is_tried_again_one_real_second_later()
     {
         var s = new PushSchedule();
