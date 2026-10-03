@@ -1,25 +1,28 @@
+// Library copy of shared/json 1.0.0. Do not edit: see src/Shared/json/VERSION.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace ProjectCook
+namespace SlShared.Json
 {
     // A small JSON reader for the lists that the game sends to its web pages: an array of objects.
-    // Game-free, so the unit tests compile it alone. The plugin targets netstandard2.1, which has no JSON library,
-    // and a library would add DLL files to the release.
+    // The plugins target netstandard2.1, which has no JSON library, and a library would add DLL files to the release.
     // It reads the fields of each top-level object in any order. A field value is a string, a double, or a bool.
     // A null or a nested object or array is skipped with the value null, so unknown fields of a game update do no harm.
-    public static class FlatJson
+    internal static class FlatJson
     {
-        public sealed class Obj
+        internal sealed class Obj
         {
             // Index of the '{' in the source text.
             public int Start;
             public Dictionary<string, object> Fields = new Dictionary<string, object>();
+            // Index of the closing '"' of each string field, so a caller can insert text at the end of the value.
+            // Null for an object with no string field.
+            public Dictionary<string, int> StringEnds;
         }
 
-        // Null when the text is not a complete JSON array.
+        // Null when the text is not one complete JSON array.
         public static List<Obj> ReadArray(string json)
         {
             if (string.IsNullOrEmpty(json)) return null;
@@ -95,7 +98,13 @@ namespace ProjectCook
                     if (Peek() != '"') throw new FormatException();
                     string name = String();
                     Expect(':');
-                    obj.Fields[name] = Value();
+                    object value = Value();
+                    obj.Fields[name] = value;
+                    if (value is string)
+                    {
+                        if (obj.StringEnds == null) obj.StringEnds = new Dictionary<string, int>();
+                        obj.StringEnds[name] = i - 1;
+                    }
                 } while (Take(','));
                 Expect('}');
                 return obj;
@@ -125,15 +134,20 @@ namespace ProjectCook
             {
                 int start = i;
                 while (i < s.Length && "+-.eE0123456789".IndexOf(s[i]) >= 0) i++;
-                if (!double.TryParse(s.Substring(start, i - start), NumberStyles.Float, CultureInfo.InvariantCulture, out double number))
+                if (!double.TryParse(s.AsSpan(start, i - start), NumberStyles.Float, CultureInfo.InvariantCulture, out double number))
                     throw new FormatException();
                 return number;
             }
 
             private string String()
             {
-                var sb = new StringBuilder();
                 i++;
+                // Most strings have no escape: one Substring and no builder.
+                int start = i;
+                while (i < s.Length && s[i] != '"' && s[i] != '\\') i++;
+                if (i >= s.Length) throw new FormatException();
+                if (s[i] == '"') return s.Substring(start, i++ - start);
+                var sb = new StringBuilder(s, start, i - start, i - start + 16);
                 while (true)
                 {
                     if (i >= s.Length) throw new FormatException();

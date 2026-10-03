@@ -81,7 +81,7 @@ dotnet build src/ProjectCook.csproj -c Release
 
 `Directory.Build.props` sets `GameDir` to the default Steam install path. If the game is in another place, override it without an edit of the file: set a `GameDir` environment variable, or pass `-p:GameDir=...` on the build. The output DLL is at `src\bin\Release\ProjectCook.dll`.
 
-The preview math, the text of the lines, the JSON for the page script, and the send schedule are game-free code (`src/Preview/PreviewLogic.cs`, `src/Preview/FlatJson.cs`, `src/Web/PageJson.cs`, `src/Web/PushSchedule.cs`) with unit tests. The tests do not need the game:
+The preview math, the text of the lines, the JSON for the page script, and the send schedule are game-free code (`src/Preview/PreviewLogic.cs`, `src/Web/PageJson.cs`, `src/Web/PushSchedule.cs`, and the JSON library in `src/Shared/json/`) with unit tests. `src/Shared/json/` is a library copy of the JSON library of the modding workspace (`JsonText`, `FlatJson`), at the version that its `VERSION` file names; it is not edited in this repo. The tests do not need the game:
 
 ```
 dotnet test tests/ProjectCook.Tests

@@ -33,17 +33,4 @@ public class PageJsonTests
 
         Assert.Equal("{\"tips\":{},\"tiers\":{\"1\":1,\"3\":3}}", json);
     }
-
-    [Theory]
-    [InlineData("Salt", "\"Salt\"")]
-    [InlineData("a\"b", "\"a\\\"b\"")]
-    [InlineData("a\\b", "\"a\\\\b\"")]
-    [InlineData("a\nb\rc\td", "\"a\\nb\\rc\\td\"")]
-    [InlineData("a\u0001b", "\"a\\u0001b\"")]
-    [InlineData("饱腹", "\"饱腹\"")]
-    [InlineData(null, "\"\"")]
-    public void Str_is_a_quoted_JSON_string(string text, string expected)
-    {
-        Assert.Equal(expected, PageJson.Str(text));
-    }
 }

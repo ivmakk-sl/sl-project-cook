@@ -28,15 +28,35 @@ namespace ProjectCook
         private static readonly string NoIngredientData = PageJson.DataJson(
             new System.Collections.Generic.KeyValuePair<int, string>[0], new System.Collections.Generic.KeyValuePair<int, int>[0]);
 
+        // The time of the last data build, for the timing line.
+        private static double buildMs;
+
+        // With the dish preview off the page gets no ingredient data, and still its script for the food sort.
+        // A static delegate, so the tick of each frame allocates no closure.
+        private static readonly Func<string> Build = () =>
+        {
+            long buildStart = Timing.Start();
+            string json = Plugin.DishPreview.Value
+                ? IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal())
+                : NoIngredientData;
+            buildMs = Timing.Ms(buildStart);
+            return json;
+        };
+
         private static void Postfix()
         {
             try
             {
-                // With the dish preview off the page gets no ingredient data, and still its script for the food sort.
-                var step = schedule.Tick(Time.realtimeSinceStartup, () => Plugin.DishPreview.Value
-                    ? IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal())
-                    : NoIngredientData);
-                if (step.Kind != PushSchedule.Kind.None) PageScript.Send(step);
+                var step = schedule.Tick(Time.realtimeSinceStartup, Build);
+                if (step.Kind == PushSchedule.Kind.None) return;
+                long sendStart = Timing.Start();
+                PageScript.Send(step);
+                if (Plugin.Verbose.Value)
+                {
+                    // The text that the command carries: the data of setData, and the sort data.
+                    double kb = (step.Kind == PushSchedule.Kind.SetData ? Timing.Kb(step.Json) : 0) + Timing.Kb(step.SortJson);
+                    Plugin.Log.LogDebug(FormattableString.Invariant($"timing: build {buildMs:0.00} ms, send {Timing.Ms(sendStart):0.00} ms, json {kb:0.0} KB ({step.Kind})"));
+                }
             }
             catch (Exception e)
             {

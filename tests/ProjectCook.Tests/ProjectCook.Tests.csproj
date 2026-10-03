@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\src\Preview\PreviewLogic.cs" Link="PreviewLogic.cs" />
-    <Compile Include="..\..\src\Preview\FlatJson.cs" Link="FlatJson.cs" />
+    <Compile Include="..\..\src\Shared\json\cs\*.cs" Link="Shared\json\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\Web\PageJson.cs" Link="PageJson.cs" />
     <Compile Include="..\..\src\Web\PushSchedule.cs" Link="PushSchedule.cs" />
     <Compile Include="..\..\src\CookingTag\CookingTagLogic.cs" Link="CookingTagLogic.cs" />

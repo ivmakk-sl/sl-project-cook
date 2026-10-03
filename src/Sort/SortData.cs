@@ -59,7 +59,7 @@ namespace ProjectCook
                     cookingTabNumbers = numbers;
                     send = SortLogic.Merge(numbers, workbenchNumbers);
                 }
-                PageTick.RequestSort(PageJson.SortDataJson(cookingTab, send, Words()));
+                RequestSort(() => PageJson.SortDataJson(cookingTab, send, Words()));
                 Log($"cooking{(workbench ? " workbench" : "")} {ownerId} items={numbers.Count} sent={send.Count}", eatLog);
             }
             catch (Exception e)
@@ -90,7 +90,7 @@ namespace ProjectCook
                 if (bag != 0 && state.ItemDataList_A != null)
                     send = SortLogic.Merge(numbers, Numbers(state.ItemDataList_A, currentHours, out _));
                 else bag = 0;
-                PageTick.RequestSort(PageJson.SortDataJson(owner, send, Words(), bag));
+                RequestSort(() => PageJson.SortDataJson(owner, send, Words(), bag));
                 Log($"storage {owner}{(dual ? "" : " alone")} bag={bag} items={numbers.Count} sent={send.Count}", eatLog);
             }
             catch (Exception e)
@@ -127,6 +127,17 @@ namespace ProjectCook
                 numbers.Add(new KeyValuePair<long, SortLogic.Numbers>(item.LogicId, n));
             }
             return numbers;
+        }
+
+        // Builds the sort data and hands it to the send schedule, with a timing line.
+        private static void RequestSort(Func<string> build)
+        {
+            long start = Timing.Start();
+            string json = build();
+            double ms = Timing.Ms(start);
+            PageTick.RequestSort(json);
+            if (Plugin.Verbose.Value)
+                Plugin.Log.LogDebug(FormattableString.Invariant($"timing: sort build {ms:0.00} ms, json {Timing.Kb(json):0.0} KB"));
         }
 
         private static void Log(string text, string eatLog)
