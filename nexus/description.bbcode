@@ -1,23 +1,30 @@
 The cooking window tells you which dish you get, but not how good it will be. Project Cook adds the numbers. Each dish card of the "THIS POT" panel shows one line for each quality level that can occur, with the chance of that level and what the dish gives at that level. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
 
-With the default settings, Project Cook only changes what the cooking window shows. It does not change the cooking result, the recipes, or your save.
+With the default settings, Project Cook does not change cooking results, recipes, or what you get from food. The previews and food sort change what the windows show. The Cooking tag is kept in your save and lets you cook from more home storages.
 
-[size=5]Main features[/size]
+[size=5]Features[/size]
 [list]
-[*][b]Quality chances.[/b] One line for each quality level (Perfect, Good, Average, Failed) with its chance in percent. Levels that cannot occur do not show.[/*]
-[*][b]What you get for each level.[/b] Satiety, morale, stamina, and life that your character gets from the whole dish at that quality, with its eat talents and the Life factor of the difficulty (not temporary buffs).[/*]
-[*][b]Portion count.[/b] Shows when the dish splits into more than one portion.[/*]
-[*][b]Talents included.[/b] The chances include the cooking talents of your character, for example "Practice Makes Perfect".[/*]
-[*][b]Dish card tooltip.[/b] Point at a dish card to see the tier of the dish, the cooking XP for that dish, and its trade value at each quality level.[/*]
-[*][b]Ingredient tooltips.[/b] Point at an ingredient in the cooking window to see its tier (High-end, Mid-tier, Low-grade), its trade value, and its raw stats.[/*]
-[*][b]Food sort.[/b] A fridge and a Cooking storage get a dropdown in the storage window and in the cooking window (also the Backpack): sort by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with the number on each item (also on the workbench). Expired food comes first, with the days until it spoils in red. Only the view changes; the items stay in their places in the storage.[/*]
-[*][b]Cooking tag.[/b] Tag any storage with Cooking (Status row of "What goes in here"), and its items show as a tab in the cooking window. A storage with the game's Food tag shows as a tab too. It does not change the robot or how fast food spoils.[/*]
-[*][b]Tier badge.[/b] The food badge of an ingredient shows its tier: gold with a triangle up is High-end, grey with a triangle down is Low-grade. The unchanged green badge means Mid-tier or no tier.[/*]
-[*][b]Drink previews.[/b] The Juicer and Coffee Machine show quality chances, drink stats, portion counts, tooltips, and ingredient tier badges.[/*]
-[*][b]English and Chinese.[/b] Added text follows the game language.[/*]
+[*][b]Dish previews.[/b] See quality chances, eat values, and portion counts before cooking, including drinks from the Juicer and Coffee Machine.[/*]
+[*][b]Cooking tooltips.[/b] Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.[/*]
+[*][b]Food sort.[/b] Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item.[/*]
+[*][b]Cook from home storages.[/b] Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.[/*]
 [/list]
 
-Trade values include your appraisal talents, and not the demand of a trader.
+Supported languages: English and Chinese.
+
+Eat values include fixed talents and the difficulty's Life factor, but temporary buffs or talent effects, random talent bonuses, being tired of the food, and stat maximums can change the actual gain.
+
+Trade values include your appraisal talents. They exclude the trader's bonus for wanted items and any reduction to half value.
+
+[size=5]Using the food sort[/size]
+Choose a sort from the dropdown below the grid. Each item shows the selected number, including ingredients on the cooking workbench:
+[list]
+[*][b]Satiety, Morale, Stamina, Life:[/b] eat value per use, highest first. Positive values are green and negative values are red.[/*]
+[*][b]Trade value:[/b] value of the whole stack, highest first, in gold.[/*]
+[*][b]Expiration Date:[/b] rotten food first, then expired food, then food with the fewest days left. White numbers show days until expiration; red numbers on expired food show days until it spoils. Food that cannot spoil further shows Expired or Rotten instead of a countdown.[/*]
+[*]Items with no value for the selected choice come last and are dimmed.[/*]
+[/list]
+The food sort changes only the displayed order. One choice applies to both windows until you quit the game. Select Default to see the items in their stored places and rearrange them by hand. Transfers between grids still work while sorted, and Auto Organize still moves items as usual. If the items cannot fit in the sorted order, the grid shows their stored places.
 
 [size=5]How the ingredient tier works[/size]
 [b]Quality and tier are separate.[/b] Quality is the cooking result: Perfect, Good, Average, or Failed. Tier is High-end, Mid-tier, or Low-grade and matters for recipes that use ingredient types, such as Meat + Vegetables. A High-end dish can still turn out Failed, and a Low-grade dish can turn out Perfect. Project Cook shows the dish tier and the chance of each quality.
@@ -47,16 +54,13 @@ Trade values include your appraisal talents, and not the demand of a trader.
 [/*]
 [/list]
 
-[size=5]Settings[/size]
-The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] has a switch for each feature in its [font=Courier New][Features][/font] section, all on by default. Set one to [font=Courier New]false[/font] and restart the game to turn that feature off, for example when another mod conflicts with it:
-[list]
-[*][font=Courier New]DishPreview[/font] - the dish card lines and tooltip, and the ingredient lines and tier marks.[/*]
-[*][font=Courier New]FoodSort[/font] - the food sort in the storage window and the cooking window.[/*]
-[*][font=Courier New]CookingStorages[/font] - the Cooking tag and the tabs of Cooking and Food storages. Off works like an uninstall of this part: the game drops the Cooking tag on the next save.[/*]
-[/list]
-
 [size=5]Uninstall[/size]
 Delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
+
+[size=5]Configuration[/size]
+The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] is created the first time you start the game with the mod. Dish preview, food sort, and cooking storages are all on by default and can be turned off separately. Edit the file while the game is closed; changes take effect on the next start. See the [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]settings reference[/url] for the switches and their effects.
+
+Before turning off [font=Courier New]CookingStorages[/font], give any storage with only Cooking a game tag such as Food. Turning this feature off removes Cooking tags from the save, just like uninstalling; turning it back on does not restore them.
 
 [size=5]Source and license[/size]
 Open source under GPL-3.0: [url=https://github.com/ivmakk-sl/sl-project-cook]github.com/ivmakk-sl/sl-project-cook[/url]
