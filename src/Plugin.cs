@@ -46,6 +46,9 @@ namespace ProjectCook
                          typeof(StorageSortOnRefresh),
                          typeof(StorageBagSortOnRefresh),
                          typeof(CookingSortOnRefresh),
+                         typeof(CookingSortOnOpen),
+                         typeof(CookingSortOnSwitchBag),
+                         typeof(CookingSortOnRefreshBag),
                      })
             {
                 try { harmony.CreateClassProcessor(type).Patch(); }
