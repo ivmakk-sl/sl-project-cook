@@ -1,0 +1,6 @@
+# Library copy of shared/icons. Do not edit it: edit shared/icons/, then run tools/shared-sync.ps1 -Mod ProjectCook -Lib icons.
+name=icons
+version=1.0.0
+sha256 web/default.svg a24052ddf0338f0f54bbd9d0f7ed6bab433690feaf457ada679af8b0930be93c
+sha256 web/sort.svg c685a553de7ab39308d461b6911e7fd7f619d70da855a17d2491c1989729d696
+sha256 web/trade.svg ade1898c2f294e0bbecb5a9666e5cd2600b0bf9db3b462e0020415d4ae11597e

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PageSource Include="Web\**\*.ts;Web\**\*.js;Web\**\*.css;Web\**\*.svg" />
+    <PageSource Include="Shared\**\web\**" />
     <PageSource Include="$(ModRoot)\package.json;$(ModRoot)\package-lock.json;$(ModRoot)\vite.config.ts" />
     <EmbeddedResource Include="$(PageBundle)" LogicalName="ProjectCook.page.js" />
   </ItemGroup>

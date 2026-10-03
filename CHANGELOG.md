@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The open list of the food sort closes when you click anywhere outside it. The click still does its own action, for example on an item, and the choice stays the same.
+- The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.
+
 ## [1.2.0] - 2026-10-03
 
 ### Added

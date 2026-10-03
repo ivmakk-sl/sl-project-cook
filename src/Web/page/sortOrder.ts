@@ -1,6 +1,8 @@
 // The order and the pack of the food sort (design D4), with no page part: the same code for the storage window and
 // the cooking window. The places that it gives are page places only; the game never sees them.
 import type { SortData, SortItem } from './types';
+// The places of the items in an order: the first-fit pack of the grid pack library, or null when they do not fit.
+export { pack } from '../../Shared/grid-pack/web/gridPack';
 
 // The index of a choice in the words of the sort data. The numbers of an item ("n") have the order of the
 // choices 1 to 6: Satiety, Morale, Stamina, Life, Trade value, Expiration Date.
@@ -28,32 +30,6 @@ export function order(items: GridItem[], sort: SortData, choice: number): { ids:
     return sign * (a.k - b.k) || a.c - b.c || a.i - b.i;
   });
   return { ids: keyed.map((k) => k.id), dim: new Set(keyed.filter((k) => k.k === null).map((k) => k.id)) };
-}
-
-// The places of the items in this order, first-fit row by row (the row-major scan of the game's BagPacker, as the
-// value view of Better Trade packs), or null when they do not fit the grid in this order.
-export function pack(items: GridItem[], cols: number, rows: number): Map<number | string, [number, number]> | null {
-  const used: boolean[][] = [];
-  for (let y = 0; y < rows; y++) used.push(new Array(cols).fill(false));
-  const free = (x: number, y: number, w: number, h: number): boolean => {
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) if (used[y + j][x + i]) return false;
-    return true;
-  };
-  const result = new Map<number | string, [number, number]>();
-  for (const it of items) {
-    const w = it.w || 1, h = it.h || 1;
-    let placed = false;
-    for (let y = 0; y + h <= rows && !placed; y++) {
-      for (let x = 0; x + w <= cols && !placed; x++) {
-        if (!free(x, y, w, h)) continue;
-        for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) used[y + j][x + i] = true;
-        result.set(it.id, [x, y]);
-        placed = true;
-      }
-    }
-    if (!placed) return null;
-  }
-  return result;
 }
 
 // The color of a badge, null for the plain (white) text: a stat above 0 is positive and below 0 negative, the trade

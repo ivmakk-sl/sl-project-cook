@@ -31,6 +31,16 @@
   --pc-ico-days: #9fd18b;
   --pc-text-shadow: 1px 1px 2px var(--pc-black);
 
+  /* The variables of the dropdown library and the number badge library (prefix projectcook-sort). The badge is
+     above the frost of a freezer in a cell (z-index 3) and below the open list of a dropdown. */
+  --projectcook-sort-fg: var(--pc-white);
+  --projectcook-sort-accent: var(--pc-sort-gold);
+  --projectcook-sort-menu-bg: var(--pc-menu-bg);
+  --projectcook-sort-badge-fg: var(--pc-white);
+  --projectcook-sort-badge-bg: var(--pc-badge-bg);
+  --projectcook-sort-badge-shadow: var(--pc-text-shadow);
+  --projectcook-sort-badge-z: 7;
+
   /* The pictures of the tier badges: a triangle that points up (High) or down (Low). */
   --pc-badge-up: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 3 22 20H2z' fill='white'/></svg>");
   --pc-badge-down: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21 2 4h20z' fill='white'/></svg>");

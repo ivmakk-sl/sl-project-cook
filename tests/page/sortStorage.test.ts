@@ -186,6 +186,22 @@ test('storage sort: with a sort on, the button shows the icon and the word of th
   assert.ok(!btn.classList.contains('projectcook-sort-active'));
 });
 
+test('storage sort: a click on a grid cell with the list open closes the list, keeps the choice, and reaches the cell', () => {
+  const w = storageWindow();
+  view.sort = sortData('42');
+  applyStorageSort(w);
+  select(w, 2);
+  const menu = toolbarB(w).querySelector('.projectcook-sort-menu');
+  toolbarB(w).querySelector('.projectcook-sort-btn').dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  assert.equal(menu.hidden, false);
+  let cellClicks = 0;
+  cellsB(w)[0].addEventListener('click', () => cellClicks++);
+  cellsB(w)[0].dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+  assert.equal(menu.hidden, true);
+  assert.equal(cellClicks, 1);
+  assert.equal(view.choice, 2);
+});
+
 test('storage sort: Satiety packs the items in its order, with badges and a dim class, and Default puts the real places back', () => {
   const w = storageWindow();
   view.sort = sortData('42');

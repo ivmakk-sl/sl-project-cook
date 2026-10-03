@@ -1,6 +1,9 @@
 // The helpers that all features use: the game parts, the stored data, the style node, and the error record.
 import tokensCss from '../tokens.css?inline';
 import pageCss from '../page.css?inline';
+import { dropdownCss } from '../../Shared/dropdown/web/dropdown';
+import { numberBadgeCss } from '../../Shared/number-badge/web/numberBadge';
+import { PREFIX as SORT_PREFIX } from './sortUi';
 import type { ModWindow, PageData, SortData } from './types';
 
 // Page parts each feature depends on, by feature:
@@ -84,11 +87,12 @@ export function newErrorsText(w: ModWindow): string {
   return texts.join(' || ');
 }
 
-// The one style node of the mod in the frame: the tokens, then the rules.
+// The one style node of the mod in the frame: the tokens, the rules of the libraries, then the rules of the mod, so a
+// rule of the mod wins over a library rule of the same weight.
 export function ensureStyle(doc: Document): void {
   if (doc.getElementById('projectcook-style')) return;
   const style = doc.createElement('style');
   style.id = 'projectcook-style';
-  style.textContent = tokensCss + '\n' + pageCss;
+  style.textContent = [tokensCss, dropdownCss(SORT_PREFIX), numberBadgeCss(SORT_PREFIX), pageCss].join('\n');
   doc.head.appendChild(style);
 }
