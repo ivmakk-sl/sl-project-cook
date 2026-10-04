@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using SlShared.I18n;
 
 namespace ProjectCook
 {
@@ -84,9 +85,9 @@ namespace ProjectCook
             public string Expired, Rotten;
             // The text of the dropdown button with Default.
             public string Sort;
-            // The unit of the days on a badge: d in English, 天 in Chinese, as the game writes the shelf life
-            // ({0}d, {0}天 in SR_UI_ItemTips_6).
-            public string DayUnit;
+            // The text of the days on a badge, with the placeholder {days}: {days}d in English, {days}天 in Chinese, as
+            // the game writes the shelf life ({0}d, {0}天 in SR_UI_ItemTips_6).
+            public string DaysLeft;
         }
 
         // oneUse holds the values of one use of the item: the instance values of a cooked dish, else the config
@@ -131,36 +132,35 @@ namespace ProjectCook
             return v > 0 ? (int?)v : null;
         }
 
-        // The badge of the days left: whole days with the day unit (d when none is given), or one decimal under one day
+        // The badge of the days left: the daysLeft text with {days} filled by whole days, or by one decimal under one day
         // (at least 0.1).
-        public static string DaysText(float days, string unit = null)
+        public static string DaysText(float days, string daysLeft)
         {
-            if (string.IsNullOrEmpty(unit)) unit = "d";
-            if (days >= 1f) return ((int)Math.Floor(days)).ToString(CultureInfo.InvariantCulture) + unit;
+            if (days >= 1f) return I18nTexts.Fill(daysLeft, ("days", (int)Math.Floor(days)));
             var tenths = Math.Max(0.1, Math.Round(days, 1, MidpointRounding.AwayFromZero));
-            return tenths.ToString("0.0", CultureInfo.InvariantCulture) + unit;
+            return I18nTexts.Fill(daysLeft, ("days", tenths.ToString("0.0", CultureInfo.InvariantCulture)));
         }
 
-        // The words of the dropdown: the game's Default text (SR_Web_EventChoice_DefaultTag), the game's stat names,
-        // the trade value label of the card tooltip, and the game's word for the shelf life (UI_BattleBag_6,
-        // Expiration Date); the game's expired word (UI_ItemTips_2); the mod's word for the button with Default (the
-        // game's Sort, 整理, is the word of its Auto Organize). A game text that is empty gives the mod's word in the
-        // language.
-        public static Words WordsFrom(PreviewLogic.Words words, string defaultText, string expiredText, string expirationText, bool chinese, string rottenText = null)
+        // The words of the dropdown from the mod texts of one language (src/i18n/): the game's Default text
+        // (SR_Web_EventChoice_DefaultTag), the stat names and the trade value label of the preview words, the game's
+        // word for the shelf life (UI_BattleBag_6, Expiration Date), the game's expired and rotten words (UI_ItemTips_2,
+        // SR_Web_Backpack_Rotten), the mod's word for the button with Default (the game's Sort, 整理, is the word of
+        // its Auto Organize), and the text of the days left.
+        internal static Words WordsFrom(PreviewLogic.Words words, I18nTextSet texts)
         {
             return new Words
             {
                 Choices = new[]
                 {
-                    string.IsNullOrEmpty(defaultText) ? (chinese ? "默认" : "Default") : defaultText,
+                    texts["sortDefault"],
                     words.Stat[EatLogic.Satiety], words.Stat[EatLogic.Morale], words.Stat[EatLogic.Stamina], words.Stat[EatLogic.Life],
                     words.TradeLabel,
-                    string.IsNullOrEmpty(expirationText) ? (chinese ? "保质期" : "Expiration Date") : expirationText,
+                    texts["expirationDate"],
                 },
-                Sort = chinese ? "排序" : "Sort",
-                DayUnit = chinese ? "天" : "d",
-                Expired = string.IsNullOrEmpty(expiredText) ? (chinese ? "已过期" : "Expired") : expiredText,
-                Rotten = string.IsNullOrEmpty(rottenText) ? (chinese ? "已腐败" : "Rotten") : rottenText,
+                Sort = texts["sort"],
+                DaysLeft = texts["daysLeft"],
+                Expired = texts["expired"],
+                Rotten = texts["rotten"],
             };
         }
 

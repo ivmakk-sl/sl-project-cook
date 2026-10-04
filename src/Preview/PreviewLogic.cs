@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SlShared.I18n;
 using SlShared.Json;
 
 namespace ProjectCook
@@ -20,9 +21,9 @@ namespace ProjectCook
             public string[] Tier;
             // Order of the game's stat array: satiety, morale, stamina, health, life.
             public string[] Stat;
-            // The label before the tier name. The game has no text for it, so it is the one word that the mod translates.
+            // The label before the tier name. The game has no text for it.
             public string TierLabel;
-            // The labels of the dish card tooltip. The game has no text for them either, so the mod translates them too.
+            // The labels of the dish card tooltip. The game has no text for them either.
             public string TradeLabel, ExpLabel;
             // The choices of the portion switch: the whole dish, then one portion. The game has no text for them.
             public string[] Portion;
@@ -40,49 +41,20 @@ namespace ProjectCook
             }
         }
 
-        // The game's English texts for these words. They show when the game gives no text for a word.
-        public static readonly Words EnglishWords = new Words
+        // The words from the mod texts of one language (src/i18n/). The cell separator and the line break of the line
+        // formats cannot be part of a word.
+        internal static Words WordsFrom(I18nTextSet texts)
         {
-            Quality = new[] { "Failed", "Average", "Good", "Perfect" },
-            Tier = new[] { null, "High-end", "Mid-tier", "Low-grade" },
-            Stat = new[] { "Satiety", "Morale", "Stamina", "Fitness", "Life" },
-            TierLabel = "Tier",
-            TradeLabel = "Trade value",
-            ExpLabel = "Cooking XP",
-            Portion = new[] { "Whole dish", "Per portion" },
-        };
-
-        // Builds the words from the game texts. keys and texts have the order: quality Fail..Perfect, tier High..Low,
-        // then the stat array order. A text that is missing, empty, or equal to its key (the game returns the key for
-        // an unknown key) becomes the English word, and its key goes into fellBack. The cell separator and the line
-        // break of the line formats cannot be part of a word. chinese selects the tier label of the mod.
-        public static Words WordsOrEnglish(string[] keys, string[] texts, bool chinese, out List<string> fellBack)
-        {
-            fellBack = new List<string>();
-            var english = new List<string>(EnglishWords.Quality);
-            english.AddRange(new[] { EnglishWords.Tier[1], EnglishWords.Tier[2], EnglishWords.Tier[3] });
-            english.AddRange(EnglishWords.Stat);
-
-            var words = new string[english.Count];
-            for (int i = 0; i < words.Length; i++)
-            {
-                string text = texts != null && i < texts.Length ? texts[i] : null;
-                if (string.IsNullOrEmpty(text) || text == keys[i])
-                {
-                    fellBack.Add(keys[i]);
-                    text = english[i];
-                }
-                words[i] = text.Replace('|', ' ').Replace('\n', ' ').Replace('\r', ' ');
-            }
+            string W(string name) => texts[name].Replace('|', ' ').Replace('\n', ' ').Replace('\r', ' ');
             return new Words
             {
-                Quality = new[] { words[0], words[1], words[2], words[3] },
-                Tier = new[] { null, words[4], words[5], words[6] },
-                Stat = new[] { words[7], words[8], words[9], words[10], words[11] },
-                TierLabel = chinese ? "档次" : EnglishWords.TierLabel,
-                TradeLabel = chinese ? "交易价值" : EnglishWords.TradeLabel,
-                ExpLabel = chinese ? "烹饪熟练度" : EnglishWords.ExpLabel,
-                Portion = chinese ? new[] { "整道菜", "每份" } : EnglishWords.Portion,
+                Quality = new[] { W("qualityFail"), W("qualityNormal"), W("qualityGood"), W("qualityPerfect") },
+                Tier = new[] { null, W("tierHigh"), W("tierMid"), W("tierLow") },
+                Stat = new[] { W("satiety"), W("morale"), W("stamina"), W("health"), W("life") },
+                TierLabel = W("tierLabel"),
+                TradeLabel = W("tradeLabel"),
+                ExpLabel = W("expLabel"),
+                Portion = new[] { W("portionWhole"), W("portionOne") },
             };
         }
 

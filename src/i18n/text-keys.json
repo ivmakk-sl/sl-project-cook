@@ -1,0 +1,18 @@
+{
+  "qualityFail": "SR_Web_Cooking_87",
+  "qualityNormal": "SR_Web_Cooking_86",
+  "qualityGood": "SR_Web_Cooking_85",
+  "qualityPerfect": "SR_Web_Cooking_84",
+  "tierHigh": "SR_Web_Cooking_53",
+  "tierMid": "SR_Web_Cooking_54",
+  "tierLow": "SR_Web_Cooking_55",
+  "satiety": "GameKey_1",
+  "morale": "GameKey_2",
+  "stamina": "GameKey_3",
+  "health": "GameKey_4",
+  "life": "GameKey_5",
+  "sortDefault": "SR_Web_EventChoice_DefaultTag",
+  "expirationDate": "UI_BattleBag_6",
+  "expired": "UI_ItemTips_2",
+  "rotten": "SR_Web_Backpack_Rotten"
+}

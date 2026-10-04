@@ -209,15 +209,8 @@ namespace ProjectCook
 
         private static SortLogic.Words Words()
         {
-            var config = ConfigManager.Instance;
-            bool chinese = false;
-            try { chinese = config?.customCache != null && config.customCache.LanguageType == LanguageType.Chinese; }
-            catch (Exception) { }
-            return SortLogic.WordsFrom(GameWords.Current(),
-                ConstantTextTools.ToConstantTextOrEmpty("SR_Web_EventChoice_DefaultTag"),
-                ConstantTextTools.ToConstantTextOrEmpty("UI_ItemTips_2"),
-                ConstantTextTools.ToConstantTextOrEmpty("UI_BattleBag_6"), chinese,
-                ConstantTextTools.ToConstantTextOrEmpty("SR_Web_Backpack_Rotten"));
+            var texts = ModTexts.Current();
+            return SortLogic.WordsFrom(PreviewLogic.WordsFrom(texts), texts);
         }
     }
 }

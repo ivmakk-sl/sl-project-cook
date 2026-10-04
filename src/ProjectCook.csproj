@@ -21,6 +21,8 @@
     <EmbeddedResource Include="$(PageBundle)" LogicalName="ProjectCook.page.js" />
     <!-- The head bar icon of the cooking tag (the alpha file of tools/browser-check/svg-to-png.mjs, from COOK_ICON). -->
     <EmbeddedResource Include="CookingTag\cook-tag.alpha" LogicalName="ProjectCook.cook-tag.alpha" />
+    <!-- The i18n files of the mod texts, read by the i18n library copy. -->
+    <EmbeddedResource Include="i18n\*.json" LogicalName="ProjectCook.i18n.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <Target Name="BuildPage" BeforeTargets="BeforeBuild" Inputs="@(PageSource)" Outputs="$(PageBundle)">

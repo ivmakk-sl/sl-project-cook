@@ -108,7 +108,7 @@ namespace ProjectCook
                 sb.Append(',').Append(JsonText.Num(n.Cage));
                 sb.Append("],\"d\":");
                 if (days.IsRotten) sb.AppendStr(words.Rotten);
-                else if (days.HasNumber) sb.AppendStr(SortLogic.DaysText(days.Days, words.DayUnit));
+                else if (days.HasNumber) sb.AppendStr(SortLogic.DaysText(days.Days, words.DaysLeft));
                 else if (days.IsExpired) sb.AppendStr(words.Expired);
                 else sb.Append("null");
                 sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));

@@ -142,7 +142,7 @@ public class LinesTests
     public void HighestQualityFirst_ZeroChanceOmitted_ZeroStatsOmitted()
     {
         var stats = Stats(new[] { 3, 0, 0, 0, 0 }, new[] { 22, 5, 0, 0, 3 }, new[] { 27, 9, 0, 0, 5 }, new[] { 32, 13, 0, 0, 7 });
-        var lines = PreviewLogic.Lines(new[] { 0, 0, 27.87, 72.13 }, stats, new[] { 1, 1, 1, 1 }, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.Lines(new[] { 0, 0, 27.87, 72.13 }, stats, new[] { 1, 1, 1, 1 }, TestTexts.English());
         Assert.Equal(new[] { "3|Perfect|72%|🍖32|🧠13|❤️7", "2|Good|28%|🍖27|🧠9|❤️5" }, lines);
     }
 
@@ -151,7 +151,7 @@ public class LinesTests
     {
         // energy is 0 only at Normal, and only Perfect has 2 portions
         var stats = Stats(new int[5], new[] { 7, 0, 0, 0, 0 }, new[] { 9, 0, 3, 0, 0 }, new[] { 40, 0, 6, 0, 0 });
-        var lines = PreviewLogic.Lines(new[] { 0, 25.0, 33, 42 }, stats, new[] { 1, 1, 1, 2 }, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.Lines(new[] { 0, 25.0, 33, 42 }, stats, new[] { 1, 1, 1, 2 }, TestTexts.English());
         Assert.Equal(new[] { "3|Perfect|42%|🍖40|⚡6|x2", "2|Good|33%|🍖9|⚡3|x1", "1|Average|25%|🍖7|⚡0|x1" }, lines);
     }
 
@@ -160,7 +160,7 @@ public class LinesTests
     {
         // Eating does not change Fitness, so the lines never show it.
         var stats = Stats(new int[5], new int[5], new int[5], new[] { 221, 10, -4, 6, 2 });
-        var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, stats, new[] { 1, 1, 1, 7 }, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, stats, new[] { 1, 1, 1, 7 }, TestTexts.English());
         Assert.Equal(new[] { "3|Perfect|100%|🍖221|🧠10|⚡-4|❤️2|x7" }, lines);
     }
 
@@ -177,7 +177,7 @@ public class LinesTests
     public void PerPortion_LinesKeepThePortionCount()
     {
         var values = new[] { new double[5], new double[5], new double[5], new[] { 123.0, 68.0, 0, 0, 0 } };
-        var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, PreviewLogic.PerPortion(values, new[] { 1, 1, 1, 2 }), new[] { 1, 1, 1, 2 }, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, PreviewLogic.PerPortion(values, new[] { 1, 1, 1, 2 }), new[] { 1, 1, 1, 2 }, TestTexts.English());
         Assert.Equal(new[] { "3|Perfect|100%|🍖62|🧠34|x2" }, lines);
     }
 
@@ -193,7 +193,7 @@ public class LinesTests
     public void TinyChanceShowsAsOnePercent()
     {
         var stats = Stats(new[] { 10, 0, 0, 0, 0 }, new[] { 20, 0, 0, 0, 0 }, new int[5], new int[5]);
-        var lines = PreviewLogic.Lines(new[] { 0.2, 99.8, 0, 0 }, stats, new[] { 1, 1, 1, 1 }, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.Lines(new[] { 0.2, 99.8, 0, 0 }, stats, new[] { 1, 1, 1, 1 }, TestTexts.English());
         Assert.Equal(new[] { "1|Average|100%|🍖20", "0|Failed|1%|🍖10" }, lines);
     }
 
@@ -201,7 +201,7 @@ public class LinesTests
     public void QualityNameComesFromTheWords_OtherCellsDoNotChange()
     {
         var stats = Stats(new int[5], new int[5], new[] { 9, 0, 3, 0, 0 }, new[] { 40, 0, 6, 0, 0 });
-        var lines = PreviewLogic.Lines(new[] { 0, 0, 58.0, 42 }, stats, new[] { 1, 1, 1, 2 }, WordsTests.Chinese());
+        var lines = PreviewLogic.Lines(new[] { 0, 0, 58.0, 42 }, stats, new[] { 1, 1, 1, 2 }, TestTexts.Chinese());
         Assert.Equal(new[] { "3|完美|42%|🍖40|⚡6|x2", "2|良好|58%|🍖9|⚡3|x1" }, lines);
     }
 }
@@ -215,115 +215,91 @@ public class IngredientTipTests
     [InlineData(new[] { 8, 0, 0, 0, 0 }, 0, 3, "Trade value: 3\n🍖 Satiety: +8")]
     public void TierThenTradeValueThenOneSignedLineForEachStat(int[] stats, int tier, int tradeValue, string expected)
     {
-        Assert.Equal(expected, PreviewLogic.IngredientTip(stats, tier, tradeValue, PreviewLogic.EnglishWords));
+        Assert.Equal(expected, PreviewLogic.IngredientTip(stats, tier, tradeValue, TestTexts.English()));
     }
 
     [Fact]
     public void NothingToShow()
     {
-        Assert.Null(PreviewLogic.IngredientTip(new int[5], 0, 0, PreviewLogic.EnglishWords));
+        Assert.Null(PreviewLogic.IngredientTip(new int[5], 0, 0, TestTexts.English()));
     }
 
     [Fact]
     public void NamesComeFromTheWords()
     {
-        Assert.Equal("T3|档次|低档\n交易价值: 5\n🍖 饱腹: +7\n🧠 心态: -4", PreviewLogic.IngredientTip(new[] { 7, -4, 0, 0, 0 }, 3, 5, WordsTests.Chinese()));
+        Assert.Equal("T3|档次|低档\n交易价值: 5\n🍖 饱腹: +7\n🧠 心态: -4", PreviewLogic.IngredientTip(new[] { 7, -4, 0, 0, 0 }, 3, 5, TestTexts.Chinese()));
     }
 }
 public class WordsTests
 {
-    // Order of the word list: quality Fail..Perfect, tier High..Low, then the stat array order.
-    private static readonly string[] Keys = { "q0", "q1", "q2", "q3", "t1", "t2", "t3", "s0", "s1", "s2", "s3", "s4" };
-    private static string[] ChineseTexts() => new[] { "失败", "普通", "良好", "完美", "高档", "中档", "低档", "饱腹", "心态", "精力", "健康", "生命" };
-
-    internal static PreviewLogic.Words Chinese() => PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _);
+    [Fact]
+    public void EnglishTexts()
+    {
+        var words = TestTexts.English();
+        Assert.Equal(new[] { "Failed", "Average", "Good", "Perfect" }, words.Quality);
+        Assert.Equal(new[] { null, "High-end", "Mid-tier", "Low-grade" }, words.Tier);
+        Assert.Equal(new[] { "Satiety", "Morale", "Stamina", "Fitness", "Life" }, words.Stat);
+        Assert.Equal("Tier", words.TierLabel);
+        Assert.Equal("Trade value", words.TradeLabel);
+        Assert.Equal("Cooking XP", words.ExpLabel);
+        Assert.Equal(new[] { "Whole dish", "Per portion" }, words.Portion);
+    }
 
     [Fact]
-    public void AllTextsGiven()
+    public void ChineseGameTextsWithTheChineseModTexts()
     {
-        var words = PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out var fellBack);
+        var words = TestTexts.Chinese();
         Assert.Equal(new[] { "失败", "普通", "良好", "完美" }, words.Quality);
         Assert.Equal(new[] { null, "高档", "中档", "低档" }, words.Tier);
         Assert.Equal(new[] { "饱腹", "心态", "精力", "健康", "生命" }, words.Stat);
-        Assert.Empty(fellBack);
+        Assert.Equal("档次", words.TierLabel);
+        Assert.Equal("交易价值", words.TradeLabel);
+        Assert.Equal("烹饪熟练度", words.ExpLabel);
+        Assert.Equal(new[] { "整道菜", "每份" }, words.Portion);
     }
 
     [Fact]
-    public void NullEmptyOrKeyBecomesTheEnglishWord_OtherWordsStay()
+    public void AMissingGameTextGivesTheEnglishText_OtherWordsStay()
     {
-        var texts = ChineseTexts();
-        texts[3] = null; // Perfect
-        texts[5] = "";   // Mid
-        texts[8] = "s1"; // the game returns the key for an unknown key
-        var words = PreviewLogic.WordsOrEnglish(Keys, texts, true, out var fellBack);
+        var game = TestTexts.ChineseGameTexts();
+        game.Remove("SR_Web_Cooking_84");          // Perfect
+        game["SR_Web_Cooking_54"] = "";            // Mid
+        game["GameKey_2"] = "GameKey_2";           // the game returns the key for an unknown key
+        var texts = TestTexts.Load();
+        var words = PreviewLogic.WordsFrom(texts.For(0, TestTexts.Game(game)));
         Assert.Equal(new[] { "失败", "普通", "良好", "Perfect" }, words.Quality);
         Assert.Equal(new[] { null, "高档", "Mid-tier", "低档" }, words.Tier);
         Assert.Equal(new[] { "饱腹", "Morale", "精力", "健康", "生命" }, words.Stat);
-        Assert.Equal(new[] { "q3", "t2", "s1" }, fellBack);
-    }
-
-    [Fact]
-    public void TierLabelIsTheOneWordOfTheMod_ByLanguage()
-    {
-        Assert.Equal("档次", PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _).TierLabel);
-        Assert.Equal("Tier", PreviewLogic.WordsOrEnglish(Keys, null, false, out _).TierLabel);
-        Assert.Equal("Tier", PreviewLogic.EnglishWords.TierLabel);
-    }
-
-    [Fact]
-    public void PortionSwitchLabelsAreWordsOfTheMod_ByLanguage()
-    {
-        Assert.Equal(new[] { "Whole dish", "Per portion" }, PreviewLogic.WordsOrEnglish(Keys, null, false, out _).Portion);
-        Assert.Equal(new[] { "整道菜", "每份" }, PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _).Portion);
-        Assert.Equal(new[] { "Whole dish", "Per portion" }, PreviewLogic.EnglishWords.Portion);
-    }
-
-    [Fact]
-    public void TooltipLabelsAreWordsOfTheMod_ByLanguage()
-    {
-        var english = PreviewLogic.WordsOrEnglish(Keys, null, false, out _);
-        Assert.Equal("Trade value", english.TradeLabel);
-        Assert.Equal("Cooking XP", english.ExpLabel);
-
-        var chinese = PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _);
-        Assert.Equal("交易价值", chinese.TradeLabel);
-        Assert.Equal("烹饪熟练度", chinese.ExpLabel);
-    }
-
-    [Fact]
-    public void NoTextsAtAllGivesEnglish()
-    {
-        var words = PreviewLogic.WordsOrEnglish(Keys, null, false, out var fellBack);
-        Assert.Equal(PreviewLogic.EnglishWords.Quality, words.Quality);
-        Assert.Equal(PreviewLogic.EnglishWords.Tier, words.Tier);
-        Assert.Equal(PreviewLogic.EnglishWords.Stat, words.Stat);
-        Assert.Equal(Keys, fellBack);
+        foreach (var key in new[] { "SR_Web_Cooking_84", "SR_Web_Cooking_54", "GameKey_2" })
+            Assert.Contains(texts.Warnings, w => w.Contains(key));
     }
 
     [Fact]
     public void SeparatorCharactersInAWordBecomeSpaces()
     {
-        var texts = ChineseTexts();
-        texts[2] = "Go|od";
-        texts[7] = "Sat\niety";
-        var words = PreviewLogic.WordsOrEnglish(Keys, texts, false, out _);
+        var game = TestTexts.ChineseGameTexts();
+        game["SR_Web_Cooking_85"] = "Go|od";
+        game["GameKey_1"] = "Sat\niety";
+        game["GameKey_3"] = "Sta\rmina";
+        var words = PreviewLogic.WordsFrom(TestTexts.Load().For(1, TestTexts.Game(game)));
         Assert.Equal("Go od", words.Quality[2]);
         Assert.Equal("Sat iety", words.Stat[0]);
+        Assert.Equal("Sta mina", words.Stat[2]);
     }
 
     [Fact]
     public void SameWordsAreEqual()
     {
-        Assert.True(Chinese().SameAs(Chinese()));
-        Assert.False(Chinese().SameAs(PreviewLogic.EnglishWords));
-        Assert.False(Chinese().SameAs(null));
+        Assert.True(TestTexts.Chinese().SameAs(TestTexts.Chinese()));
+        Assert.False(TestTexts.Chinese().SameAs(TestTexts.English()));
+        Assert.False(TestTexts.Chinese().SameAs(null));
     }
 
     [Fact]
     public void SameAsIsFalseWhenOnlyATooltipLabelDiffers()
     {
-        var a = Chinese();
-        var b = Chinese();
+        var a = TestTexts.Chinese();
+        var b = TestTexts.Chinese();
         b.ExpLabel = "other";
         Assert.False(a.SameAs(b));
     }
@@ -333,7 +309,7 @@ public class TipLinesTests
     [Fact]
     public void ExpLineThenQualityHeaderAndTradeRow_HighestFirst_ZeroChanceOmitted()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 28.0, 72.0 }, new[] { 20, 50, 90, 200 }, 79, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 28.0, 72.0 }, new[] { 20, 50, 90, 200 }, 79, 0, TestTexts.English());
         Assert.Equal(new[]
         {
             "Cooking XP: +79",
@@ -345,7 +321,7 @@ public class TipLinesTests
     [Fact]
     public void ExpLineNamesTheZeroOfAFailedDish()
     {
-        var lines = PreviewLogic.TipLines(new[] { 20.0, 0, 0, 80.0 }, new[] { 5, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 20.0, 0, 0, 80.0 }, new[] { 5, 0, 0, 200 }, 79, 0, TestTexts.English());
         Assert.Equal(new[]
         {
             "Cooking XP: +79 (Failed 0)",
@@ -357,14 +333,14 @@ public class TipLinesTests
     [Fact]
     public void OneLevelGivesPlainLines_WithNoTalentsLine()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, TestTexts.English());
         Assert.Equal(new[] { "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 
     [Fact]
     public void OneLevelGivesPlainLines_ChineseWordsGiveChineseLabels()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, WordsTests.Chinese());
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, TestTexts.Chinese());
         Assert.Equal(new[]
         {
             "烹饪熟练度: +79",
@@ -378,7 +354,7 @@ public class TipLinesOnlyFailTests
     [Fact]
     public void OnlyFailedCanOccur_ExpIsAPlainZero()
     {
-        var lines = PreviewLogic.TipLines(new[] { 100.0, 0, 0, 0 }, new[] { 5, 0, 0, 0 }, 79, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 100.0, 0, 0, 0 }, new[] { 5, 0, 0, 0 }, 79, 0, TestTexts.English());
         Assert.Equal(new[] { "Cooking XP: 0", "Trade value: 5" }, lines);
     }
 }
@@ -388,14 +364,14 @@ public class TipLinesTierTests
     [Fact]
     public void TierLineComesFirst_InTheFormatOfTheIngredientTip()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 2, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 2, TestTexts.English());
         Assert.Equal(new[] { "T2|Tier|Mid-tier", "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 
     [Fact]
     public void DishWithNoTierHasNoTierLine()
     {
-        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, PreviewLogic.EnglishWords);
+        var lines = PreviewLogic.TipLines(new[] { 0, 0, 0, 100.0 }, new[] { 0, 0, 0, 200 }, 79, 0, TestTexts.English());
         Assert.Equal(new[] { "Cooking XP: +79", "Trade value: 200" }, lines);
     }
 }

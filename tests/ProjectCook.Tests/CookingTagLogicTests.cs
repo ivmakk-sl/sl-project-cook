@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ProjectCook;
+using SlShared.I18n;
 using Xunit;
 
 public class CookingTagLogicTests
@@ -14,10 +15,12 @@ public class CookingTagLogicTests
         Assert.Equal("cook", CookingTagLogic.IconKey);
     }
 
+    private static I18nTexts Texts() => I18nTexts.Load(typeof(CookingTagLogicTests).Assembly, "ProjectCook");
+
     [Fact]
     public void Words_English()
     {
-        var w = CookingTagLogic.WordsFor(1);
+        var w = CookingTagLogic.WordsFrom(Texts().For(1, null));
         Assert.Equal("Cooking", w.Name);
         Assert.Equal("Food here shows as a tab of the cooking window. It does not change which food goes here.", w.Desc);
     }
@@ -25,7 +28,7 @@ public class CookingTagLogicTests
     [Fact]
     public void Words_Chinese()
     {
-        var w = CookingTagLogic.WordsFor(0);
+        var w = CookingTagLogic.WordsFrom(Texts().For(0, null));
         Assert.Equal("烹饪", w.Name);
         Assert.Equal("这里的食物作为烹饪台的一个页签接入，直接取用；不会改变哪些食物放进来。", w.Desc);
     }
@@ -33,7 +36,7 @@ public class CookingTagLogicTests
     [Fact]
     public void Words_UnknownLanguage_IsEnglish()
     {
-        Assert.Equal("Cooking", CookingTagLogic.WordsFor(7).Name);
+        Assert.Equal("Cooking", CookingTagLogic.WordsFrom(Texts().For(7, null)).Name);
     }
 
     [Fact]

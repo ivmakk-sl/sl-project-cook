@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SlShared.I18n;
 using SlShared.ModTags;
 
 namespace ProjectCook
@@ -37,16 +38,8 @@ namespace ProjectCook
             public Tab(long ownerId, int configId, bool locked) { OwnerId = ownerId; ConfigId = configId; Locked = locked; }
         }
 
-        private static readonly Words English = new Words(
-            "Cooking", "Food here shows as a tab of the cooking window. It does not change which food goes here.");
-
-        // 烹饪 is the game's word in 开始烹饪 (SR_Web_Cooking_16). The description uses the words of the game's
-        // cooking guide (SR_Web_Cooking_Guide_15: 家里每台冰箱作为一个页签接入，直接取用) and of the Chilled tag (放进来).
-        private static readonly Words Chinese = new Words(
-            "烹饪", "这里的食物作为烹饪台的一个页签接入，直接取用；不会改变哪些食物放进来。");
-
-        // languageType is the game's LanguageType: 0 is Chinese. Each other language gets the English words.
-        public static Words WordsFor(int languageType) => languageType == 0 ? Chinese : English;
+        // The name and the description of the tag, from the mod texts of one language.
+        internal static Words WordsFrom(I18nTextSet texts) => new Words(texts["cookingTagName"], texts["cookingTagDesc"]);
 
         // The tabs that the cooking tag adds after the fridge tabs: each tagged storage that is not a fridge, in the
         // order of tagged.

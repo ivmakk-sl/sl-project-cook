@@ -54,15 +54,15 @@ public class SortLogicTests
     [InlineData(0.04f, "0.1d")]
     public void DaysText(float days, string expected)
     {
-        Assert.Equal(expected, SortLogic.DaysText(days));
+        Assert.Equal(expected, SortLogic.DaysText(days, "{days}d"));
     }
 
     [Fact]
     public void DaysText_TheDayUnitOfTheLanguage()
     {
-        Assert.Equal("3天", SortLogic.DaysText(3.9f, "天"));
-        Assert.Equal("0.5天", SortLogic.DaysText(0.5f, "天"));
-        Assert.Equal("3d", SortLogic.DaysText(3.9f, null));
+        Assert.Equal("3天", SortLogic.DaysText(3.9f, "{days}天"));
+        Assert.Equal("0.5天", SortLogic.DaysText(0.5f, "{days}天"));
+        Assert.Equal("3d", SortLogic.DaysText(3.9f, "{days}d"));
     }
 
     [Fact]
@@ -131,6 +131,7 @@ public class SortDataJsonTests
         Choices = new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date" },
         Expired = "Expired",
         Sort = "Sort",
+        DaysLeft = "{days}d",
     };
 
     [Fact]
@@ -175,7 +176,7 @@ public class SortDataJsonTests
         {
             new KeyValuePair<long, SortLogic.Numbers>(1, new SortLogic.Numbers { ConfigId = 5, Stats = new int?[4], Days = SortLogic.DaysLeft.Spoils(12.4f) }),
         };
-        var chinese = new SortLogic.Words { Choices = Words.Choices, Expired = "已过期", Sort = "排序", DayUnit = "天" };
+        var chinese = new SortLogic.Words { Choices = Words.Choices, Expired = "已过期", Sort = "排序", DaysLeft = "{days}天" };
         Assert.Contains("\"d\":\"12天\"", PageJson.SortDataJson(1, items, chinese));
     }
 
@@ -191,37 +192,42 @@ public class SortDataJsonTests
 public class SortWordsTests
 {
     [Fact]
-    public void English_GameWordsForTheStatsDefaultExpirationAndExpired()
+    public void English_TheStatsDefaultExpirationExpiredAndTheDaysLeft()
     {
-        var w = SortLogic.WordsFrom(PreviewLogic.EnglishWords, "Default", "Expired", "Expiration Date", false);
+        var w = SortLogic.WordsFrom(TestTexts.English(), TestTexts.EnglishSet());
         Assert.Equal(new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date" }, w.Choices);
         Assert.Equal("Expired", w.Expired);
+        Assert.Equal("Rotten", w.Rotten);
         Assert.Equal("Sort", w.Sort);
-        Assert.Equal("d", w.DayUnit);
+        Assert.Equal("{days}d", w.DaysLeft);
     }
 
     [Fact]
-    public void Chinese_GameWordForExpiration_ModWordForSort()
+    public void Chinese_TheModTextsOfTheLanguage()
     {
-        var w = SortLogic.WordsFrom(WordsTests.Chinese(), "默认", "已过期", "保质期", true);
+        var w = SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.ChineseSet());
         Assert.Equal("默认", w.Choices[0]);
+        Assert.Equal("饱腹", w.Choices[1]);
         Assert.Equal("保质期", w.Choices[6]);
         Assert.Equal("已过期", w.Expired);
+        Assert.Equal("已腐败", w.Rotten);
         Assert.Equal("排序", w.Sort);
-        Assert.Equal("天", w.DayUnit);
+        Assert.Equal("{days}天", w.DaysLeft);
     }
 
     [Fact]
-    public void NoGameText_GivesTheModWord()
+    public void TheGameTextsOfTheTextKeysWin()
     {
-        var w = SortLogic.WordsFrom(PreviewLogic.EnglishWords, "", null, "", false);
-        Assert.Equal("Default", w.Choices[0]);
-        Assert.Equal("Expiration Date", w.Choices[6]);
-        Assert.Equal("Expired", w.Expired);
-        var zh = SortLogic.WordsFrom(WordsTests.Chinese(), null, "", null, true);
-        Assert.Equal("默认", zh.Choices[0]);
-        Assert.Equal("保质期", zh.Choices[6]);
-        Assert.Equal("已过期", zh.Expired);
+        var game = TestTexts.ChineseGameTexts();
+        game["SR_Web_EventChoice_DefaultTag"] = "默认G";
+        game["UI_BattleBag_6"] = "保质期G";
+        game["UI_ItemTips_2"] = "已过期G";
+        game["SR_Web_Backpack_Rotten"] = "已腐败G";
+        var w = SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.Load().For(0, TestTexts.Game(game)));
+        Assert.Equal("默认G", w.Choices[0]);
+        Assert.Equal("保质期G", w.Choices[6]);
+        Assert.Equal("已过期G", w.Expired);
+        Assert.Equal("已腐败G", w.Rotten);
     }
 }
 

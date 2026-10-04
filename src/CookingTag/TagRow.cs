@@ -36,7 +36,7 @@ namespace ProjectCook
                 var config = ConfigManager.Instance;
                 var cache = config?.customCache;
                 if (cache == null) return;
-                var language = (int)cache.LanguageType;
+                var language = ModTexts.Language();
                 if (cache.Pointer == lastCache && language == lastLanguage) return;
                 lastCache = cache.Pointer;
                 lastLanguage = language;
@@ -56,10 +56,11 @@ namespace ProjectCook
                     return;
                 }
 
-                var words = CookingTagLogic.WordsFor(language);
+                // The texts come from the i18n files only: the Prefix can run early in a save load, before the game texts.
+                var words = CookingTagLogic.WordsFrom(ModTexts.For(language));
                 SetText(cache.LanguageMap, words);
-                SetText(cache.ChineseLanguageMap, CookingTagLogic.WordsFor(0));
-                SetText(cache.EnglishLanguageMap, CookingTagLogic.WordsFor(1));
+                SetText(cache.ChineseLanguageMap, CookingTagLogic.WordsFrom(ModTexts.For(0)));
+                SetText(cache.EnglishLanguageMap, CookingTagLogic.WordsFrom(ModTexts.For(1)));
 
                 if (table.ContainsKey(ModTagRule.CookingTagId)) return;
                 table[ModTagRule.CookingTagId] = new Config_FurnitureTag
