@@ -1,6 +1,8 @@
 // The icon of the cooking tag in the storage window. The page keeps its tag icons in a const of setup(), which a
 // script cannot reach, and its render calls tagIconSvg of the setup state with the IconKey of a tag (misc icon for
-// an unknown key). So the script wraps tagIconSvg of the #app component for the key of the cooking tag.
+// an unknown key). So the script gives the icon of the cooking tag to the registry of the mod tags library, which
+// wraps tagIconSvg of the #app component once for all mods.
+import { registerTagIcon } from '../../Shared/mod-tags/web/registerTagIcon';
 import { addError } from './core';
 import type { StorageWindow } from './types';
 
@@ -13,10 +15,9 @@ export const COOK_ICON =
 // The IconKey of the cooking tag (CookingTagLogic.IconKey in C#).
 const COOK_KEY = 'cook';
 
-type IconFn = ((icon: string) => string) & { __projectCook?: boolean };
 type AppNode = HTMLElement & { _vnode?: { component?: { setupState?: Record<string, unknown> } } };
 
-// Wraps tagIconSvg once. False, with an error for the result of the pass, when the page has no such function.
+// Adds the icon to the registry. False, with an error for the result of the pass, when the page has no such function.
 export function installTagIcon(w: StorageWindow): boolean {
   const app = w.document.getElementById('app') as AppNode | null;
   const state = app && app._vnode && app._vnode.component && app._vnode.component.setupState;
@@ -24,14 +25,9 @@ export function installTagIcon(w: StorageWindow): boolean {
     addError(w, 'tagIcon: no Vue component on #app');
     return false;
   }
-  const game = state.tagIconSvg as IconFn | undefined;
-  if (typeof game !== 'function') {
+  if (!registerTagIcon(state, COOK_KEY, COOK_ICON)) {
     addError(w, 'tagIcon: no tagIconSvg in the setup state');
     return false;
   }
-  if (game.__projectCook) return true;
-  const wrapped: IconFn = (icon: string) => (icon === COOK_KEY ? COOK_ICON : game(icon));
-  wrapped.__projectCook = true;
-  state.tagIconSvg = wrapped;
   return true;
 }

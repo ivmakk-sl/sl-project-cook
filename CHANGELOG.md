@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The items that the cooking station does not take are dimmed in each tab of the cooking window: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. Fuel such as Scrap Paper stays bright at a stove that burns fuel. Turn it off with `DimUncookable`.
 - Portion switch after the "THIS POT" title: the dish cards show the stats of the whole dish or of one portion, with the portion count "xN" on each line. Whole dish is the choice at each game start, and the choice stays until you quit the game. It is part of the dish preview (`DishPreview`).
 - Food sort in the Rat Cage window: the dropdown under the Leave All and Leave by Type buttons sorts the open tab (the Backpack or a fridge). In this window, Satiety sorts by the satiety that the cage gets from each item (all uses left), highest first, and items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the numbers of the choice too. The choice is the one of the storage window and the cooking window.
+- The head bar above a storage shows the icon of the Cooking tag in its color, next to the icons of the other tags. Before, the game showed no icon for it and wrote an error to its log.
 
 ### Changed
 
@@ -20,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The open list of the food sort closes when you click anywhere outside it. The click still does its own action, for example on an item, and the choice stays the same.
 - The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.
+- When a game update adds a tag of its own with the id of the Cooking tag, the mod turns the Cooking tag off and writes a warning to the log, so the game's tag works as without the mod. The cooking window and the other features keep working.
 
 ## [1.2.0] - 2026-10-03
 

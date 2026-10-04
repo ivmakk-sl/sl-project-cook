@@ -19,6 +19,8 @@
     <PageSource Include="Shared\**\web\**" />
     <PageSource Include="$(ModRoot)\package.json;$(ModRoot)\package-lock.json;$(ModRoot)\vite.config.ts" />
     <EmbeddedResource Include="$(PageBundle)" LogicalName="ProjectCook.page.js" />
+    <!-- The head bar icon of the cooking tag (the alpha file of tools/browser-check/svg-to-png.mjs, from COOK_ICON). -->
+    <EmbeddedResource Include="CookingTag\cook-tag.alpha" LogicalName="ProjectCook.cook-tag.alpha" />
   </ItemGroup>
 
   <Target Name="BuildPage" BeforeTargets="BeforeBuild" Inputs="@(PageSource)" Outputs="$(PageBundle)">

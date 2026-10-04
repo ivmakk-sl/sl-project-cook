@@ -7,14 +7,11 @@ public class CookingTagLogicTests
     [Fact]
     public void RowValues_FollowTheStatusRow()
     {
-        Assert.Equal(1900, CookingTagLogic.TagId);
         Assert.Equal(3, CookingTagLogic.Dim);
         Assert.Equal(320, CookingTagLogic.Order);
         Assert.Equal(4, CookingTagLogic.SortPriority);
         Assert.Equal("#E07A3C", CookingTagLogic.Color);
         Assert.Equal("cook", CookingTagLogic.IconKey);
-        Assert.Equal("FurnitureTag_TagName_1900", CookingTagLogic.NameKey);
-        Assert.Equal("FurnitureTag_TagDesc_1900", CookingTagLogic.DescKey);
     }
 
     [Fact]
@@ -37,32 +34,6 @@ public class CookingTagLogicTests
     public void Words_UnknownLanguage_IsEnglish()
     {
         Assert.Equal("Cooking", CookingTagLogic.WordsFor(7).Name);
-    }
-
-    [Fact]
-    public void RuleForGame_DropsTheCookingTag()
-    {
-        Assert.Equal(new[] { 1010, 1006 }, CookingTagLogic.RuleForGame(new[] { 1010, 1900, 1006 }));
-    }
-
-    [Fact]
-    public void RuleForGame_CookingAlone_IsFood()
-    {
-        Assert.Equal(new[] { 1001 }, CookingTagLogic.RuleForGame(new[] { 1900 }));
-    }
-
-    [Fact]
-    public void RuleForGame_WithoutCookingTag_IsTheSameList()
-    {
-        var rule = new[] { 1010, 1006 };
-        Assert.Same(rule, CookingTagLogic.RuleForGame(rule));
-    }
-
-    [Fact]
-    public void RuleForGame_EmptyRule_IsTheSameList()
-    {
-        var rule = new int[0];
-        Assert.Same(rule, CookingTagLogic.RuleForGame(rule));
     }
 
     [Fact]
@@ -102,6 +73,16 @@ public class CookingTagLogicTests
     [InlineData(new int[0], false)]
     public void LinksToCooking_TheCookingTagOrTheGameTagFood(int[] tagIds, bool expected)
     {
-        Assert.Equal(expected, CookingTagLogic.LinksToCooking(tagIds));
+        Assert.Equal(expected, CookingTagLogic.LinksToCooking(tagIds, false));
+    }
+
+    // When the game took the id 1900 for a tag of its own, that tag does not link to the cooking window. Food still does.
+    [Theory]
+    [InlineData(new[] { 1900 }, false)]
+    [InlineData(new[] { 1001 }, true)]
+    [InlineData(new[] { 1900, 1001 }, true)]
+    public void LinksToCooking_Disabled_OnlyFood(int[] tagIds, bool expected)
+    {
+        Assert.Equal(expected, CookingTagLogic.LinksToCooking(tagIds, true));
     }
 }

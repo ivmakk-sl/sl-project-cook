@@ -29,13 +29,30 @@ test('tagIcon: the cook key gets the mod icon, each other key the game answer', 
   assert.match(COOK_ICON, /^<svg viewBox="0 0 24 24">/);
 });
 
-test('tagIcon: a second install keeps one wrapper', () => {
+test('tagIcon: a second install keeps one wrapper, the registry of the mod tags', () => {
   const w = storageWindow(true);
   installTagIcon(w);
   const first = tagIconSvg(w);
   installTagIcon(w);
   assert.equal(tagIconSvg(w), first);
+  assert.equal(tagIconSvg(w)('cook'), COOK_ICON);
   assert.equal(tagIconSvg(w)('dish'), 'game:dish');
+  assert.equal((first as any).__slModTagIcons.cook, COOK_ICON);
+});
+
+test('tagIcon: the icon joins the registry of another mod', () => {
+  const w = storageWindow(true);
+  const state = w.document.getElementById('app')._vnode.component.setupState;
+  const game = state.tagIconSvg;
+  // The wrapper of another mod's registry copy: it reads its map first.
+  const icons: Record<string, string> = { trade: 'coin' };
+  const other = (icon: string) => icons[icon] ?? game(icon);
+  (other as any).__slModTagIcons = icons;
+  state.tagIconSvg = other;
+  installTagIcon(w);
+  assert.equal(tagIconSvg(w), other);
+  assert.equal(tagIconSvg(w)('cook'), COOK_ICON);
+  assert.equal(tagIconSvg(w)('trade'), 'coin');
 });
 
 test('tagIcon: no tagIconSvg records a missing part and changes nothing', () => {

@@ -70,7 +70,7 @@ namespace ProjectCook
             if (SeparatePieces.Value)
                 patches.AddRange(new[] { typeof(PiecesOnCookingDragMove), typeof(PiecesOnTryMergeIntoOwner), typeof(PiecesOnMoveItem) });
             if (CookingStorages.Value)
-                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs) });
+                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs), typeof(HeadBarIcon) });
             if (FoodSort.Value)
                 patches.AddRange(new[]
                 {

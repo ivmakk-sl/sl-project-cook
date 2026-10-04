@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SlShared.ModTags;
 
 namespace ProjectCook
 {
@@ -6,15 +7,11 @@ namespace ProjectCook
     // compile it alone.
     public static class CookingTagLogic
     {
-        // The row of the game's FurnitureTag table that the mod adds. The id is far from the game's ids (1001-1032),
-        // Dim 3 is the Status row, Order 320 puts it after Chilled (310), and SortPriority is the value of Food.
-        public const int TagId = 1900, Dim = 3, Order = 320, SortPriority = 4;
+        // The row of the game's FurnitureTag table that the mod adds, with the id ModTagRule.CookingTagId and the keys
+        // of the mod tags library. Dim 3 is the Status row, Order 320 puts it after Chilled (310), and SortPriority is
+        // the value of Food.
+        public const int Dim = 3, Order = 320, SortPriority = 4;
         public const string Color = "#E07A3C", IconKey = "cook";
-        public const string NameKey = "FurnitureTag_TagName_1900", DescKey = "FurnitureTag_TagDesc_1900";
-
-        // The game's tag Food. With only the cooking tag, the game sees this rule. A storage with Food also links to
-        // the cooking window, because Food takes every food.
-        public const int FoodTagId = 1001;
 
         // A fridge tab of the cooking window is locked below this cooking level (CookingFridgeInfo.UnlockCookingLevel).
         public const int UnlockCookingLevel = 2;
@@ -51,28 +48,14 @@ namespace ProjectCook
         // languageType is the game's LanguageType: 0 is Chinese. Each other language gets the English words.
         public static Words WordsFor(int languageType) => languageType == 0 ? Chinese : English;
 
-        // The rule that the game's tag logic sees: the rule without the cooking tag, or Food when the cooking tag is
-        // the only tag. A rule without the cooking tag comes back as the same list.
-        public static IReadOnlyList<int> RuleForGame(IReadOnlyList<int> rule)
-        {
-            var at = -1;
-            for (var i = 0; i < rule.Count; i++)
-                if (rule[i] == TagId) { at = i; break; }
-            if (at < 0) return rule;
-            var result = new List<int>(rule.Count);
-            for (var i = 0; i < rule.Count; i++)
-                if (rule[i] != TagId) result.Add(rule[i]);
-            if (result.Count == 0) result.Add(FoodTagId);
-            return result;
-        }
-
         // The tabs that the cooking tag adds after the fridge tabs: each tagged storage that is not a fridge, in the
         // order of tagged.
-        // A storage links to the cooking window (a container tab, the food sort) with the cooking tag or the tag Food.
-        public static bool LinksToCooking(IEnumerable<int> tagIds)
+        // A storage links to the cooking window (a container tab, the food sort) with the cooking tag or the tag Food,
+        // because Food takes every food. When the cooking tag is disabled (the game took its id), only Food links.
+        public static bool LinksToCooking(IEnumerable<int> tagIds, bool disabled)
         {
             foreach (var id in tagIds)
-                if (id == TagId || id == FoodTagId) return true;
+                if ((id == ModTagRule.CookingTagId && !disabled) || id == ModTagRule.FoodTagId) return true;
             return false;
         }
 

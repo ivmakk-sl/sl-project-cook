@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using HarmonyLib;
+using SlShared.ModTags;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes;
 using Il2CppList = Il2CppSystem.Collections.Generic.List<int>;
@@ -10,8 +11,9 @@ using Il2CppReadOnlyList = Il2CppSystem.Collections.Generic.IReadOnlyList<int>;
 
 namespace ProjectCook
 {
-    // The game's tag logic sees each rule without the cooking tag, or Food when the cooking tag is the only tag
-    // (CookingTagLogic.RuleForGame). A match of the tag itself would change the robot rules: the options of one row
+    // The game's tag logic sees each rule without the mod tags, or Food when the cooking tag is the only tag
+    // (ModTagRule.ForGame of the mod tags library, which also removes the mod tags of other mods, so two mods give the
+    // same rule whichever runs first). A match of the tag itself would change the robot rules: the options of one row
     // are OR'd (Chilled + Cooking would take each food), and the specificity counts the options (a storage with the
     // tag would rank above one without it).
     // Each path that matches a rule against an item goes through one of these three methods. Evaluate is a real call
@@ -23,10 +25,10 @@ namespace ProjectCook
         private static readonly HashSet<string> logged = new HashSet<string>();
         private static bool warned;
 
-        // The rule for the game, or null when the rule has no cooking tag (the common case, with no allocation).
+        // The rule for the game, or null when the rule has no mod tag to remove (the common case, with no allocation).
         public static Il2CppList ForGame(Il2CppObjectBase rule)
         {
-            if (rule == null) return null;
+            if (rule == null || TagRow.Disabled) return null;
             var list = rule.TryCast<Il2CppList>();
             if (list == null)
             {
@@ -37,10 +39,18 @@ namespace ProjectCook
                 }
                 return null;
             }
-            if (!list.Contains(CookingTagLogic.TagId)) return null;
-            var ids = new int[list.Count];
+            var count = list.Count;
+            var any = false;
+            for (var i = 0; i < count && !any; i++)
+            {
+                var id = list[i];
+                any = id >= ModTagRule.RangeStart && id <= ModTagRule.RangeEnd;
+            }
+            if (!any) return null;
+            var ids = new int[count];
             for (var i = 0; i < ids.Length; i++) ids[i] = list[i];
-            var forGame = CookingTagLogic.RuleForGame(ids);
+            var forGame = ModTagRule.ForGame(ids, TagRow.Taken);
+            if (ReferenceEquals(forGame, ids)) return null;
             var result = new Il2CppList(forGame.Count);
             foreach (var id in forGame) result.Add(id);
             if (Plugin.Verbose.Value)
