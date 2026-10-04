@@ -66,7 +66,7 @@ namespace ProjectCook
             };
             if (DishPreview.Value) patches.Add(typeof(PreviewOnRefreshPrediction));
             if (RowSplit.Value)
-                patches.AddRange(new[] { typeof(RowSplitOnRefreshPrediction), typeof(RowSplitOnStart), typeof(RowSplitOnValidate), typeof(RowSplitOnSettle) });
+                patches.AddRange(new[] { typeof(RowSplitOnRefreshPrediction), typeof(RowSplitOnStart), typeof(RowSplitOnValidate), typeof(RowSplitOnSettle), typeof(RowSplitOnAdmission) });
             if (SeparatePieces.Value)
                 patches.AddRange(new[] { typeof(PiecesOnCookingDragMove), typeof(PiecesOnTryMergeIntoOwner), typeof(PiecesOnMoveItem) });
             if (CookingStorages.Value)
