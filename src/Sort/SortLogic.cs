@@ -72,6 +72,8 @@ namespace ProjectCook
             public int?[] Stats;
             public int? Trade;
             public DaysLeft Days;
+            // The cage satiety (CageSatiety): the Rat Cage window shows it for the choice Satiety.
+            public int? Cage;
         }
 
         public sealed class Words
@@ -114,6 +116,19 @@ namespace ProjectCook
             if (useTimes < 1) return 1f;
             int max = maxUseTimes > 0 ? maxUseTimes : uses;
             return (float)useTimes / max * uses;
+        }
+
+        // The cage satiety of an item (Furniture.GetRatCageFoodSatiety): the first instance value of a cooked dish or a
+        // ration, else the raw satiety of the config (ValueDisplay1), times the uses left, or with no uses count the
+        // effective max uses (the item's own max, else the config uses, at least 1). Null when the satiety is not
+        // above 0 or the number rounds to 0: the Rat Cage does not take the item.
+        public static int? CageSatiety(float[] instanceValues, float valueDisplay1, int useTimes, int maxUseTimes, int cfgUses)
+        {
+            float satiety = instanceValues != null && instanceValues.Length > 0 ? instanceValues[0] : valueDisplay1;
+            if (!(satiety > 0f)) return null;
+            int uses = useTimes >= 1 ? useTimes : Math.Max(1, maxUseTimes > 0 ? maxUseTimes : cfgUses);
+            var v = (int)Math.Round((double)satiety * uses, MidpointRounding.AwayFromZero);
+            return v > 0 ? (int?)v : null;
         }
 
         // The badge of the days left: whole days with the day unit (d when none is given), or one decimal under one day

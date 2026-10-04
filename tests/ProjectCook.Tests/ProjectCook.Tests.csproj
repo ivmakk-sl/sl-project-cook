@@ -16,6 +16,8 @@
     <Compile Include="..\..\src\CookingTag\CookingTagLogic.cs" Link="CookingTagLogic.cs" />
     <Compile Include="..\..\src\Eat\EatLogic.cs" Link="EatLogic.cs" />
     <Compile Include="..\..\src\Sort\SortLogic.cs" Link="SortLogic.cs" />
+    <Compile Include="..\..\src\RowSplit\RowSplitLogic.cs" Link="RowSplitLogic.cs" />
+    <Compile Include="..\..\src\Pieces\PiecesLogic.cs" Link="PiecesLogic.cs" />
     <None Include="..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

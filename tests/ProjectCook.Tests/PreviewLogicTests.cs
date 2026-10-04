@@ -165,6 +165,31 @@ public class LinesTests
     }
 
     [Fact]
+    public void PerPortion_DividesTheUnroundedValuesAndRoundsHalfAwayFromZero()
+    {
+        // The example of the spec: 123 satiety and 68 morale for the whole dish of 2 portions.
+        var values = new[] { new double[5], new double[5], new double[5], new[] { 123.0, 68.0, -5.0, 0, 7.4 } };
+        var stats = PreviewLogic.PerPortion(values, new[] { 1, 1, 1, 2 });
+        Assert.Equal(new[] { 62, 34, -3, 0, 4 }, stats[3]);
+    }
+
+    [Fact]
+    public void PerPortion_LinesKeepThePortionCount()
+    {
+        var values = new[] { new double[5], new double[5], new double[5], new[] { 123.0, 68.0, 0, 0, 0 } };
+        var lines = PreviewLogic.Lines(new[] { 0, 0, 0, 100.0 }, PreviewLogic.PerPortion(values, new[] { 1, 1, 1, 2 }), new[] { 1, 1, 1, 2 }, PreviewLogic.EnglishWords);
+        Assert.Equal(new[] { "3|Perfect|100%|🍖62|🧠34|x2" }, lines);
+    }
+
+    [Fact]
+    public void PerPortion_OnePortion_SameAsTheWholeDish()
+    {
+        var values = new[] { new double[5], new double[5], new[] { 26.5, 9.2, 0, 0, 4.5 }, new[] { 32.4, 13.0, 0, 0, 7.6 } };
+        var whole = Array.ConvertAll(values, l => Array.ConvertAll(l, v => (int)Math.Round(v)));
+        Assert.Equal(whole, PreviewLogic.PerPortion(values, new[] { 1, 1, 1, 1 }));
+    }
+
+    [Fact]
     public void TinyChanceShowsAsOnePercent()
     {
         var stats = Stats(new[] { 10, 0, 0, 0, 0 }, new[] { 20, 0, 0, 0, 0 }, new int[5], new int[5]);
@@ -243,6 +268,14 @@ public class WordsTests
         Assert.Equal("档次", PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _).TierLabel);
         Assert.Equal("Tier", PreviewLogic.WordsOrEnglish(Keys, null, false, out _).TierLabel);
         Assert.Equal("Tier", PreviewLogic.EnglishWords.TierLabel);
+    }
+
+    [Fact]
+    public void PortionSwitchLabelsAreWordsOfTheMod_ByLanguage()
+    {
+        Assert.Equal(new[] { "Whole dish", "Per portion" }, PreviewLogic.WordsOrEnglish(Keys, null, false, out _).Portion);
+        Assert.Equal(new[] { "整道菜", "每份" }, PreviewLogic.WordsOrEnglish(Keys, ChineseTexts(), true, out _).Portion);
+        Assert.Equal(new[] { "Whole dish", "Per portion" }, PreviewLogic.EnglishWords.Portion);
     }
 
     [Fact]

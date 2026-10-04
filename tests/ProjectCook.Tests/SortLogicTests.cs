@@ -86,6 +86,44 @@ public class SortLogicTests
     }
 }
 
+// The satiety that the Rat Cage gets from one item (Furniture.GetRatCageFoodSatiety of game 1.1.18293).
+public class CageSatietyTests
+{
+    [Theory]
+    // Watermelon: raw satiety 60, one use
+    [InlineData(null, 60f, 1, 0, 1, 60)]
+    // Hardtack with 2 of 10 uses left: 20 x 2
+    [InlineData(null, 20f, 2, 10, 10, 40)]
+    // A cooked dish: its own satiety, not the raw one, 32.4 x 3 = 97.2
+    [InlineData(32.4f, 5f, 3, 3, 3, 97)]
+    // No uses count: the effective max, the item's own max first
+    [InlineData(null, 10f, 0, 3, 5, 30)]
+    [InlineData(null, 10f, 0, 0, 5, 50)]
+    [InlineData(null, 10f, 0, 0, 0, 10)]
+    // Half away from zero: 2.5 x 1
+    [InlineData(null, 2.5f, 1, 1, 1, 3)]
+    public void SatietyTimesTheUsesLeft(float? instanceFirst, float valueDisplay1, int useTimes, int maxUseTimes, int cfgUses, int expected)
+    {
+        var instance = instanceFirst.HasValue ? new[] { instanceFirst.Value, 1f, 1f, 1f, 1f } : null;
+        Assert.Equal(expected, SortLogic.CageSatiety(instance, valueDisplay1, useTimes, maxUseTimes, cfgUses));
+    }
+
+    [Fact]
+    public void NoSatiety_HasNoNumber()
+    {
+        // a tool, an item with a negative satiety, and a dish whose own satiety is 0 (the raw one does not count)
+        Assert.Null(SortLogic.CageSatiety(null, 0f, 1, 1, 1));
+        Assert.Null(SortLogic.CageSatiety(null, -5f, 1, 1, 1));
+        Assert.Null(SortLogic.CageSatiety(new[] { 0f, 3f }, 20f, 1, 1, 1));
+    }
+
+    [Fact]
+    public void AnEmptyInstanceArray_ReadsTheRawSatiety()
+    {
+        Assert.Equal(35, SortLogic.CageSatiety(new float[0], 35f, 1, 1, 1));
+    }
+}
+
 public class SortDataJsonTests
 {
     private static readonly SortLogic.Words Words = new SortLogic.Words
@@ -106,6 +144,7 @@ public class SortDataJsonTests
                 Stats = new int?[] { 14, -3, null, 2 },
                 Trade = 40,
                 Days = SortLogic.DaysLeft.Spoils(0.5f),
+                Cage = 42,
             }),
             new KeyValuePair<long, SortLogic.Numbers>(7, new SortLogic.Numbers
             {
@@ -125,7 +164,7 @@ public class SortDataJsonTests
         var json = PageJson.SortDataJson(4294986608, items, Words);
         Assert.Equal(
             "{\"owner\":\"4294986608\",\"words\":{\"choices\":[\"Default\",\"Satiety\",\"Morale\",\"Stamina\",\"Life\",\"Trade value\",\"Expiration Date\"],\"expired\":\"Expired\",\"sort\":\"Sort\"},"
-            + "\"items\":{\"8589969913\":{\"n\":[14,-3,null,2,40,0.5],\"d\":\"0.5d\",\"c\":2109},\"7\":{\"n\":[null,null,null,null,null,-100000],\"d\":\"Expired\",\"c\":556},\"8\":{\"n\":[5,null,null,null,3,null],\"d\":null,\"c\":556}}}",
+            + "\"items\":{\"8589969913\":{\"n\":[14,-3,null,2,40,0.5,42],\"d\":\"0.5d\",\"c\":2109},\"7\":{\"n\":[null,null,null,null,null,-100000,null],\"d\":\"Expired\",\"c\":556},\"8\":{\"n\":[5,null,null,null,3,null,null],\"d\":null,\"c\":556}}}",
             json);
     }
 

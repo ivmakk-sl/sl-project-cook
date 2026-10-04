@@ -28,14 +28,21 @@ namespace ProjectCook
     [HarmonyPatch(typeof(CookingFormula), "CalcProductVD")]
     internal static class ResultLogOnCalcProductVD
     {
-        private static void Postfix(CookingFormula.CookingTier tier, int qualityTier, int productItemId, bool isExact, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<float> __result)
+        private static void Postfix(Il2CppSystem.Collections.Generic.Dictionary<int, int> participatedCounts, CookingFormula.CookingTier tier, int qualityTier, int productItemId, bool isExact, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<float> __result)
         {
             if (!Plugin.Verbose.Value || Preview.Calculating) return;
             try
             {
                 var sb = new StringBuilder();
                 for (int i = 0; __result != null && i < __result.Length; i++) sb.Append(i == 0 ? "" : "/").Append(__result[i].ToString("0.##"));
-                Plugin.Log.LogDebug($"result vd tier={(int)tier} qualityTier={qualityTier} product={productItemId} exact={isExact} vd={sb}");
+                // The items of the dish, to compare with the row plan of the preview.
+                var counts = new StringBuilder();
+                if (participatedCounts != null)
+                {
+                    var e = participatedCounts.GetEnumerator();
+                    while (e.MoveNext()) counts.Append(counts.Length > 0 ? "," : "").Append(e.Current.Key).Append(':').Append(e.Current.Value);
+                }
+                Plugin.Log.LogDebug($"result vd tier={(int)tier} qualityTier={qualityTier} product={productItemId} exact={isExact} counts={counts} vd={sb}");
             }
             catch (Exception e)
             {

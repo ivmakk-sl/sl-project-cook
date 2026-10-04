@@ -52,19 +52,20 @@ export function removeDropdown(toolbar: Element | null): void {
 }
 
 // Writes the badge and the dim class of each cell. ids[i] is the item of cells[i]. With no sort data or Default, the
-// cells get no badge and no dim class. With a layer, the badges go into the layer at the places of their cells (the
+// cells get no badge and no dim class. An item in always is dimmed also then (an uncookable item). With a layer, the badges go into the layer at the places of their cells (the
 // storage window draws the frost above the cells, and the layer is above the frost); else each badge is the last
 // child of its cell.
-export function drawCells(doc: Document, cells: ArrayLike<Element>, ids: (number | string)[], sort: SortData | null, choice: number, dim: Set<number | string>, layer?: HTMLElement): void {
+export function drawCells(doc: Document, cells: ArrayLike<Element>, ids: (number | string)[], sort: SortData | null, choice: number, dim: Set<number | string>, layer?: HTMLElement, always?: Set<number | string>): void {
   const on = !!sort && choice !== CHOICE.default;
   const looks: (BadgeLook | null)[] = [];
   for (let i = 0; i < cells.length; i++) {
+    const kept = !!always && always.has(ids[i]);
     if (!on) {
-      looks.push(null);
+      looks.push(kept ? { text: null, dim: true, id: String(ids[i]) } : null);
       continue;
     }
     const item = sort!.items[String(ids[i])];
-    looks.push({ text: badgeText(item, choice), tone: badgeTone(item, choice), dim: dim.has(ids[i]), id: String(ids[i]) });
+    looks.push({ text: badgeText(item, choice), tone: badgeTone(item, choice), dim: kept || dim.has(ids[i]), id: String(ids[i]) });
   }
   drawBadges(doc, PREFIX, cells, looks, layer);
 }

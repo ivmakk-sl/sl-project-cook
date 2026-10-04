@@ -1,1 +1,1 @@
-Cooking previews, food sorting, and direct access to ingredients in home storages.
+Cooking previews, dishes split by the rows of the ingredient grid, food sorting, and direct access to ingredients in home storages.

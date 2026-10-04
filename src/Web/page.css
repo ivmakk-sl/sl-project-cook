@@ -120,3 +120,43 @@
 .projectcook-sort-ico[data-choice="6"] {
   color: var(--pc-ico-days);
 }
+
+/* The Rat Cage window draws its Food and Rat tags at the top left of a cell and leaves the top right free. */
+.projectcook-ratcage .projectcook-sort-badge {
+  right: 1px;
+  left: auto;
+}
+
+/* The line of the dropdown in the Rat Cage window, under the Leave All and Leave by Type buttons. */
+.projectcook-sort-line {
+  display: flex;
+  margin-top: 8px;
+}
+
+/* The portion switch at the right end of the "THIS POT" title: two words, the chosen one in the gold of the title.
+   The title is a flex row in capitals; the switch keeps the case of its words. */
+.pot-sec-title .projectcook-portion {
+  display: inline-flex;
+  gap: 2px;
+  margin-left: auto;
+  padding: 1px;
+  border-radius: 4px;
+  background: var(--pc-badge-bg);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+}
+
+.projectcook-portion-opt {
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--pc-grid-text);
+  cursor: pointer;
+}
+
+.projectcook-portion-opt.projectcook-portion-on {
+  color: var(--pc-black);
+  background: var(--pc-sort-gold);
+}

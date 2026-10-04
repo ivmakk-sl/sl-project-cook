@@ -11,8 +11,9 @@ namespace ProjectCook
     public static class PageJson
     {
         // The data of setData: the tooltip lines of each ingredient and the tier of each ingredient that the
-        // page marks (High 1 and Low 3), by config ID.
-        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers)
+        // page marks (High 1 and Low 3), by config ID, the names of the page features that are on in the config, and the
+        // labels of the portion switch.
+        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null)
         {
             var sb = new StringBuilder("{\"tips\":{");
             bool first = true;
@@ -31,7 +32,26 @@ namespace ProjectCook
                 first = false;
                 sb.Append('"').Append(kv.Key).Append("\":").Append(kv.Value);
             }
-            sb.Append("}}");
+            sb.Append('}');
+            if (features != null)
+            {
+                sb.Append(",\"features\":[");
+                first = true;
+                foreach (var name in features)
+                {
+                    if (!first) sb.Append(',');
+                    first = false;
+                    sb.AppendStr(name);
+                }
+                sb.Append(']');
+            }
+            if (portion != null)
+            {
+                sb.Append(",\"portion\":[");
+                for (int i = 0; i < portion.Length; i++) sb.Append(i == 0 ? "" : ",").AppendStr(portion[i]);
+                sb.Append(']');
+            }
+            sb.Append('}');
             return sb.ToString();
         }
 
@@ -61,8 +81,8 @@ namespace ProjectCook
             script + ";window.__projectCook.setData(" + json + (sortJson == null ? "" : "," + sortJson) + ");";
 
         // The data of setSortData: the owner of the open storage, the words of the dropdown, and the numbers of each
-        // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, and the sort key of the days
-        // (SortLogic.DaysKey: below 0 for an expired item), with null for no number. "d" is the text of the days
+        // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, the sort key of the days
+        // (SortLogic.DaysKey: below 0 for an expired item), and the cage satiety, with null for no number. "d" is the text of the days
         // badge: the days left, or for an expired item the days until it spoils, the expired word, or the rotten word.
         // "c" is the config id: a tie of the numbers groups the same items. "bag" is the owner of the Backpack side of
         // the storage window, whose items are in "items" too (none in the cooking window).
@@ -85,6 +105,7 @@ namespace ProjectCook
                 var days = n.Days;
                 var key = SortLogic.DaysKey(days);
                 sb.Append(key.HasValue ? key.Value.ToString("0.###", CultureInfo.InvariantCulture) : "null");
+                sb.Append(',').Append(JsonText.Num(n.Cage));
                 sb.Append("],\"d\":");
                 if (days.IsRotten) sb.AppendStr(words.Rotten);
                 else if (days.HasNumber) sb.AppendStr(SortLogic.DaysText(days.Days, words.DayUnit));

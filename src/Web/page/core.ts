@@ -12,6 +12,8 @@ import type { ModWindow, PageData, SortData } from './types';
 //   itemTip:  showItemTip, #recipeTooltip
 //   tierMark: backpack.getConfig, pot.getConfig
 //   cookingSort: backpack.refresh, backpack._flushPendingRefresh, backpack.updateItemPosition, .bag-toolbar
+//   ratCageSort: backpack.refresh, backpack._flushPendingRefresh, backpack.updateItemPosition, foodBag.getConfig, .fill-row (Rat Cage window)
+//   pieces:   pot.checkValidity, pot.getOccupiedSlots, pot.getItems, backpack.getItems
 //   tagIcon:  #app (storage window)
 //   storageSort: Vue.watch, .grid-container, .toolbar (storage window; bagB is in the setup state of #app)
 // #predictionList .pot-bd exists only after a render, so it is checked in the render wrapper instead of here.
@@ -22,29 +24,34 @@ export const FEATURES = {
   itemTip: ['showItemTip', '#recipeTooltip'],
   tierMark: ['backpack.getConfig', 'pot.getConfig'],
   cookingSort: ['backpack.refresh', 'backpack._flushPendingRefresh', 'backpack.updateItemPosition', '.bag-toolbar'],
+  ratCageSort: ['backpack.refresh', 'backpack._flushPendingRefresh', 'backpack.updateItemPosition', 'foodBag.getConfig', '.fill-row'],
+  pieces: ['pot.checkValidity', 'pot.getOccupiedSlots', 'pot.getItems', 'backpack.getItems'],
   tagIcon: ['#app'],
   storageSort: ['Vue.watch', '.grid-container', '.toolbar']
 };
 
 export type Feature = keyof typeof FEATURES;
 
-// The window of each feature: the Cooking frame or the storage window frame (BackpackUI).
-export type Page = 'cooking' | 'storage';
+// The window of each feature: the Cooking frame, the storage window frame (BackpackUI), or the Rat Cage frame.
+export type Page = 'cooking' | 'storage' | 'ratcage';
 const PAGE_OF: Record<Feature, Page> = {
   preview: 'cooking',
   cardTip: 'cooking',
   itemTip: 'cooking',
   tierMark: 'cooking',
   cookingSort: 'cooking',
+  ratCageSort: 'ratcage',
+  pieces: 'cooking',
   tagIcon: 'storage',
   storageSort: 'storage'
 };
 
 // The data of the last setData; the version counts the setData calls, so a frame draws its bag items again
 // when the tiers can have changed since its last draw. sort is the data of the last setSortData, and choice the
-// choice of the food sort (an index of CHOICE): the root page keeps it for all frames until a browser rebuild.
-export const view: { data: PageData; version: number; sort: SortData | null; choice: number } =
-  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0 };
+// choice of the food sort (an index of CHOICE), and portion the choice of the portion switch (true: per portion): the
+// root page keeps them for all frames until a browser rebuild.
+export const view: { data: PageData; version: number; sort: SortData | null; choice: number; portion: boolean } =
+  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0, portion: false };
 
 function partExists(w: Window, doc: Document, name: string): boolean {
   if (name.charAt(0) === '#' || name.charAt(0) === '.') return !!doc.querySelector(name);

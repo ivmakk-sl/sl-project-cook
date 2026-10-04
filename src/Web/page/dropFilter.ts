@@ -1,4 +1,4 @@
-// The drop filter of the food sort (design D5). Both pages send their moves through sendMessage of
+// The drop filter of the food sort (design D5). The pages send their moves through sendMessage of
 // createWebUICore, which calls window.parent.postMessage({ type, data, sourcePageId }): the postMessage of the root
 // page, where this script runs. While a sort is on, the cells of each sorted grid show page places, not real ones:
 // - a move inside a sorted grid is dropped, so no item moves in it;
@@ -44,7 +44,8 @@ function move(message: PageMessage): { from: string | null; to: string; item: st
   if (!d) return null;
   switch (message.type) {
     case 'DRAG_ITEM': return { from: String(d.srcOwnerId), to: String(d.dstOwnerId), item: String(d.itemId) };
-    case 'ITEM_MOVE': return { from: String(d.fromOwnerId), to: String(d.toOwnerId), item: String(d.itemId) };
+    case 'ITEM_MOVE':
+    case 'FOOD_MOVE': return { from: String(d.fromOwnerId), to: String(d.toOwnerId), item: String(d.itemId) };
     case 'GROUND_PICK_TO': return { from: null, to: String(d.ownerId), item: null };
     default: return null;
   }

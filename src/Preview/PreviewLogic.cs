@@ -24,6 +24,8 @@ namespace ProjectCook
             public string TierLabel;
             // The labels of the dish card tooltip. The game has no text for them either, so the mod translates them too.
             public string TradeLabel, ExpLabel;
+            // The choices of the portion switch: the whole dish, then one portion. The game has no text for them.
+            public string[] Portion;
 
             public bool SameAs(Words other)
             {
@@ -31,6 +33,7 @@ namespace ProjectCook
                     && TierLabel == other.TierLabel
                     && TradeLabel == other.TradeLabel
                     && ExpLabel == other.ExpLabel
+                    && string.Join("|", Portion) == string.Join("|", other.Portion)
                     && string.Join("|", Quality) == string.Join("|", other.Quality)
                     && string.Join("|", Tier) == string.Join("|", other.Tier)
                     && string.Join("|", Stat) == string.Join("|", other.Stat);
@@ -46,6 +49,7 @@ namespace ProjectCook
             TierLabel = "Tier",
             TradeLabel = "Trade value",
             ExpLabel = "Cooking XP",
+            Portion = new[] { "Whole dish", "Per portion" },
         };
 
         // Builds the words from the game texts. keys and texts have the order: quality Fail..Perfect, tier High..Low,
@@ -78,6 +82,7 @@ namespace ProjectCook
                 TierLabel = chinese ? "档次" : EnglishWords.TierLabel,
                 TradeLabel = chinese ? "交易价值" : EnglishWords.TradeLabel,
                 ExpLabel = chinese ? "烹饪熟练度" : EnglishWords.ExpLabel,
+                Portion = chinese ? new[] { "整道菜", "每份" } : EnglishWords.Portion,
             };
         }
 
@@ -183,9 +188,11 @@ namespace ProjectCook
             return list;
         }
 
-        // Adds a "Preview" field, and a "PreviewTip" field when tipByRecipeId has a text for the entry's RecipeId.
+        // Adds a "Preview" field, a "PreviewTip" field when tipByIndex has a text for the entry, and a "PreviewPortion"
+        // field (the lines of one portion) when portionByIndex has one. The key is the index of the entry in the list
+        // of ReadEntries, so two dishes of one recipe each get their own text.
         // The page ignores unknown fields. Returns the input unchanged when nothing matches or when anything fails.
-        public static string AddPreviews(string json, Dictionary<int, string> previewByRecipeId, Dictionary<int, string> tipByRecipeId = null)
+        public static string AddPreviews(string json, Dictionary<int, string> previewByIndex, Dictionary<int, string> tipByIndex = null, Dictionary<int, string> portionByIndex = null)
         {
             try
             {
@@ -194,12 +201,13 @@ namespace ProjectCook
                 // Last entry first, so an insert does not move the start of an entry that is still to do.
                 for (int i = entries.Count - 1; i >= 0; i--)
                 {
-                    int recipeId = entries[i].Value.RecipeId;
                     var fields = new StringBuilder();
-                    if (previewByRecipeId.TryGetValue(recipeId, out string preview))
+                    if (previewByIndex.TryGetValue(i, out string preview))
                         fields.Append("\"Preview\":\"").Append(Escape(preview)).Append("\",");
-                    if (tipByRecipeId != null && tipByRecipeId.TryGetValue(recipeId, out string tip))
+                    if (tipByIndex != null && tipByIndex.TryGetValue(i, out string tip))
                         fields.Append("\"PreviewTip\":\"").Append(Escape(tip)).Append("\",");
+                    if (portionByIndex != null && portionByIndex.TryGetValue(i, out string portion))
+                        fields.Append("\"PreviewPortion\":\"").Append(Escape(portion)).Append("\",");
                     if (fields.Length > 0) sb.Insert(entries[i].Key + 1, fields.ToString());
                 }
                 return entries.Count == 0 ? json : sb.ToString();
@@ -280,6 +288,22 @@ namespace ProjectCook
             }
             else lines.Add($"{words.TradeLabel}: {tradeValues[onlyLevel]}");
             return lines;
+        }
+
+        // The stats of one portion of each level: the unrounded eat values of the whole dish (values[level]) divided by
+        // the portion count of that level, rounded half away from zero. With one portion the values round as the
+        // whole-dish stats do, so the lines are the same.
+        public static int[][] PerPortion(double[][] values, int[] portions)
+        {
+            var stats = new int[values.Length][];
+            for (int level = 0; level < values.Length; level++)
+            {
+                int count = portions[level];
+                stats[level] = Array.ConvertAll(values[level], v => count > 1
+                    ? (int)Math.Round(v / count, MidpointRounding.AwayFromZero)
+                    : (int)Math.Round(v));
+            }
+            return stats;
         }
 
         // One line for each quality level that can occur, highest level first. stats[level] is the stat array of that level.

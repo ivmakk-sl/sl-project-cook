@@ -37,10 +37,13 @@ namespace ProjectCook
                 }
 
                 long buildStart = Timing.Start();
-                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, words, out var tips);
+                // The row split Postfix runs first and rebuilds the list from its plan, one entry for each dish.
+                var plan = RowPlanner.Current;
+                var dishes = plan != null && plan.Dishes.Count == entries.Count ? plan.Dishes : null;
+                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, dishes, words, out var tips, out var portionTexts);
                 if (previews.Count == 0) return;
 
-                string withPreviews = PreviewLogic.AddPreviews(json, previews, tips);
+                string withPreviews = PreviewLogic.AddPreviews(json, previews, tips, portionTexts);
                 double buildMs = Timing.Ms(buildStart);
                 state.PredictionListJson.Value = withPreviews;
                 if (Plugin.Verbose.Value)

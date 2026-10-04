@@ -6,7 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Row split: from cooking level 3, each row of the cooking station (the ingredient grid of the cooking window) is its own group of ingredients. The game matches the dishes of each row alone, so three Pork Chops in three rows give three Salt and Pepper Pork Chops, not one mixed dish. One row can still give more than one dish, and a row with no recipe gives no dish. With all ingredients in one row, the cook works as before. The seasonings still give their quality bonus to every dish, and their tier to every dish of ingredient types. The "THIS POT" panel shows the dishes of the rows. Turn it off with `RowSplit` in the `[Features]` section of the config file.
+- Separate pieces: a piece of an ingredient with more than one use (for example Wild Rabbit 1/3) that you drop on a free cell of the cooking station stays its own item, so a recipe counts it as its own ingredient and two pieces in two rows give two dishes. Drop a piece on an item of the same kind to merge them into that item, as before. Turn it off with `SeparatePieces`.
+- The items that the cooking station does not take are dimmed in each tab of the cooking window: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. Fuel such as Scrap Paper stays bright at a stove that burns fuel. Turn it off with `DimUncookable`.
+- Portion switch after the "THIS POT" title: the dish cards show the stats of the whole dish or of one portion, with the portion count "xN" on each line. Whole dish is the choice at each game start, and the choice stays until you quit the game. It is part of the dish preview (`DishPreview`).
+- Food sort in the Rat Cage window: the dropdown under the Leave All and Leave by Type buttons sorts the open tab (the Backpack or a fridge). In this window, Satiety sorts by the satiety that the cage gets from each item (all uses left), highest first, and items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the numbers of the choice too. The choice is the one of the storage window and the cooking window.
+
 ### Changed
+
+- Two dish cards of the same recipe each show the lines of their own ingredients.
 
 - The open list of the food sort closes when you click anywhere outside it. The click still does its own action, for example on an item, and the choice stays the same.
 - The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.

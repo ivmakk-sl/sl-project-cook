@@ -25,8 +25,10 @@ namespace ProjectCook
         public static void OnResult(PushSchedule.Step step, string result) =>
             schedule.OnResult(step, result, Time.realtimeSinceStartup);
 
-        private static readonly string NoIngredientData = PageJson.DataJson(
-            new System.Collections.Generic.KeyValuePair<int, string>[0], new System.Collections.Generic.KeyValuePair<int, int>[0]);
+        // Built at the first use, after Load has set the page features.
+        private static string noIngredientData;
+        private static string NoIngredientData => noIngredientData ?? (noIngredientData = PageJson.DataJson(
+            new System.Collections.Generic.KeyValuePair<int, string>[0], new System.Collections.Generic.KeyValuePair<int, int>[0], Plugin.PageFeatures));
 
         // The time of the last data build, for the timing line.
         private static double buildMs;

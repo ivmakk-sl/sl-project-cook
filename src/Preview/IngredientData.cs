@@ -37,7 +37,7 @@ namespace ProjectCook
                     if (tip != null) tips[item.ID] = tip;
                     if (tier >= 1 && tier <= 3) tiers[item.ID] = tier;
                 }
-                json = PageJson.DataJson(tips, tiers);
+                json = PageJson.DataJson(tips, tiers, Plugin.PageFeatures, current.Portion);
                 words = current;
                 appraisal = currentAppraisal;
                 if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ingredient tips: {tips.Count} items, {tiers.Count} with a tier, appraisal={currentAppraisal}");

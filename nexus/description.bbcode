@@ -1,12 +1,16 @@
 The cooking window tells you which dish you get, but not how good it will be. Project Cook adds the numbers. Each dish card of the "THIS POT" panel shows one line for each quality level that can occur, with the chance of that level and what the dish gives at that level. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
 
-With the default settings, Project Cook does not change cooking results, recipes, or what you get from food. The previews and food sort change what the windows show. The Cooking tag is kept in your save and lets you cook from more home storages.
+Project Cook does not change cooking results or what you get from food. The previews, the food sort, and the dim of items change what the windows show. The row split lets you choose how one cook splits its ingredients into dishes, and separate pieces let you put pieces of one ingredient into different rows. The Cooking tag is kept in your save and lets you cook from more home storages.
 
 [size=5]Main features[/size]
 [list]
 [*][b]Dish previews.[/b] See quality chances, eat values, and portion counts before cooking, including drinks from the Juicer and Coffee Machine.[/*]
+[*][b]Portion switch.[/b] Switch the dish cards between the stats of the whole dish and of one portion.[/*]
 [*][b]Cooking tooltips.[/b] Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.[/*]
-[*][b]Food sort.[/b] Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item.[/*]
+[*][b]Row split.[/b] From cooking level 3, each row of the ingredient grid is its own dish group: three Pork Chops in three rows give three Salt and Pepper Pork Chops, not one mixed dish.[/*]
+[*][b]Separate pieces.[/b] Drop a piece of Wild Rabbit or another ingredient with more than one use on a free cell of the cooking station, and it stays its own ingredient. Drop it on the same item to merge them.[/*]
+[*][b]Dim of uncookable items.[/b] Items that the cooking station does not take (items that are not food, products such as Beef Slices, and items that need cutting first) are dimmed in the tabs of the cooking window. Fuel stays bright at a stove that burns fuel.[/*]
+[*][b]Food sort.[/b] Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.[/*]
 [*][b]Cook from home storages.[/b] Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.[/*]
 [/list]
 
@@ -16,6 +20,16 @@ Eat values include fixed talents and the difficulty's Life factor, but temporary
 
 Trade values include your appraisal talents. They exclude the trader's bonus for wanted items and any reduction to half value.
 
+[size=5]Using the row split[/size]
+From cooking level 3 the game can cook more than one dish at once, but it puts all ingredients in one pool. With Project Cook, each row of the ingredient grid (the cooking station) is its own group of ingredients, and the game matches the dishes of each row alone:
+[list]
+[*]Each row gives the same dishes as a cook with only that row. A row can give more than one dish, and a row with no recipe gives no dish.[/*]
+[*]A dish of ingredient types (for example Meat + Vegetables) gets the tier and the stats of its own row.[/*]
+[*]A seasoning in a row can be an ingredient of a recipe of that row. Each seasoning still gives its quality bonus to every dish, and its tier to every dish of ingredient types, as without the mod.[/*]
+[*]An item that covers two rows belongs to the row of its top cell.[/*]
+[/list]
+The "THIS POT" panel shows the dishes of the rows, each with its own preview lines. With all ingredients in one row, or below cooking level 3, cooking works as without the mod.
+
 [size=5]Using the food sort[/size]
 Choose a sort from the dropdown below the grid. Each item shows the selected number, including ingredients on the cooking workbench:
 [list]
@@ -24,7 +38,8 @@ Choose a sort from the dropdown below the grid. Each item shows the selected num
 [*][b]Expiration Date:[/b] rotten food first, then expired food, then food with the fewest days left. White numbers show days until expiration; red numbers on expired food show days until it spoils. Food that cannot spoil further shows Expired or Rotten instead of a countdown.[/*]
 [*]Items with no value for the selected choice come last and are dimmed.[/*]
 [/list]
-The food sort changes only the displayed order. One choice applies to both windows until you quit the game. Select Default to see the items in their stored places and rearrange them by hand. Transfers between grids still work while sorted, and Auto Organize still moves items as usual. If the items cannot fit in the sorted order, the grid shows their stored places.
+The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, where [b]Satiety[/b] shows the satiety that the cage gets from each item (all uses left, no talent bonus). The Food Storage grid of the cage shows the numbers too.
+The food sort changes only the displayed order. One choice applies to all these windows until you quit the game. Select Default to see the items in their stored places and rearrange them by hand. Transfers between grids still work while sorted, and Auto Organize still moves items as usual. If the items cannot fit in the sorted order, the grid shows their stored places.
 
 [size=5]How the ingredient tier works[/size]
 [b]Quality and tier are separate.[/b] Quality is the cooking result: Perfect, Good, Average, or Failed. Tier is High-end, Mid-tier, or Low-grade and matters for recipes that use ingredient types, such as Meat + Vegetables. A High-end dish can still turn out Failed, and a Low-grade dish can turn out Perfect. Project Cook shows the dish tier and the chance of each quality.
@@ -58,7 +73,7 @@ The food sort changes only the displayed order. One choice applies to both windo
 Delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
 
 [size=5]Configuration[/size]
-The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] is created the first time you start the game with the mod. Dish preview, food sort, and cooking storages are all on by default and can be turned off separately. Edit the file while the game is closed; changes take effect on the next start. See the [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]settings reference[/url] for the switches and their effects.
+The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] is created the first time you start the game with the mod. Dish preview, food sort, cooking storages, row split, separate pieces, and the dim of items are all on by default (the portion switch is part of the dish preview) and can be turned off separately. Edit the file while the game is closed; changes take effect on the next start. See the [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]settings reference[/url] for the switches and their effects.
 
 Before turning off [font=Courier New]CookingStorages[/font], give any storage with only Cooking a game tag such as Food. Turning this feature off removes Cooking tags from the save, just like uninstalling; turning it back on does not restore them.
 

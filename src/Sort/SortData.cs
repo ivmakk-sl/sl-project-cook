@@ -15,7 +15,11 @@ namespace ProjectCook
         private static object perfectIdsSource;
         private static bool warned;
         private static readonly HashSet<string> loggedEat = new HashSet<string>();
-        // The last container tab of the cooking window and the last items of its workbench.
+        // The windows of RequestCooking: the cooking window, and the Rat Cage window, whose Food Storage grid has the
+        // role of the workbench.
+        public const string Cooking = "cooking", RatCage = "ratcage";
+        // The window of the last RequestCooking, the last container tab of it, and the last items of its workbench.
+        private static string cookingWindow;
         private static long cookingTab;
         private static List<KeyValuePair<long, SortLogic.Numbers>> cookingTabNumbers, workbenchNumbers;
 
@@ -35,14 +39,21 @@ namespace ProjectCook
             return SortLogic.IsSortable(isFridge, Plugin.CookingStorages.Value && CookingTabs.LinksToCooking(tags), false);
         }
 
-        // The cooking window: reads the items of one grid and requests a send. The window has two grids: the
-        // container tab (the bag, a fridge, or a cooking storage), and the workbench, the grid whose owner is not
-        // sortable (the cooking furniture). The send holds the numbers of both, with the owner of the tab.
-        public static void RequestCooking(long ownerId, Il2CppDict.List<Data_Item> items, float currentHours)
+        // The cooking window and the Rat Cage window: reads the items of one grid and requests a send. The window has
+        // two grids: the container tab (the bag, a fridge, or a cooking storage), and the workbench, the grid whose
+        // owner is not sortable (the cooking furniture, or the cage). The send holds the numbers of both, with the
+        // owner of the tab. The numbers of the other window are dropped, so a send holds no item of it.
+        public static void RequestCooking(long ownerId, Il2CppDict.List<Data_Item> items, float currentHours, string window = Cooking)
         {
             try
             {
                 if (items == null) return;
+                if (cookingWindow != window)
+                {
+                    cookingWindow = window;
+                    cookingTabNumbers = null;
+                    workbenchNumbers = null;
+                }
                 bool workbench = !IsSortable(ownerId, true);
                 var numbers = Numbers(items, currentHours, out string eatLog);
                 List<KeyValuePair<long, SortLogic.Numbers>> send;
@@ -60,7 +71,7 @@ namespace ProjectCook
                     send = SortLogic.Merge(numbers, workbenchNumbers);
                 }
                 RequestSort(() => PageJson.SortDataJson(cookingTab, send, Words()));
-                Log($"cooking{(workbench ? " workbench" : "")} {ownerId} items={numbers.Count} sent={send.Count}", eatLog);
+                Log($"{window}{(workbench ? " workbench" : "")} {ownerId} items={numbers.Count} sent={send.Count}", eatLog);
             }
             catch (Exception e)
             {
@@ -82,6 +93,7 @@ namespace ProjectCook
                 long owner = dual ? state.OwnerId_B : state.OwnerId_A;
                 var items = dual ? state.ItemDataList_B : state.ItemDataList_A;
                 if (items == null || !IsSortable(owner, false)) return;
+                cookingWindow = null;
                 cookingTabNumbers = null;
                 workbenchNumbers = null;
                 var numbers = Numbers(items, currentHours, out string eatLog);
@@ -124,9 +136,17 @@ namespace ProjectCook
                     SortLogic.TradeUses(item.UseTimes, item.MaxUseTimes, cfg.UseTimes), item.ItemCount, appraisal,
                     Days(item, cfg, currentHours));
                 n.ConfigId = cfg.ID;
+                n.Cage = SortLogic.CageSatiety(FirstInstanceValue(item), cfg.ValueDisplay1, item.UseTimes, item.MaxUseTimes, cfg.UseTimes);
                 numbers.Add(new KeyValuePair<long, SortLogic.Numbers>(item.LogicId, n));
             }
             return numbers;
+        }
+
+        // The first instance value of a cooked dish or a ration (its own satiety), or null.
+        private static float[] FirstInstanceValue(Data_Item item)
+        {
+            var vd = item.InstanceVD;
+            return vd != null && vd.Length > 0 ? new[] { vd[0] } : null;
         }
 
         // Builds the sort data and hands it to the send schedule, with a timing line.

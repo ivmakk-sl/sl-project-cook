@@ -33,4 +33,22 @@ public class PageJsonTests
 
         Assert.Equal("{\"tips\":{},\"tiers\":{\"1\":1,\"3\":3}}", json);
     }
+
+    // The labels of the portion switch.
+    [Fact]
+    public void DataJson_writes_the_portion_switch_labels()
+    {
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), new[] { "portionSwitch" }, new[] { "Whole dish", "Per \"portion\"" });
+
+        Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"portionSwitch\"],\"portion\":[\"Whole dish\",\"Per \\\"portion\\\"\"]}", json);
+    }
+
+    // The page features that are on in the config.
+    [Fact]
+    public void DataJson_lists_the_page_features()
+    {
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), new[] { "separatePieces", "dimUncookable" });
+
+        Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"separatePieces\",\"dimUncookable\"]}", json);
+    }
 }

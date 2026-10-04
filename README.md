@@ -6,13 +6,38 @@ The stats on the card are eat values: the dish stats with the eat talents of you
 
 The Juicer and the Coffee Machine open the same cooking window, so their drinks get the same preview lines, dish card tooltip, ingredient tooltips, and tier badges as the dishes of a stove.
 
+The switch after the "THIS POT" title changes the stats of the cards between the whole dish and one portion. With "Per portion", each stat is the stat of the whole dish divided by the portion count of that line, and the portion count stays on the line. Whole dish is the choice at each game start, and the choice stays until you quit the game.
+
 Point at a dish card to see more: the tier of the dish, the cooking XP for that dish, and its trade value at each quality level.
 
 Ingredient tooltips in the cooking window also show the tier of the ingredient (High-end, Mid-tier, Low-grade), its trade value, and its raw stats. The trade values include the appraisal talents of your character (Shrewd Appraisal, Bargaining), and not the demand of a trader. The food badge of an ingredient shows its tier at a glance: a gold badge with a triangle that points up is High-end, a grey badge with a triangle that points down is Low-grade, and the game's green badge is Mid-tier or no tier.
 
 The added text follows the game language, English and Chinese. The quality, tier, and stat names are the game's own words, so they are equal to the rest of the window.
 
-With the default settings, Project Cook does not change the cooking result, the recipes, or what you get from food. The stats and the portion count come from the game's own formula. The chances use the same inputs as the game's quality roll: cooking level, cook furniture, fresh or expired ingredients, seasonings, exact recipe, and the cooking talents of the character. Hot pot mode has no preview.
+In each tab of the cooking window, the items that the cooking station does not take are dimmed: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. At a stove that burns fuel, the fuel items (for example Scrap Paper) are not dimmed, because the fuel queue takes them. The dim does not change the item, its place, or a drag.
+
+Apart from the row split and the separate pieces (see below), Project Cook does not change the cooking result, the recipes, or what you get from food. The stats and the portion count come from the game's own formula. The chances use the same inputs as the game's quality roll: cooking level, cook furniture, fresh or expired ingredients, seasonings, exact recipe, and the cooking talents of the character. Hot pot mode has no preview.
+
+## Row split
+
+From cooking level 3 the game can cook more than one dish at once, but it puts all ingredients in one pool and picks the recipe that uses the most ingredients first. Project Cook lets you choose the dishes: each row of the cooking station (the ingredient grid of the cooking window) is its own group of ingredients, and the game matches the dishes of each row alone, with its own rule.
+
+- Three Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. In one row they give one mixed dish, as without the mod.
+- A row can still give more than one dish, the same dishes as a cook with only that row.
+- A meat and a vegetable in the first row and another meat and a vegetable in the second row give two dishes, each with the tier and the stats of its own row.
+- A seasoning in a row can be an ingredient of a recipe of that row. Each seasoning on the cooking station still gives its quality bonus to every dish, and its tier to every dish of ingredient types, as without the mod. So a row with only seasonings works.
+- A row whose items match no recipe gives no dish.
+- An item that covers two rows belongs to the row of its top cell.
+
+The "THIS POT" panel shows the dishes of the rows, from the top row down, each with its own preview lines. With all ingredients in one row, or below cooking level 3, the cook works as without the mod. The cook time stays the game's.
+
+## Separate pieces
+
+An ingredient with more than one use, such as Wild Rabbit (1/3, 2/3, 3/3), joins the cooking station one piece at a time. Without the mod each piece merges into the item of the same kind that is already on the cooking station, and a recipe counts one item as one ingredient, whatever its pieces. With Project Cook:
+
+- A piece that you drop on a free cell stays its own item there. A recipe counts it as its own ingredient, so two pieces in two rows give two dishes with the row split.
+- A piece that you drop on an item of the same kind merges into that item, as without the mod. When that item cannot take it (it is full, or the game does not merge the two, for example for a different freshness), the piece goes to a free cell as its own item.
+- A quick move to the cooking station, and hot pot mode, work as without the mod.
 
 ## Food sort
 
@@ -25,7 +50,9 @@ A fridge and a cooking storage get a Sort dropdown with a sort icon on the line 
 
 In the cooking window, the items on the workbench show the number of the choice too, at their places, so you can compare them with the open tab.
 
-The sort only changes what the window shows, not the places of the items. One choice applies to both windows until you quit the game. While a sort is on, a drag inside the sorted grid does nothing; a drag to or from another grid works as usual, and an item that you put in goes to a free place. Select Default to move items by hand.
+The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for the Backpack and each fridge tab. Here Satiety shows the satiety that the cage gets from the item, not the eat value: the satiety of the dish itself for a cooked dish or a ration, else the raw satiety, times the uses left, with no talent bonus. So the same item can show a bigger Satiety number here than in the cooking window. Items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the number of the choice at each item.
+
+The sort only changes what the window shows, not the places of the items. One choice applies to all these windows until you quit the game. While a sort is on, a drag inside the sorted grid does nothing; a drag to or from another grid works as usual, and an item that you put in goes to a free place. Select Default to move items by hand.
 
 ## Cooking tag
 
@@ -53,8 +80,11 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it, then restart the game.
 
-- `DishPreview` - the preview lines and the tooltip of the dish cards, and the added ingredient lines and tier marks.
-- `FoodSort` - the food sort in the storage window and the cooking window.
+- `DishPreview` - the preview lines and the tooltip of the dish cards, the portion switch, and the added ingredient lines and tier marks.
+- `FoodSort` - the food sort in the storage window, the cooking window, and the Rat Cage window.
+- `RowSplit` - each row of the cooking station as its own group of ingredients, from cooking level 3.
+- `SeparatePieces` - a piece that you drop on a free cell of the cooking station stays its own item.
+- `DimUncookable` - the dim of the items that the cooking station does not take, in the tabs of the cooking window.
 - `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
 
 See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for editing the file.
@@ -81,7 +111,7 @@ dotnet build src/ProjectCook.csproj -c Release
 
 `Directory.Build.props` sets `GameDir` to the default Steam install path. If the game is in another place, override it without an edit of the file: set a `GameDir` environment variable, or pass `-p:GameDir=...` on the build. The output DLL is at `src\bin\Release\ProjectCook.dll`.
 
-The preview math, the text of the lines, the JSON for the page script, and the send schedule are game-free code (`src/Preview/PreviewLogic.cs`, `src/Web/PageJson.cs`, `src/Web/PushSchedule.cs`, and the JSON library in `src/Shared/json/`) with unit tests. `src/Shared/json/` is a library copy of the JSON library of the modding workspace (`JsonText`, `FlatJson`), at the version that its `VERSION` file names; it is not edited in this repo. The tests do not need the game:
+The preview math, the rows of the row split, the merge target of a piece, the text of the lines, the JSON for the page script, and the send schedule are game-free code (`src/Preview/PreviewLogic.cs`, `src/RowSplit/RowSplitLogic.cs`, `src/Pieces/PiecesLogic.cs`, `src/Web/PageJson.cs`, `src/Web/PushSchedule.cs`, and the JSON library in `src/Shared/json/`) with unit tests. `src/Shared/json/` is a library copy of the JSON library of the modding workspace (`JsonText`, `FlatJson`), at the version that its `VERSION` file names; it is not edited in this repo. The tests do not need the game:
 
 ```
 dotnet test tests/ProjectCook.Tests
