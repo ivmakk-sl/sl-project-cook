@@ -41,6 +41,14 @@
   --projectcook-sort-badge-shadow: var(--pc-text-shadow);
   --projectcook-sort-badge-z: 7;
 
+  /* The variables of the tooltip lines library (prefix projectcook): the block of the mod in the ingredient
+     tooltip, and the rule above it that parts it from the lines of the game. The text keeps the color and the size
+     of the game's own tooltip lines, which the block sits below. */
+  --projectcook-tip-fg: inherit;
+  --projectcook-tip-rule: rgb(from var(--pc-white) r g b / 12%);
+  --projectcook-tip-size: inherit;
+  --projectcook-tip-gap: 2px;
+
   /* The pictures of the tier badges: a triangle that points up (High) or down (Low). */
   --pc-badge-up: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 3 22 20H2z' fill='white'/></svg>");
   --pc-badge-down: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21 2 4h20z' fill='white'/></svg>");

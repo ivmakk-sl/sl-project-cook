@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Two dish cards of the same recipe each show the lines of their own ingredients.
+- The ingredient tooltip of the cooking window is parted from the lines of the game by a rule, as the tooltips of the other mods are. Its lines keep their colors and their text size.
+- The ingredient tooltip stays inside the window when it would reach past the edge, so no line is cut off.
+- The mod draws its tooltip lines through a shared library, so a tooltip with the lines of another mod in it shows each mod once, in a fixed order, whichever mod the game loads first.
 
 - The open list of the food sort closes when you click anywhere outside it. The click still does its own action, for example on an item, and the choice stays the same.
 - The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.

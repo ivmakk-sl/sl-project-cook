@@ -15,6 +15,16 @@ import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
 import { test, type TestContext } from 'vitest';
 
+// The tooltip library draws the block of a mod on the next render tick, not inside the call of the page, so a test
+// that reads the tooltip waits for that tick first.
+function drawn(w: Win): Promise<void> {
+  return new Promise((resolve) => {
+    const settle = () => w.setTimeout(() => resolve(), 0);
+    if (typeof w.requestAnimationFrame === 'function') w.requestAnimationFrame(settle);
+    else settle();
+  });
+}
+
 // The jsdom windows carry the game's page globals (renderPredictionList, pot, showItemTip) and the root page
 // stub carries the page script's interface, which have no types.
 type Win = any;
@@ -149,6 +159,8 @@ if (!gameFilesExist) {
     assert.match(result, /^(installed|already installed)/, `setData result was "${result}"`);
 
     cookingWindow.showItemTip({ name: 'Test', configId: 556, canCook: true });
+
+    await drawn(cookingWindow);
     const tip = cookingWindow.document.getElementById('recipeTooltip');
     assert.match(tip.textContent, /Low "raw" \\ tier/);
 
@@ -295,6 +307,7 @@ if (!gameFilesExist) {
     withFrame(root, cookingWindow);
     root.__projectCook.apply();
     cookingWindow.showItemTip({ name: 'Test', configId: 555, canCook: true });
+    await drawn(cookingWindow);
     assert.match(cookingWindow.document.getElementById('recipeTooltip').textContent, /High-tier/);
   });
 
@@ -392,10 +405,59 @@ if (!gameFilesExist) {
     root.__projectCook.setData({ tips: { 557: 'T1|Tier|High-tier\nSatiety: +8\nHealth: -2' }, tiers: {} });
 
     cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+
+    await drawn(cookingWindow);
     const tip = cookingWindow.document.getElementById('recipeTooltip');
     assert.ok(tip.querySelector('.projectcook-tier-1'), 'the tier name has no projectcook-tier-1');
     assert.equal(tip.querySelector('.projectcook-value-pos').textContent, '+8');
     assert.equal(tip.querySelector('.projectcook-value-neg').textContent, '-2');
+  });
+
+  test('the ingredient tooltip of the mod alone sits in one block below the lines of the game', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'T1|Tier|High-tier\nSatiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    const tip = cookingWindow.document.getElementById('recipeTooltip');
+    const blocks = tip.querySelectorAll('[data-sl-tip]');
+    assert.equal(blocks.length, 1, 'one block of the mod');
+    assert.equal(blocks[0].getAttribute('data-sl-tip'), 'projectcook-ingredient');
+    assert.equal(blocks[0].className, 'projectcook-tip');
+    assert.equal(blocks[0], tip.lastElementChild, 'below the lines of the game');
+    assert.match(blocks[0].textContent, /High-tier/);
+  });
+
+  test('a second hover draws the block once and does not stack its lines', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'Satiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    const tip = cookingWindow.document.getElementById('recipeTooltip');
+    assert.equal(tip.querySelectorAll('[data-sl-tip="projectcook-ingredient"]').length, 1);
+    assert.equal(tip.querySelectorAll('.projectcook-value-pos').length, 1);
+  });
+
+  test('the mod registers one block only, so the dish card tooltip keeps its own drawing', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'Satiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    // The registry lives in the frame, so its array is of that realm: compare the text, not the array.
+    const ids = cookingWindow.__slTipLines.blocks.map((b: { id: string }) => b.id).join(',');
+    assert.equal(ids, 'projectcook-ingredient', 'the item tooltip only');
+    // The dish card tooltip of the mod is drawn by cardTip.ts and is no block of the library.
+    assert.equal(cookingWindow.document.querySelectorAll('.projectcook-card-tip [data-sl-tip]').length, 0);
   });
 
   test('css: a High bag item gets the bag tier classes that the badge rule selects', async (t) => {
