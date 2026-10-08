@@ -122,6 +122,23 @@ public class EatLogicTests
         Assert.Equal(5, EatLogic.EatValues(Dish(new float[] { 10, 0, 0, 0, 0 }), factors)[Sat], 3);
     }
 
+    [Theory]
+    [InlineData(0f, 0)]
+    [InlineData(0.1f, 100)]
+    [InlineData(-0.25f, -250)]
+    [InlineData(2f, 2000)]
+    public void ToPermille_IsTheGameFloatTimes1000(float value, int permille)
+    {
+        Assert.Equal(permille, EatLogic.ToPermille(value));
+    }
+
+    [Fact]
+    public void BaseRatio_Plus10Percent_40Is44()
+    {
+        var factors = new EatLogic.Factors { BasePermille = new[] { EatLogic.ToPermille(0.1f), 0, 0, 0, 0 } };
+        Assert.Equal(44, EatLogic.EatValues(Dish(new float[] { 40, 0, 0, 0, 0 }), factors)[Sat], 3);
+    }
+
     [Fact]
     public void FoodType_IsClampedBetweenMinus1And2()
     {

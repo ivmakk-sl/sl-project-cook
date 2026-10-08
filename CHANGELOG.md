@@ -26,6 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.
 - When a game update adds a tag of its own with the id of the Cooking tag, the mod turns the Cooking tag off and writes a warning to the log, so the game's tag works as without the mod. The cooking window and the other features keep working.
 
+### Fixed
+
+- The game no longer writes five errors to its log, one for each of the Satiety Bonus, Morale Bonus, Stamina Bonus, Fitness Bonus, and Life Bonus, when the mod reads the eat values. The eat values now include the base part of these bonuses.
+- A second save load in one game run, for example after a return to the title screen, no longer writes an error about the icon of the Cooking tag to the game's log.
+
 ## [1.2.0] - 2026-10-03
 
 ### Added

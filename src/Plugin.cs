@@ -53,6 +53,8 @@ namespace ProjectCook
             // The portion switch is part of the dish preview.
             if (DishPreview.Value) features.Add("portionSwitch");
             PageFeatures = features.ToArray();
+            SlShared.ModTags.ModTagIcon.Setup(CookingTagLogic.IconKey, typeof(Plugin).Assembly, "ProjectCook.cook-tag.alpha",
+                text => Log.LogWarning("Project Cook: " + text), text => { if (Verbose.Value) Log.LogDebug(text); });
             var harmony = new Harmony(PluginGuid);
             var patches = new System.Collections.Generic.List<Type>
             {
@@ -70,7 +72,7 @@ namespace ProjectCook
             if (SeparatePieces.Value)
                 patches.AddRange(new[] { typeof(PiecesOnCookingDragMove), typeof(PiecesOnTryMergeIntoOwner), typeof(PiecesOnMoveItem) });
             if (CookingStorages.Value)
-                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs), typeof(HeadBarIcon) });
+                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs), typeof(SlShared.ModTags.ModTagIconLoad), typeof(SlShared.ModTags.ModTagIconPreload) });
             if (FoodSort.Value)
                 patches.AddRange(new[]
                 {
