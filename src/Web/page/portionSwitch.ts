@@ -1,6 +1,7 @@
 // The portion switch after the "THIS POT" title: the dish cards show the stats of the whole dish or of one portion.
-// The game writes the title with textContent on a language change, which takes the switch away, so the preview
-// wrapper draws it again at each render of the list. The choice lives in the root page (view.portion).
+// The game writes the title with textContent in its language message (at each window open, and on a language change),
+// after its render of the list, which takes the switch away. So an observer of the title draws the switch again from
+// the last call. The choice lives in the root page (view.portion).
 import { view } from './core';
 import type { CookingWindow } from './types';
 
@@ -15,6 +16,8 @@ export function drawPortionSwitch(w: CookingWindow, show: boolean, redraw: () =>
   const doc = w.document;
   const title = doc.getElementById('potSectionTitle');
   if (!title) return;
+  if (!w.__projectCookPortion) observeTitle(w, title);
+  w.__projectCookPortion = { show, redraw };
   let box = title.querySelector('.' + CLS) as (HTMLElement & { __redraw?: () => void }) | null;
   if (!show) {
     if (box) box.remove();
@@ -47,4 +50,13 @@ export function drawPortionSwitch(w: CookingWindow, show: boolean, redraw: () =>
     if (opt.textContent !== labels[i]) opt.textContent = labels[i];
     opt.classList.toggle(CLS + '-on', view.portion === (i === 1));
   }
+}
+
+// One observer for each frame (a new open is a new frame). The add of the switch makes one more record, which finds
+// the switch there, so the observer does not loop.
+function observeTitle(w: CookingWindow, title: HTMLElement): void {
+  new w.MutationObserver(() => {
+    const last = w.__projectCookPortion;
+    if (last && last.show && portionSwitchOn() && !title.querySelector('.' + CLS)) drawPortionSwitch(w, true, last.redraw);
+  }).observe(title, { childList: true });
 }

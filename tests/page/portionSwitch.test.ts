@@ -103,3 +103,28 @@ test.skipIf(!gameFilesExist)('portion switch: a choice after a change of the lis
   click(w, options(w)[1]);
   assert.deepEqual(cells(w), ['100%', '🍖40', 'x1']);
 });
+
+// The language message of the game, as at each window open: it draws the list again and then writes the title text,
+// which takes the switch away with no render after it.
+async function localizationMsg(w: Win): Promise<void> {
+  w.postMessage({ type: 'WebUI_Cooking_LocalizationMsg', data: { potKnownHint: 'x', hotPotTitle: 'THIS POT' } }, '*');
+  // One turn for the message; the observer runs in a microtask right after the handler.
+  await new Promise((r) => setTimeout(r, 0));
+}
+
+test.skipIf(!gameFilesExist)('portion switch: comes back after the language message of the game writes the title', async (t) => {
+  view.portion = true;
+  const w = await cookingWindow(t);
+  w.renderPredictionList([ENTRY]);
+  await localizationMsg(w);
+  assert.ok(title(w).textContent.startsWith('THIS POT'));
+  assert.deepEqual(options(w).map((o) => o.textContent), ['Whole dish', 'Per portion']);
+  assert.ok(options(w)[1].classList.contains('projectcook-portion-on'));
+});
+
+test.skipIf(!gameFilesExist)('portion switch: the language message adds no switch with no preview line', async (t) => {
+  const w = await cookingWindow(t);
+  w.renderPredictionList([{ ...ENTRY, Preview: undefined, PreviewPortion: undefined }]);
+  await localizationMsg(w);
+  assert.equal(options(w).length, 0);
+});
