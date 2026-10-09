@@ -36,7 +36,7 @@ The "THIS POT" panel shows the dishes of the rows, from the top row down, each w
 An ingredient with more than one use, such as Wild Rabbit (1/3, 2/3, 3/3), joins the cooking station one piece at a time. Without the mod each piece merges into the item of the same kind that is already on the cooking station, and a recipe counts one item as one ingredient, whatever its pieces. With Project Cook:
 
 - A piece that you drop on a free cell stays its own item there. A recipe counts it as its own ingredient, so two pieces in two rows give two dishes with the row split.
-- A piece that you drop on an item of the same kind merges into that item, as without the mod. When that item cannot take it (it is full, or the game does not merge the two, for example for a different freshness), the piece goes to a free cell as its own item.
+- A piece that you drop on an item of the same kind merges into that item, as without the mod. A drop on a full item does nothing. When the game does not merge the piece into an item that is not full, the piece goes to a free cell as its own item.
 - A quick move to the cooking station, and hot pot mode, work as without the mod.
 
 ## Food sort
