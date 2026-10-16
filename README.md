@@ -58,6 +58,19 @@ The sort only changes what the window shows, not the places of the items. One ch
 
 The tag rule of a storage ("What goes in here") gets the tag Cooking in its Status row. A storage with this tag shows as a container tab in the cooking window, after the fridges, so you can cook with its items (from cooking level 2, as the fridge tabs). It is for food that keeps long and that you still cook with. A storage with the game's tag Food also shows as a tab, with no Cooking tag needed. The tag does not change what the robot puts in or takes out: with other tags the storage works as with those tags alone, and with only the Cooking tag it works as with the tag Food. It does not change how fast food spoils.
 
+## Store Chilled Food
+
+The snowflake button of the backpack in the storage window, Store Chilled Food, sends the food that needs cold (under 10 days left) to cold storages. The game alone uses only a storage with the tag Chilled and a fridge with no tag. Project Cook adds the storages where you keep food on purpose:
+
+- a fridge (Fridge, Refrigerator, Double-Door Fridge, Deluxe Fridge, Freezer, Large-Capacity Freezer, Display Freezer) with the tag Food or Cooking;
+- a storage in the Cold Storage room of the warehouse home with the tag Food or Cooking, while the room keeps food cold: the Cold Storage Chiller runs, or the room is sealed.
+
+The button fills them in this order: a storage with Chilled, then a fridge with Food or Cooking, then a fridge with no tag, then the Cold Storage room. Food goes to a later step only when the earlier ones have no room. The tag rule still decides each item, as for the robot: a storage with Meat and Cooking takes only meat. Food takes each food, and the game keeps Food only when the rule has no other food tag. A cabinet with Food outside the Cold Storage room stays out, because food spoils there at the normal speed.
+
+In the Cold Storage room the food in your backpack spoils slower, so the game alone hides the button there. With Project Cook the button shows in the room too, and counts your food by its days at the normal speed. While you stand in the room, a storage with Chilled gets none of this food, because the game checks Chilled with the slower days of the room.
+
+Outside the Cold Storage room the button still takes the same items (only food that needs cold). The robot rules, the tag rules, and how fast food spoils stay the same. Turn it off with `ColdSortFood`.
+
 Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## How the ingredient tier works
@@ -86,6 +99,7 @@ The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written
 - `SeparatePieces` - a piece that you drop on a free cell of the cooking station stays its own item.
 - `DimUncookable` - the dim of the items that the cooking station does not take, in the tabs of the cooking window.
 - `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
+- `ColdSortFood` - the fridges with Food or Cooking and the Cold Storage room storages as targets of Store Chilled Food.
 
 See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for editing the file.
 

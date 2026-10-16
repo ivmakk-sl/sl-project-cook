@@ -16,6 +16,7 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 | `SeparatePieces` | `true` | `true` / `false` | A piece of an ingredient with more than one use (for example Wild Rabbit 1/3) that you drop on a free cell of the cooking station stays its own item. A drop on an item of the same kind merges the piece into that item. |
 | `DimUncookable` | `true` | `true` / `false` | Dims the items that the cooking station does not take in each tab of the cooking window: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. Fuel items stay bright at a stove that burns fuel. |
 | `CookingStorages` | `true` | `true` / `false` | Lets you use ingredients directly from home storages tagged Cooking or Food in the cooking window, from cooking level 2. Adds the Cooking tag to storage settings. |
+| `ColdSortFood` | `true` | `true` / `false` | The Store Chilled Food button of the backpack also fills a fridge tagged Food or Cooking, and last a storage tagged Food or Cooking in the Cold Storage room while the room keeps food cold. A storage tagged Chilled still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Off: the button works as without the mod. |
 
 With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
 
@@ -35,6 +36,7 @@ CookingStorages = true
 RowSplit = true
 SeparatePieces = true
 DimUncookable = true
+ColdSortFood = true
 ```
 
 The sort choice and the choice of the portion switch are selected in the window, not in this file. The sort choice is shared between the storage window, the cooking window, and the Rat Cage window and resets to Default when you restart the game. The portion switch resets to Whole dish when you restart the game.

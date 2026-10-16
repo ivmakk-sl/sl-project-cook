@@ -16,7 +16,7 @@ namespace ProjectCook
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
         internal static ConfigEntry<bool> IgnoreCookingTalents;
-        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable;
+        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood;
         // The names of the page features that are on, for the page data (PageJson.DataJson).
         internal static string[] PageFeatures = new string[0];
 
@@ -47,6 +47,9 @@ namespace ProjectCook
             DimUncookable = Config.Bind(
                 "Features", "DimUncookable", true,
                 "In each tab of the cooking window, the items that the cooking station does not take are dimmed: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. Fuel items stay bright at a stove that burns fuel. Needs a game restart.");
+            ColdSortFood = Config.Bind(
+                "Features", "ColdSortFood", true,
+                "The Store Chilled Food button of the backpack also fills a fridge with the Food tag or the Cooking tag, and last a storage with one of these tags in the Cold Storage room while the room keeps food cold. A storage with the Chilled tag still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Needs a game restart.");
             var features = new System.Collections.Generic.List<string>();
             if (SeparatePieces.Value) features.Add("separatePieces");
             if (DimUncookable.Value) features.Add("dimUncookable");
@@ -96,8 +99,17 @@ namespace ProjectCook
                 }
                 catch (Exception e) { Log.LogError($"patch {nameof(IgnoreTalentsOnGetTalentEffectRatio)} failed: {e.Message}"); }
             }
-            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value)
-                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value}");
+            if (ColdSortFood.Value)
+            {
+                try { ColdSortDetour.Apply(); }
+                catch (Exception e)
+                {
+                    ColdSortDetour.Undo();
+                    Log.LogWarning($"patch ItemManager.TryRankQuickStoreTarget failed, Store Chilled Food keeps the game's targets: {e.Message}");
+                }
+            }
+            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value)
+                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value}");
             Log.LogInfo("Project Cook loaded.");
         }
     }
