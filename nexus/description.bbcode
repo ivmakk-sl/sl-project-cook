@@ -1,35 +1,40 @@
-The cooking window tells you which dish you get, but not how good it will be. Project Cook adds the numbers. Each dish card of the "THIS POT" panel shows one line for each quality level that can occur, with the chance of that level and what the dish gives at that level. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
-
-Project Cook does not change cooking results or what you get from food. The previews, the food sort, and the dim of items change what the windows show. The row split lets you choose how one cook splits its ingredients into dishes, and separate pieces let you put pieces of one ingredient into different rows. The Cooking tag is kept in your save and lets you cook from more home storages. Store Chilled Food gets more places to put food, and in the Cold Storage room it counts your food by its days at the normal speed.
+The cooking window tells you which dish you get, but not how good it will be. See whether better ingredients or more seasoning are worth using, and arrange ingredients by row to choose which dishes you cook together.
 
 [size=5]Main features[/size]
 [list]
-[*][b]Dish previews.[/b] See quality chances, eat values, and portion counts before cooking, including drinks from the Juicer and Coffee Machine.[/*]
+[*][b]Dish previews.[/b] Each dish card in "THIS POT" shows the chance, eat values, and portion count for each possible quality. Drinks from the Juicer and Coffee Machine get previews too.[/*]
 [*][b]Portion switch.[/b] Switch the dish cards between the stats of the whole dish and of one portion.[/*]
 [*][b]Cooking tooltips.[/b] Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.[/*]
-[*][b]Row split.[/b] From cooking level 3, each row of the ingredient grid is its own dish group: three Pork Chops in three rows give three Salt and Pepper Pork Chops, not one mixed dish.[/*]
-[*][b]Separate pieces.[/b] Drop a piece of Wild Rabbit or another ingredient with more than one use on a free cell of the cooking station, and it stays its own ingredient. Drop it on the same item to merge them.[/*]
-[*][b]Dim of uncookable items.[/b] Items that the cooking station does not take (items that are not food, products such as Beef Slices, and items that need cutting first) are dimmed in the tabs of the cooking window. Fuel stays bright at a stove that burns fuel.[/*]
+[*][b]Cook by row.[/b] From cooking level 3, each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP.[/*]
+[*][b]Separate pieces.[/b] Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.[/*]
+[*][b]Dim uncookable items.[/b] Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.[/*]
 [*][b]Food sort.[/b] Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.[/*]
 [*][b]Cook from home storages.[/b] Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.[/*]
-[*][b]Store Chilled Food for your food storages.[/b] The snowflake button of the backpack also fills fridges with the Food or Cooking tag, and last the racks of the Cold Storage room while the room keeps food cold. Chilled storages still come first, and the tags still decide which food goes where.[/*]
+[*][b]Store Chilled Food.[/b] The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.[/*]
 [/list]
 
 Supported languages: English and Chinese.
+
+Cooking by row and keeping pieces separate can change which dishes you make. Recipes, quality rules, cooking time, and food effects stay the same. The Cooking tag is stored in your save; see Uninstall before removing the mod.
 
 Eat values include fixed talents and the difficulty's Life factor, but temporary buffs or talent effects, random talent bonuses, being tired of the food, and stat maximums can change the actual gain.
 
 Trade values include your appraisal talents. They exclude the trader's bonus for wanted items and any reduction to half value.
 
 [size=5]Using the row split[/size]
-From cooking level 3 the game can cook more than one dish at once, but it puts all ingredients in one pool. With Project Cook, each row of the ingredient grid (the cooking station) is its own group of ingredients, and the game matches the dishes of each row alone:
+From cooking level 3 the game can cook more than one dish at once, but it matches recipes against all the ingredients together. With Project Cook, it matches recipes for each row of the ingredient grid separately:
 [list]
 [*]Each row gives the same dishes as a cook with only that row. A row can give more than one dish, and a row with no recipe gives no dish.[/*]
-[*]A dish of ingredient types (for example Meat + Vegetables) gets the tier and the stats of its own row.[/*]
+[*]A recipe that asks for ingredient types (for example Meat + Vegetables) uses the tier and stats of the ingredients in its row.[/*]
 [*]A seasoning in a row can be an ingredient of a recipe of that row. Each seasoning still gives its quality bonus to every dish, and its tier to every dish of ingredient types, as without the mod.[/*]
 [*]An item that covers two rows belongs to the row of its top cell.[/*]
 [/list]
-The "THIS POT" panel shows the dishes of the rows, each with its own preview lines. With all ingredients in one row, or below cooking level 3, cooking works as without the mod.
+The "THIS POT" panel shows the dishes of the rows, each with its own preview lines. Row splitting has no effect with all ingredients in one row or below cooking level 3.
+
+[size=5]Using Store Chilled Food[/size]
+The button moves food with more than 0 and less than 10 days left before expiration. Your storage's tags still decide which items it accepts: Meat with Cooking takes only meat. Outside the Cold Storage room, Food or Cooking qualifies only on a fridge; tagging an ordinary cabinet Food does not make it a cold destination.
+
+Storage in the Cold Storage room qualifies while the Cold Storage Chiller runs or the room is sealed. The button also works while you stand in the room, using the food's days left at the normal spoilage speed. The game's Chilled tag still uses the longer days left in the cold room, so it may reject food that the Food or Cooking tag accepts. Spoilage speed and robot rules stay the same.
 
 [size=5]Using the food sort[/size]
 Choose a sort from the dropdown below the grid. Each item shows the selected number, including ingredients on the cooking workbench:
@@ -39,7 +44,7 @@ Choose a sort from the dropdown below the grid. Each item shows the selected num
 [*][b]Expiration Date:[/b] rotten food first, then expired food, then food with the fewest days left. White numbers show days until expiration; red numbers on expired food show days until it spoils. Food that cannot spoil further shows Expired or Rotten instead of a countdown.[/*]
 [*]Items with no value for the selected choice come last and are dimmed.[/*]
 [/list]
-The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, where [b]Satiety[/b] shows the satiety that the cage gets from each item (all uses left, no talent bonus). The Food Storage grid of the cage shows the numbers too.
+The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for your Backpack and each fridge tab. Satiety shows what the cage gets from each item (all uses left, no talent bonus). Items the cage does not accept come last and are dimmed. The cage's Food Storage grid shows the numbers too.
 The food sort changes only the displayed order. One choice applies to all these windows until you quit the game. Select Default to see the items in their stored places and rearrange them by hand. Transfers between grids still work while sorted, and Auto Organize still moves items as usual. If the items cannot fit in the sorted order, the grid shows their stored places.
 
 [size=5]How the ingredient tier works[/size]
@@ -47,18 +52,14 @@ The food sort changes only the displayed order. One choice applies to all these 
 [list]
 [*]The tier matters only for a recipe that asks for ingredient types (for example Meat + Vegetables). A recipe that asks for specific items has fixed stats and ignores the tier.[/*]
 [*]The dish gets the tier of the highest-tier ingredient used by the recipe. One High-end ingredient is enough; more of them add nothing to the tier. Cooking talents can also raise the dish tier.[/*]
-[*]The tier multiplies the ingredient totals for satiety, health, and life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.[/*]
+[*]The tier multiplies the ingredient totals for Satiety, Fitness, and Life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and Satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.[/*]
 [*]The multiplier works on the sum of the ingredient stats. A High-end ingredient with weak stats (for example Enoki Mushrooms) can raise the tier and the trade value, and still lower the stats. The dish card shows the final numbers, so compare there.[/*]
 [*]The tier of an ingredient comes from its price. Staple food, snacks, and drinks have no tier.[/*]
 [/list]
 
-[size=5]Limitations[/size]
-[list]
-[*]Cooking previews are not available in hot pot mode.[/*]
-[/list]
-
 [size=5]Requirements[/size]
 [list]
+[*]Survival Log 1.1.18902 or later.[/*]
 [*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
 [/list]
 
@@ -72,7 +73,7 @@ The food sort changes only the displayed order. One choice applies to all these 
 Delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
 
 [size=5]Configuration[/size]
-The config file [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] is created the first time you start the game with the mod. Dish preview, food sort, cooking storages, row split, separate pieces, and the dim of items are all on by default (the portion switch is part of the dish preview) and can be turned off separately. Edit the file while the game is closed; changes take effect on the next start. See the [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]settings reference[/url] for the switches and their effects.
+All features are on by default and can be turned off separately. The portion switch is part of the dish preview. To change mod settings, edit [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] while the game is closed (see [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]CONFIG.md[/url] for every setting). The file is created the first time you start the game with the mod. Changes apply at the next game start.
 
 Before turning off [font=Courier New]CookingStorages[/font], give any storage with only Cooking a game tag such as Food. Turning this feature off removes Cooking tags from the save, just like uninstalling; turning it back on does not restore them.
 

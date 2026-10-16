@@ -1,6 +1,22 @@
 # Project Cook
 
-A mod for the Steam game *Survival Log* that shows what a dish will be before you cook it. In the cooking window, each dish card of the "THIS POT" panel gets one line for each quality level that can occur: the chance of that level (in the color of the level; point at it for the name), what your character gets from the whole dish at that level (satiety, morale, stamina, life), and the portion count. So you can see if one more seasoning or a better ingredient is worth it, before the ingredients are gone.
+The cooking window tells you which dish you get, but not how good it will be. See whether better ingredients or more seasoning are worth using, and arrange ingredients by row to choose which dishes you cook together.
+
+## Main features
+
+- **Dish previews.** Each dish card in "THIS POT" shows the chance, eat values, and portion count for each possible quality. Drinks from the Juicer and Coffee Machine get previews too.
+- **Portion switch.** Switch the dish cards between the stats of the whole dish and of one portion.
+- **Cooking tooltips.** Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.
+- **Cook by row.** From cooking level 3, each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP.
+- **Separate pieces.** Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.
+- **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
+- **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
+- **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.
+- **Store Chilled Food.** The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.
+
+## Preview details
+
+Each preview line shows the chance in its quality's color (hover for the quality name), the whole dish's Satiety, Morale, Stamina, and Life, and its portion count.
 
 The stats on the card are eat values: the dish stats with the eat talents of your character (for example Nourishing Richness, Carnivore, Efficient Diet, Optimist, and the Morale of Perfect Morale) and the Life factor of the difficulty. They leave out temporary buffs (also talents that last a limited time, such as Leisure Time), random talent extras, being tired of a food, and the stat maximum. Fitness is not on the card, because eating does not change it.
 
@@ -12,9 +28,9 @@ Point at a dish card to see more: the tier of the dish, the cooking XP for that 
 
 Ingredient tooltips in the cooking window also show the tier of the ingredient (High-end, Mid-tier, Low-grade), its trade value, and its raw stats. The trade values include the appraisal talents of your character (Shrewd Appraisal, Bargaining), and not the demand of a trader. The food badge of an ingredient shows its tier at a glance: a gold badge with a triangle that points up is High-end, a grey badge with a triangle that points down is Low-grade, and the game's green badge is Mid-tier or no tier.
 
-The added text follows the game language, English and Chinese. The quality, tier, and stat names are the game's own words, so they are equal to the rest of the window.
+The added text follows the game language, English and Chinese. Quality, tier, and stat names match the game's own text.
 
-In each tab of the cooking window, the items that the cooking station does not take are dimmed: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. At a stove that burns fuel, the fuel items (for example Scrap Paper) are not dimmed, because the fuel queue takes them. The dim does not change the item, its place, or a drag.
+Uncookable items appear dimmed in each tab. This includes items that are not food, products such as Beef Slices, and ingredients that need cutting first. Fuel such as Scrap Paper stays bright at a stove that burns fuel. Dimming does not change items, their places, or dragging.
 
 Apart from the row split and the separate pieces (see below), Project Cook does not change the cooking result, the recipes, or what you get from food. The stats and the portion count come from the game's own formula. The chances use the same inputs as the game's quality roll: cooking level, cook furniture, fresh or expired ingredients, seasonings, exact recipe, and the cooking talents of the character. Hot pot mode has no preview.
 
@@ -22,14 +38,14 @@ Apart from the row split and the separate pieces (see below), Project Cook does 
 
 From cooking level 3 the game can cook more than one dish at once, but it puts all ingredients in one pool and picks the recipe that uses the most ingredients first. Project Cook lets you choose the dishes: each row of the cooking station (the ingredient grid of the cooking window) is its own group of ingredients, and the game matches the dishes of each row alone, with its own rule.
 
-- Three Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. In one row they give one mixed dish, as without the mod.
+- Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. In one row they give one mixed dish, as without the mod.
 - A row can still give more than one dish, the same dishes as a cook with only that row.
 - A meat and a vegetable in the first row and another meat and a vegetable in the second row give two dishes, each with the tier and the stats of its own row.
 - A seasoning in a row can be an ingredient of a recipe of that row. Each seasoning on the cooking station still gives its quality bonus to every dish, and its tier to every dish of ingredient types, as without the mod. So a row with only seasonings works.
 - A row whose items match no recipe gives no dish.
 - An item that covers two rows belongs to the row of its top cell.
 
-The "THIS POT" panel shows the dishes of the rows, from the top row down, each with its own preview lines. With all ingredients in one row, or below cooking level 3, the cook works as without the mod. The cook time stays the game's.
+The "THIS POT" panel shows the dishes of the rows, from the top row down, each with its own preview lines. Row splitting has no effect with all ingredients in one row or below cooking level 3. Cooking time stays the same.
 
 ## Separate pieces
 
@@ -60,14 +76,14 @@ The tag rule of a storage ("What goes in here") gets the tag Cooking in its Stat
 
 ## Store Chilled Food
 
-The snowflake button of the backpack in the storage window, Store Chilled Food, sends the food that needs cold (under 10 days left) to cold storages. The game alone uses only a storage with the tag Chilled and a fridge with no tag. Project Cook adds the storages where you keep food on purpose:
+Store Chilled Food, the snowflake button in your Backpack in the storage window, moves food with more than 0 and less than 10 days left before expiration. Without the mod, it uses storage tagged Chilled and untagged fridges. Project Cook adds:
 
-- a fridge (Fridge, Refrigerator, Double-Door Fridge, Deluxe Fridge, Freezer, Large-Capacity Freezer, Display Freezer) with the tag Food or Cooking;
+- a fridge (Fridge, Refrigerator, Double-Door Fridge, Deluxe Fridge, Freezer, Large-Capacity Freezer, Display Freezer) tagged Food or Cooking;
 - a storage in the Cold Storage room of the warehouse home with the tag Food or Cooking, while the room keeps food cold: the Cold Storage Chiller runs, or the room is sealed.
 
-The button fills them in this order: a storage with Chilled, then a fridge with Food or Cooking, then a fridge with no tag, then the Cold Storage room. Food goes to a later step only when the earlier ones have no room. The tag rule still decides each item, as for the robot: a storage with Meat and Cooking takes only meat. Food takes each food, and the game keeps Food only when the rule has no other food tag. A cabinet with Food outside the Cold Storage room stays out, because food spoils there at the normal speed.
+The button fills storage in this order: Chilled, fridges tagged Food or Cooking, untagged fridges, then tagged storage in the Cold Storage room. Food moves to a later group only when earlier destinations that accept it have no room. Tags still decide which items a storage accepts, as they do for the robot: Meat with Cooking takes only meat. Food accepts any food; the game keeps this tag only when no other food tag is selected. A cabinet tagged Food outside the Cold Storage room stays out because food spoils there at the normal speed.
 
-In the Cold Storage room the food in your backpack spoils slower, so the game alone hides the button there. With Project Cook the button shows in the room too, and counts your food by its days at the normal speed. While you stand in the room, a storage with Chilled gets none of this food, because the game checks Chilled with the slower days of the room.
+In the Cold Storage room, food in your Backpack spoils more slowly, which can make the game hide the button. Project Cook uses the food's days left at the normal spoilage speed, so you can store it while standing in the room too. The game's Chilled tag still uses the longer days left in the cold room, so it may reject food that the Food or Cooking tag accepts.
 
 Outside the Cold Storage room the button still takes the same items (only food that needs cold). The robot rules, the tag rules, and how fast food spoils stay the same. Turn it off with `ColdSortFood`.
 
@@ -79,9 +95,14 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 - The tier matters only for a recipe that asks for ingredient types (for example Meat + Vegetables). A recipe that asks for specific items has fixed stats and ignores the tier.
 - The dish gets the tier of the highest-tier ingredient used by the recipe. One High-end ingredient is enough; more of them add nothing to the tier. Cooking talents can also raise the dish tier.
-- The tier multiplies the ingredient totals for satiety, health, and life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.
+- The tier multiplies the ingredient totals for Satiety, Fitness, and Life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and Satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.
 - The multiplier works on the sum of the ingredient stats. A High-end ingredient with weak stats (for example Enoki Mushrooms) can raise the tier and the trade value, and still lower the stats. The dish card shows the final numbers, so compare there.
 - The tier of an ingredient comes from its price. Staple food, snacks, and drinks have no tier.
+
+## Requirements
+
+- Survival Log 1.1.18902 or later.
+- [BepInEx for Survival Log](https://www.nexusmods.com/survivallog/mods/12). Install it first.
 
 ## Install
 
@@ -97,7 +118,7 @@ The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written
 - `FoodSort` - the food sort in the storage window, the cooking window, and the Rat Cage window.
 - `RowSplit` - each row of the cooking station as its own group of ingredients, from cooking level 3.
 - `SeparatePieces` - a piece that you drop on a free cell of the cooking station stays its own item.
-- `DimUncookable` - the dim of the items that the cooking station does not take, in the tabs of the cooking window.
+- `DimUncookable` - dims items you cannot cook in the cooking window's tabs.
 - `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
 - `ColdSortFood` - the fridges with Food or Cooking and the Cold Storage room storages as targets of Store Chilled Food.
 
@@ -107,9 +128,11 @@ See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for edit
 
 Delete `ProjectCook.dll` from the `BepInEx\plugins` folder. The game then drops the Cooking tag from each storage, and keeps the items and the other tags. A storage with only the Cooking tag loses its rule, and the robot no longer puts items in it. Before you uninstall, give such a storage a tag of the game (for example Food).
 
+If a cook is in progress when you remove the mod or turn off `RowSplit`, it finishes with its saved recipes. The game assigns ingredients to those recipes using its usual rules, so the dishes may differ from the row previews.
+
 ## Troubleshooting
 
-The mod was verified on the Steam build `25366138` of the game with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
+Project Cook 1.3.0 was verified on Survival Log `1.1.18902` (Steam build `25984240`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
 
 ## Build
 

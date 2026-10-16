@@ -6,34 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-17
+
 ### Added
 
-- Row split: from cooking level 3, each row of the cooking station (the ingredient grid of the cooking window) is its own group of ingredients. The game matches the dishes of each row alone, so three Pork Chops in three rows give three Salt and Pepper Pork Chops, not one mixed dish. One row can still give more than one dish, and a row with no recipe gives no dish. With all ingredients in one row, the cook works as before. The seasonings still give their quality bonus to every dish, and their tier to every dish of ingredient types. The "THIS POT" panel shows the dishes of the rows. Turn it off with `RowSplit` in the `[Features]` section of the config file.
-- Separate pieces: a piece of an ingredient with more than one use (for example Wild Rabbit 1/3) that you drop on a free cell of the cooking station stays its own item, so a recipe counts it as its own ingredient and two pieces in two rows give two dishes. Drop a piece on an item of the same kind to merge them into that item, as before. Turn it off with `SeparatePieces`.
-- The items that the cooking station does not take are dimmed in each tab of the cooking window: an item that is not food, a product such as Beef Slices, or an item that needs cutting first. Fuel such as Scrap Paper stays bright at a stove that burns fuel. Turn it off with `DimUncookable`.
-- Portion switch after the "THIS POT" title: the dish cards show the stats of the whole dish or of one portion, with the portion count "xN" on each line. Whole dish is the choice at each game start, and the choice stays until you quit the game. It is part of the dish preview (`DishPreview`).
-- Food sort in the Rat Cage window: the dropdown under the Leave All and Leave by Type buttons sorts the open tab (the Backpack or a fridge). In this window, Satiety sorts by the satiety that the cage gets from each item (all uses left), highest first, and items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the numbers of the choice too. The choice is the one of the storage window and the cooking window.
-- The head bar above a storage shows the icon of the Cooking tag in its color, next to the icons of the other tags. Before, the game showed no icon for it and wrote an error to its log.
-- Store Chilled Food (the snowflake button of the backpack) also fills a fridge with the tag Food or Cooking, and last a storage with Food or Cooking in the Cold Storage room while the room keeps food cold. The order: a storage with Chilled, a fridge with Food or Cooking, a fridge with no tag, the Cold Storage room. The tag rule still decides each item (Meat with Cooking takes only meat), a cabinet with Food outside the Cold Storage room stays out, and outside the Cold Storage room the button takes the same items as before. The button also shows while you stand in the Cold Storage room, and there it counts your food by its days at the normal speed. Turn it off with `ColdSortFood`.
+- Cook by row from cooking level 3: each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. A row can give more than one dish; a row with no matching recipe gives none. Seasonings still give their quality bonus to every dish and their tier to recipes that use ingredient types. "THIS POT" previews the dishes by row. With one row, cooking works as before; cooking time stays the same. Turn this off with `RowSplit` in the config file's `[Features]` section.
+- Separate pieces: drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Each piece counts as an ingredient, so two pieces in two rows can make two dishes. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as before. Turn this off with `SeparatePieces`.
+- Uncookable items appear dimmed in the cooking window's tabs, including items that are not food, products such as Beef Slices, and ingredients that need cutting first. Fuel such as Scrap Paper stays bright at a stove that burns fuel. Turn this off with `DimUncookable`.
+- Whole dish / Per portion switch after the "THIS POT" title. Portion counts ("xN") stay visible in both views. The choice lasts until you quit and resets to Whole dish at each game start. This is part of `DishPreview`.
+- Food sort in the Rat Cage window, under Leave All and Leave by Type, for the Backpack and each fridge tab. Satiety shows what the cage gets from all remaining uses, highest first, without talent bonuses. Items the cage does not accept come last and are dimmed. The cage's Food Storage grid shows the selected numbers too. The sort choice is shared with the storage and cooking windows.
+- Cooking tag icon above storage, in the tag's color beside the other tag icons.
+- Store Chilled Food also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the chiller runs or the room is sealed. Priority: Chilled, tagged fridges, untagged fridges, then the Cold Storage room. Tags still decide which food each storage accepts; an ordinary cabinet outside the room does not qualify. The button also works while you stand in the room, using days left at the normal spoilage speed. Chilled still uses the longer days left in the cold room and may reject food that Food or Cooking accepts. Outside the room, the same food qualifies as before. Turn this off with `ColdSortFood`.
 
 ### Changed
 
-- Two dish cards of the same recipe each show the lines of their own ingredients.
-- The ingredient tooltip of the cooking window is parted from the lines of the game by a rule, as the tooltips of the other mods are. Its lines keep their colors and their text size.
-- The ingredient tooltip stays inside the window when it would reach past the edge, so no line is cut off.
-- The mod draws its tooltip lines through a shared library, so a tooltip with the lines of another mod in it shows each mod once, in a fixed order, whichever mod the game loads first.
+- Dish cards for the same recipe each show previews for their own ingredients.
+- A divider separates the mod's ingredient tooltip lines from the game's text. Colors and text sizes stay the same.
+- Ingredient tooltips stay inside the window so their lines remain visible.
+- Tooltip additions from this mod and other mods appear once each, in a consistent order.
+- The food sort menu closes when you click outside it. The click still works and your sort choice stays selected.
+- Default appears in white in the food sort menu. Gold marks only an active sort.
+- If a game update uses the Cooking tag's ID for a game tag, the mod turns its Cooking tag off so the game's tag works normally. Other features keep working.
 
-- The open list of the food sort closes when you click anywhere outside it. The click still does its own action, for example on an item, and the choice stays the same.
-- The open list of the food sort shows Default in white, as the other choices. Gold now marks only a sort that is on.
-- When a game update adds a tag of its own with the id of the Cooking tag, the mod turns the Cooking tag off and writes a warning to the log, so the game's tag works as without the mod. The cooking window and the other features keep working.
+### Removed
+
+- Support for Survival Log versions before 1.1.18902.
 
 ### Fixed
 
-- The game no longer writes five errors to its log, one for each of the Satiety Bonus, Morale Bonus, Stamina Bonus, Fitness Bonus, and Life Bonus, when the mod reads the eat values. The eat values now include the base part of these bonuses.
-- A second save load in one game run, for example after a return to the title screen, no longer writes an error about the icon of the Cooking tag to the game's log.
-- An item that the food sort dims in the storage window or the cooking window no longer shows the grid lines through it when it takes more than one cell (without Compact Inventory).
-- The Store Materials button of the backpack no longer makes the mod write a warning about a tag rule to the game's log.
-- The Sort button of the backpack in the storage window is first on its line again, before the game's Store Chilled Food and Store Materials buttons.
+- Eat values include the base part of Satiety Bonus, Morale Bonus, Stamina Bonus, Fitness Bonus, and Life Bonus.
+- Dimmed items that occupy several cells remain opaque, hiding the grid lines behind them when playing without Compact Inventory.
+- The Backpack's Sort button appears before Store Chilled Food and Store Materials again.
 
 ## [1.2.0] - 2026-10-03
 

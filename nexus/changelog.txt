@@ -1,3 +1,20 @@
+v1.3.0 - 2026-10-17
+Added: Cook by row from cooking level 3. Three Frozen Pork Chops in separate rows make three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. Seasonings still help every dish, and cooking time stays the same. Turn this off with RowSplit in the config file.
+Added: Drop pieces of Wild Rabbit or other ingredients with multiple uses on free cells in the ingredient grid to keep them separate. Drop a piece onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as before. Turn this off with SeparatePieces.
+Added: Uncookable items appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel. Turn this off with DimUncookable.
+Added: Whole dish / Per portion switch after the THIS POT title, with portion counts visible in both views. It resets to Whole dish at each game start and is part of the dish preview.
+Added: Food sort in the Rat Cage window for your Backpack and fridge tabs. Satiety shows what the cage gets from all remaining uses, without talent bonuses. Items the cage does not accept come last and are dimmed. The cage's Food Storage grid shows the selected numbers too. The choice is shared with the storage and cooking windows.
+Added: Cooking tag icon above storage, beside the other tag icons.
+Added: Store Chilled Food also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the chiller runs or the room is sealed. Priority: Chilled, tagged fridges, untagged fridges, then the Cold Storage room. Tags still decide which food goes where. The button works while you stand in the room, using days left at the normal spoilage speed; Chilled still uses the longer days left in the cold room. Turn this off with ColdSortFood.
+Changed: Dish cards for the same recipe each show previews for their own ingredients.
+Changed: A divider separates the mod's ingredient tooltip lines from the game's text. Tooltips stay inside the window, and additions from other mods appear once each in a consistent order.
+Changed: The food sort menu closes when you click outside it. The click still works and your sort choice stays selected. Default appears in white; gold marks only an active sort.
+Changed: If a game update uses the Cooking tag's ID for a game tag, the mod turns its Cooking tag off so the game's tag works normally. Other features keep working.
+Removed: Support for Survival Log versions before 1.1.18902.
+Fixed: Eat values include the base stat bonuses.
+Fixed: Dimmed items that occupy several cells hide the grid lines behind them when playing without Compact Inventory.
+Fixed: The Backpack's Sort button appears before Store Chilled Food and Store Materials again.
+
 v1.2.0 - 2026-10-03
 Added: Food sort for fridges and home storages tagged Cooking or Food, in the storage window and cooking window. The Backpack can also be sorted in the cooking window, and while one of these storages is open in the storage window. Sort by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date without moving the stored items.
 Added: Numbers on sorted items and cooking workbench ingredients: eat values per use, trade value per stack, or days left. Rotten and expired food come first when sorting by Expiration Date.
