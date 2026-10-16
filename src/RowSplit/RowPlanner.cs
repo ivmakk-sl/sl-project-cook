@@ -93,7 +93,8 @@ namespace ProjectCook
             {
                 var recipe = dish.Recipe;
                 var entry = new RowSplitLogic.PredictionEntry { RecipeId = recipe.ID };
-                bool known = state.UnlockedRecipeIds.Contains(recipe.ID) || (recipe.show_level > 0 && recipe.show_level <= level);
+                // The game's own rule: since game 1.1.18902 a recipe is also known through a known recipe of its dish group.
+                bool known = Reducer_Web_Cooking.IsRecipeKnownToPlayer(state, recipe);
                 if (known)
                 {
                     entry.Name = ConstantTextTools.GetLocalText(recipe.RecipeName);

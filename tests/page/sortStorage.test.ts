@@ -58,6 +58,23 @@ function storageWindow(): Win {
 const toolbarA = (w: Win) => w.document.querySelector('.bag-panel:not(.is-storage) .toolbar');
 const placeA = (w: Win, id: number) => { const it = w.__bagA.items.find((i: any) => i.id === id); return [it.x, it.y]; };
 
+test('storage sort: the dropdown is first on the Backpack line, before the quick store buttons of the game', () => {
+  const w = storageWindow();
+  // Game 1.1.18902: Store Chilled Food and Store Materials, each in a span.qs-wrap, before Discard All.
+  const discard = toolbarA(w).querySelector('.discard-btn');
+  for (const label of ['Store Chilled Food', 'Store Materials']) {
+    const wrap = w.document.createElement('span');
+    wrap.className = 'qs-wrap';
+    wrap.innerHTML = `<button class="action-btn qs-btn" aria-label="${label}">×1</button>`;
+    toolbarA(w).insertBefore(wrap, discard);
+  }
+  view.sort = sortData('42', '5');
+  applyStorageSort(w);
+  const root = toolbarA(w).querySelector('.projectcook-sort');
+  assert.equal(toolbarA(w).firstElementChild, root, 'the dropdown is the first item of the line');
+  assert.ok(root.nextElementSibling.classList.contains('qs-wrap'));
+});
+
 test('storage sort: the Backpack side gets the dropdown and the sort when the sort data names it', () => {
   const w = storageWindow();
   view.sort = sortData('42', '5');

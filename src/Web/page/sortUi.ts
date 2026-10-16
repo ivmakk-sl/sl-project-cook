@@ -26,8 +26,9 @@ function icon(key: string): DropdownIcon {
 }
 
 // The first game button of a toolbar: in the storage window an .action-btn (Discard All on the Backpack side, else
-// Auto Organize), in the cooking window .bag-sort-btn (Auto Organize).
-const ANCHOR = '.action-btn, .bag-sort-btn';
+// Auto Organize), or since game 1.1.18902 the span.qs-wrap of Store Chilled Food and Store Materials before them; in
+// the cooking window .bag-sort-btn (Auto Organize).
+const ANCHOR = '.action-btn, .qs-wrap, .bag-sort-btn';
 
 // Draws the dropdown at the left of the first game button, on its line. select runs when the player picks a choice.
 // With Default the button reads Sort with the sort icon; with a sort on, the word and the icon of the choice in the
