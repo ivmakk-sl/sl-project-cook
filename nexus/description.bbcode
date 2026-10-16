@@ -5,12 +5,12 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 [*][b]Dish previews.[/b] Each dish card in "THIS POT" shows the chance, eat values, and portion count for each possible quality. Drinks from the Juicer and Coffee Machine get previews too.[/*]
 [*][b]Portion switch.[/b] Switch the dish cards between the stats of the whole dish and of one portion.[/*]
 [*][b]Cooking tooltips.[/b] Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.[/*]
-[*][b]Cook by row.[/b] From cooking level 3, each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP.[/*]
+[*][b]Cook by row.[/b] From cooking level 3, cook different dishes together by putting their ingredients in separate rows. Seasonings still help every dish.[/*]
 [*][b]Separate pieces.[/b] Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.[/*]
 [*][b]Dim uncookable items.[/b] Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.[/*]
-[*][b]Food sort.[/b] Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.[/*]
+[*][b]Food sort.[/b] Sort food by stats per use, trade value per stack, or expiration date, with values on each item. Sorting changes only the displayed order. In the Rat Cage window, Satiety counts all remaining uses without talent bonuses.[/*]
 [*][b]Cook from home storages.[/b] Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.[/*]
-[*][b]Store Chilled Food.[/b] The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.[/*]
+[*][b]Store Chilled Food.[/b] The Backpack's snowflake button also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room. The room must be sealed or have the Cold Storage Chiller running. Chilled storage still comes first; the button also works while you stand in the room.[/*]
 [/list]
 
 Supported languages: English and Chinese.
@@ -21,40 +21,12 @@ Eat values include fixed talents and the difficulty's Life factor, but temporary
 
 Trade values include your appraisal talents. They exclude the trader's bonus for wanted items and any reduction to half value.
 
-[size=5]Using the row split[/size]
-From cooking level 3 the game can cook more than one dish at once, but it matches recipes against all the ingredients together. With Project Cook, it matches recipes for each row of the ingredient grid separately:
-[list]
-[*]Each row gives the same dishes as a cook with only that row. A row can give more than one dish, and a row with no recipe gives no dish.[/*]
-[*]A recipe that asks for ingredient types (for example Meat + Vegetables) uses the tier and stats of the ingredients in its row.[/*]
-[*]A seasoning in a row can be an ingredient of a recipe of that row. Each seasoning still gives its quality bonus to every dish, and its tier to every dish of ingredient types, as without the mod.[/*]
-[*]An item that covers two rows belongs to the row of its top cell.[/*]
-[/list]
-The "THIS POT" panel shows the dishes of the rows, each with its own preview lines. Row splitting has no effect with all ingredients in one row or below cooking level 3.
-
-[size=5]Using Store Chilled Food[/size]
-The button moves food with more than 0 and less than 10 days left before expiration. Your storage's tags still decide which items it accepts: Meat with Cooking takes only meat. Outside the Cold Storage room, Food or Cooking qualifies only on a fridge; tagging an ordinary cabinet Food does not make it a cold destination.
-
-Storage in the Cold Storage room qualifies while the Cold Storage Chiller runs or the room is sealed. The button also works while you stand in the room, using the food's days left at the normal spoilage speed. The game's Chilled tag still uses the longer days left in the cold room, so it may reject food that the Food or Cooking tag accepts. Spoilage speed and robot rules stay the same.
-
-[size=5]Using the food sort[/size]
-Choose a sort from the dropdown below the grid. Each item shows the selected number, including ingredients on the cooking workbench:
-[list]
-[*][b]Satiety, Morale, Stamina, Life:[/b] eat value per use, highest first.[/*]
-[*][b]Trade value:[/b] value of the whole stack, highest first.[/*]
-[*][b]Expiration Date:[/b] rotten food first, then expired food, then food with the fewest days left. White numbers show days until expiration; red numbers on expired food show days until it spoils. Food that cannot spoil further shows Expired or Rotten instead of a countdown.[/*]
-[*]Items with no value for the selected choice come last and are dimmed.[/*]
-[/list]
-The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for your Backpack and each fridge tab. Satiety shows what the cage gets from each item (all uses left, no talent bonus). Items the cage does not accept come last and are dimmed. The cage's Food Storage grid shows the numbers too.
-The food sort changes only the displayed order. One choice applies to all these windows until you quit the game. Select Default to see the items in their stored places and rearrange them by hand. Transfers between grids still work while sorted, and Auto Organize still moves items as usual. If the items cannot fit in the sorted order, the grid shows their stored places.
-
 [size=5]How the ingredient tier works[/size]
-[b]Quality and tier are separate.[/b] Quality is the cooking result: Perfect, Good, Average, or Failed. Tier is High-end, Mid-tier, or Low-grade and matters for recipes that use ingredient types, such as Meat + Vegetables. A High-end dish can still turn out Failed, and a Low-grade dish can turn out Perfect. Project Cook shows the dish tier and the chance of each quality.
+Tier (High-end, Mid-tier, Low-grade) is separate from quality: a High-end dish can still turn out Failed.
 [list]
-[*]The tier matters only for a recipe that asks for ingredient types (for example Meat + Vegetables). A recipe that asks for specific items has fixed stats and ignores the tier.[/*]
-[*]The dish gets the tier of the highest-tier ingredient used by the recipe. One High-end ingredient is enough; more of them add nothing to the tier. Cooking talents can also raise the dish tier.[/*]
-[*]The tier multiplies the ingredient totals for Satiety, Fitness, and Life: High-end x1.7, Mid-tier x1.4, Low-grade x1.1. Quality applies another multiplier, and Satiety also gets a flat bonus per ingredient. The tier also selects the dish (for example Eight-Treasure Stew, Stew, or Simple Stew), and with it the base trade value.[/*]
-[*]The multiplier works on the sum of the ingredient stats. A High-end ingredient with weak stats (for example Enoki Mushrooms) can raise the tier and the trade value, and still lower the stats. The dish card shows the final numbers, so compare there.[/*]
-[*]The tier of an ingredient comes from its price. Staple food, snacks, and drinks have no tier.[/*]
+[*]Tier matters for recipes using ingredient types, such as Meat + Vegetables. Recipes requiring specific items have fixed stats and ignore tier.[/*]
+[*]The highest-tier ingredient used by the recipe sets the dish's tier. One High-end ingredient is enough; more do not raise it further. Cooking talents can also raise the tier.[/*]
+[*]A High-end ingredient with weak stats, such as Enoki Mushrooms, can raise trade value while lowering the dish's stats. Compare the previews before using better ingredients.[/*]
 [/list]
 
 [size=5]Requirements[/size]
