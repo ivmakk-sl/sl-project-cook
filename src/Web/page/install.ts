@@ -2,6 +2,7 @@
 import { addError, ensureStyle, hasFeature, missingText, newErrorsText, view } from './core';
 import { installItemTip } from './itemTip';
 import { installPieces } from './pieces';
+import { refreshPortionSwitch } from './portionSwitch';
 import { installPreview } from './preview';
 import type { SortedGrid } from './dropFilter';
 import { applyCookingSort, cookingGrid } from './sortCooking';
@@ -109,6 +110,7 @@ function runCooking(w: CookingWindow): string | null {
     }
 
     if (w.__cookingTierMark && w.__projectCookDrawn !== view.version) redrawTiers(w);
+    try { refreshPortionSwitch(w); } catch (e) { addError(w, 'portionSwitch: ' + e); }
     if (hasFeature(w, doc, 'cookingSort')) {
       try { applyCookingSort(w); } catch (e) { addError(w, 'cookingSort: ' + e); }
     }

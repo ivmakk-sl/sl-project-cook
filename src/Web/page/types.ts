@@ -101,8 +101,9 @@ export type CookingWindow = GridSortWindow & {
   __cookingTierMark?: boolean;
   // The data version of the last draw of the bag items.
   __projectCookDrawn?: number;
-  // The last call of drawPortionSwitch, which its title observer draws again after a write of the title.
-  __projectCookPortion?: { show: boolean; redraw: () => void };
+  // The last call of drawPortionSwitch, which its title observer draws again after a write of the title, with the
+  // data version of that call.
+  __projectCookPortion?: { show: boolean; redraw: () => void; version: number };
 };
 
 // The data of setData (PageJson.DataJson in C#), by config ID: the tooltip lines of each ingredient, and

@@ -17,7 +17,7 @@ export function drawPortionSwitch(w: CookingWindow, show: boolean, redraw: () =>
   const title = doc.getElementById('potSectionTitle');
   if (!title) return;
   if (!w.__projectCookPortion) observeTitle(w, title);
-  w.__projectCookPortion = { show, redraw };
+  w.__projectCookPortion = { show, redraw, version: view.version };
   let box = title.querySelector('.' + CLS) as (HTMLElement & { __redraw?: () => void }) | null;
   if (!show) {
     if (box) box.remove();
@@ -50,6 +50,13 @@ export function drawPortionSwitch(w: CookingWindow, show: boolean, redraw: () =>
     if (opt.textContent !== labels[i]) opt.textContent = labels[i];
     opt.classList.toggle(CLS + '-on', view.portion === (i === 1));
   }
+}
+
+// Draws the list again when a setData came after the last draw: new labels (a language switch), or labels that the
+// last draw did not have yet.
+export function refreshPortionSwitch(w: CookingWindow): void {
+  const last = w.__projectCookPortion;
+  if (last && last.version !== view.version) last.redraw();
 }
 
 // One observer for each frame (a new open is a new frame). The add of the switch makes one more record, which finds

@@ -6,6 +6,7 @@ import url from 'node:url';
 import { JSDOM } from 'jsdom';
 import { beforeEach, test, type TestContext } from 'vitest';
 import { view } from '../../src/Web/page/core';
+import { refreshPortionSwitch } from '../../src/Web/page/portionSwitch';
 import { installPreview } from '../../src/Web/page/preview';
 
 type Win = any;
@@ -127,4 +128,27 @@ test.skipIf(!gameFilesExist)('portion switch: the language message adds no switc
   w.renderPredictionList([{ ...ENTRY, Preview: undefined, PreviewPortion: undefined }]);
   await localizationMsg(w);
   assert.equal(options(w).length, 0);
+});
+
+test.skipIf(!gameFilesExist)('portion switch: new labels of setData after a render redraw the switch', async (t) => {
+  const w = await cookingWindow(t);
+  w.renderPredictionList([ENTRY]);
+  view.data = { ...view.data, portion: ['Celé jídlo', 'Na porci'] };
+  view.version++;
+  refreshPortionSwitch(w);
+  assert.deepEqual(options(w).map((o) => o.textContent), ['Celé jídlo', 'Na porci']);
+});
+
+test.skipIf(!gameFilesExist)('portion switch: labels that come after a render show the switch', async (t) => {
+  view.data = { tips: {}, tiers: {}, features: ['portionSwitch'] };
+  const w = await cookingWindow(t);
+  w.renderPredictionList([ENTRY]);
+  assert.equal(options(w).length, 0);
+  view.data = { ...view.data, portion: ['Whole dish', 'Per portion'] };
+  view.version++;
+  refreshPortionSwitch(w);
+  assert.deepEqual(options(w).map((o) => o.textContent), ['Whole dish', 'Per portion']);
+  const drawn = options(w)[0];
+  refreshPortionSwitch(w);
+  assert.equal(options(w)[0], drawn, 'no redraw while the data version stays');
 });

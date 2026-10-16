@@ -79,6 +79,20 @@ test.skipIf(!gameFilesExist)('pieces: with the switch off, a drop on a piece is 
   assert.equal(drop(w, 0, 0, '20'), false);
 });
 
+test.skipIf(!gameFilesExist)('pieces: in hot pot mode, a drop on a piece is refused', async (t) => {
+  const w = await cookingWindow(t, [piece(10, 0, 0, 1)], [piece(20, 0, 0, 2)]);
+  w.State.hotPotMode = true;
+  assert.equal(drop(w, 0, 0, '20'), false);
+});
+
+test.skipIf(!gameFilesExist)('pieces: an error of the merge check keeps the game rule and is recorded', async (t) => {
+  const w = await cookingWindow(t, [piece(10, 0, 0, 1)], [piece(20, 0, 0, 2)]);
+  w.pot.getConfig = () => { throw new Error('boom'); };
+  assert.equal(drop(w, 0, 0, '20'), false);
+  assert.equal(drop(w, 1, 0, '20'), true);
+  assert.ok(Object.keys(w.__cookingErrors || {}).some((k) => k.indexOf('pieces: ') === 0));
+});
+
 test.skipIf(!gameFilesExist)('pieces: a second install keeps one wrapper', async (t) => {
   const w = await cookingWindow(t, [piece(10, 0, 0, 1)], [piece(20, 0, 0, 2)]);
   const wrapped = w.pot.checkValidity;
