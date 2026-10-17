@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using SlShared.Json;
@@ -74,6 +75,24 @@ namespace ProjectCook
             foreach (var row in Rows(Indexed(items)))
                 foreach (var item in row.Items) order.Add((int)item.Id);
             return order;
+        }
+
+        // The count of the recipe ids that each row takes, top row first, or null when the ids do not split by row.
+        // built(row, offset, k) is the entry count of the game's entry builder for the items of that row and the k ids
+        // from offset. The builder skips an id that does not match, so a row takes the longest run of the next ids
+        // that the builder takes all of. Null when ids are left after the last row, or when no row takes an id.
+        public static int[] SplitIds(int rowCount, int idCount, Func<int, int, int, int> built)
+        {
+            var counts = new int[rowCount];
+            int offset = 0;
+            for (int row = 0; row < rowCount; row++)
+            {
+                int k = 0;
+                while (offset + k < idCount && built(row, offset, k + 1) == k + 1) k++;
+                counts[row] = k;
+                offset += k;
+            }
+            return offset == 0 || offset != idCount ? null : counts;
         }
 
         // The items with the list index in place of the id.

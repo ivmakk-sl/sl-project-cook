@@ -174,3 +174,60 @@ public class RowSplitWithSeasoningsTests
         Assert.Equal(new Dictionary<int, int> { [2101] = 1 }, result);
     }
 }
+
+public class RowSplitSplitIdsTests
+{
+    // A fake of the game's entry builder: each row takes each ID that its multiset still holds and skips the others,
+    // as the builder skips a recipe that does not match the items left.
+    private static Func<int, int, int, int> Builder(int[] ids, params int[][] rows) => (row, offset, k) =>
+    {
+        var left = rows[row].ToList();
+        int count = 0;
+        for (int i = offset; i < offset + k; i++)
+            if (left.Remove(ids[i])) count++;
+        return count;
+    };
+
+    [Fact]
+    public void SplitIds_EachRowTakesTheNextIds()
+    {
+        int[] ids = { 10, 11, 20 };
+        Assert.Equal(new[] { 2, 1 }, RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new[] { 10, 11 }, new[] { 20 })));
+    }
+
+    [Fact]
+    public void SplitIds_ARowWithNoIdTakesNone()
+    {
+        int[] ids = { 20 };
+        Assert.Equal(new[] { 0, 1 }, RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new int[0], new[] { 20 })));
+    }
+
+    [Fact]
+    public void SplitIds_ARejectedIdEndsTheRowBeforeIt()
+    {
+        // The top row takes 10, rejects 20, and would take 11 again: it stops at 10, so 20 and 11 are left.
+        int[] ids = { 10, 20, 11 };
+        Assert.Null(RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new[] { 10, 11 }, new[] { 20 })));
+        Assert.Equal(new[] { 1, 2 }, RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new[] { 10, 11 }, new[] { 20, 11 })));
+    }
+
+    [Fact]
+    public void SplitIds_IdsLeftAfterTheLastRowGiveNull()
+    {
+        int[] ids = { 10, 30 };
+        Assert.Null(RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new[] { 10 }, new[] { 20 })));
+    }
+
+    [Fact]
+    public void SplitIds_NoRowTakesAnIdGivesNull()
+    {
+        int[] ids = { 30 };
+        Assert.Null(RowSplitLogic.SplitIds(2, ids.Length, Builder(ids, new[] { 10 }, new[] { 20 })));
+    }
+
+    [Fact]
+    public void SplitIds_NoIdGivesNull()
+    {
+        Assert.Null(RowSplitLogic.SplitIds(2, 0, Builder(new int[0], new[] { 10 }, new[] { 20 })));
+    }
+}
