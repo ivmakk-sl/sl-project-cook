@@ -15,6 +15,16 @@ import vm from 'node:vm';
 import { JSDOM } from 'jsdom';
 import { test, type TestContext } from 'vitest';
 
+// The tooltip library draws the block of a mod on the next render tick, not inside the call of the page, so a test
+// that reads the tooltip waits for that tick first.
+function drawn(w: Win): Promise<void> {
+  return new Promise((resolve) => {
+    const settle = () => w.setTimeout(() => resolve(), 0);
+    if (typeof w.requestAnimationFrame === 'function') w.requestAnimationFrame(settle);
+    else settle();
+  });
+}
+
 // The jsdom windows carry the game's page globals (renderPredictionList, pot, showItemTip) and the root page
 // stub carries the page script's interface, which have no types.
 type Win = any;
@@ -26,13 +36,14 @@ const GAME_DIR = process.env.SL_GAME_DIR ||
 const COOKING_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'Cooking', 'Cooking.html');
 const BAG_JS = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'webui-bag.js');
 const STORAGE_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'BackpackUI', 'BackpackUI.html');
+const RAT_CAGE_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'RatCage', 'RatCage.html');
 // The bundle that Vite builds from src/Web/page/ (npm test builds it first).
 const PAGE_JS_PATH = path.join(HERE, '..', '..', 'obj', 'page', 'page.js');
 // The source file with the FEATURES table, in the quotes that the static test parses.
 const FEATURES_PATH = path.join(HERE, '..', '..', 'src', 'Web', 'page', 'core.ts');
 const DATA_JSON_PATH = path.join(HERE, '..', 'fixtures', 'data.json');
 
-const gameFilesExist = fs.existsSync(COOKING_HTML) && fs.existsSync(BAG_JS) && fs.existsSync(STORAGE_HTML);
+const gameFilesExist = fs.existsSync(COOKING_HTML) && fs.existsSync(BAG_JS) && fs.existsSync(STORAGE_HTML) && fs.existsSync(RAT_CAGE_HTML);
 
 if (!gameFilesExist) {
   test.skip(`page.js against the game page: game files not found under SL_GAME_DIR (${GAME_DIR}); set SL_GAME_DIR to the game folder`, () => {});
@@ -42,7 +53,8 @@ if (!gameFilesExist) {
   const cookingHtml = fs.readFileSync(COOKING_HTML, 'utf8');
   const bagJs = fs.readFileSync(BAG_JS, 'utf8');
   const storageHtml = fs.readFileSync(STORAGE_HTML, 'utf8');
-  const haystack = cookingHtml + '\n' + bagJs + '\n' + storageHtml;
+  const ratCageHtml = fs.readFileSync(RAT_CAGE_HTML, 'utf8');
+  const haystack = cookingHtml + '\n' + bagJs + '\n' + storageHtml + '\n' + ratCageHtml;
 
   // Pulls the page part names out of the FEATURES table of the page source, so this test never copies the names.
   function featureNames(): string[] {
@@ -64,7 +76,7 @@ if (!gameFilesExist) {
 
   test('static: every FEATURES part name of page.js exists in the game files', () => {
     for (const name of featureNames()) {
-      assert.ok(partIsPresent(name), `page part "${name}" not found in Cooking.html, webui-bag.js, or BackpackUI.html`);
+      assert.ok(partIsPresent(name), `page part "${name}" not found in Cooking.html, webui-bag.js, BackpackUI.html, or RatCage.html`);
     }
   });
 
@@ -147,6 +159,8 @@ if (!gameFilesExist) {
     assert.match(result, /^(installed|already installed)/, `setData result was "${result}"`);
 
     cookingWindow.showItemTip({ name: 'Test', configId: 556, canCook: true });
+
+    await drawn(cookingWindow);
     const tip = cookingWindow.document.getElementById('recipeTooltip');
     assert.match(tip.textContent, /Low "raw" \\ tier/);
 
@@ -203,6 +217,44 @@ if (!gameFilesExist) {
     assert.ok(storage.document.getElementById('projectcook-style'), 'the storage window has no style node');
   });
 
+  async function loadRatCageWindow(t: TestContext): Promise<Win> {
+    const dom = new JSDOM(ratCageHtml, {
+      url: url.pathToFileURL(RAT_CAGE_HTML).href,
+      runScripts: 'dangerously',
+      resources: 'usable',
+      pretendToBeVisual: true
+    });
+    t.onTestFinished(() => dom.window.close());
+    await new Promise<void>((resolve, reject) => {
+      dom.window.addEventListener('load', () => resolve());
+      setTimeout(() => reject(new Error('RatCage.html did not fire load within 5s')), 5000);
+    });
+    return dom.window;
+  }
+
+  test('interface: a pass with only a Rat Cage window answers its own result and draws the food sort', async (t) => {
+    const ratCage = await loadRatCageWindow(t);
+    ratCage.backpack.setOwnerId(42);
+    ratCage.backpack.refresh([{ itemId: 7, x: 0, y: 0, w: 1, h: 1, name: 'Test', configId: 555 }]);
+    const root = rootWithoutFrame();
+    withFrames(root, [ratCage]);
+
+    assert.match(root.__projectCook.setSortData(SORT), /^ratcage: installed/);
+    assert.match(root.__projectCook.apply(), /^ratcage: already installed/);
+    assert.ok(ratCage.document.getElementById('projectcook-style'), 'the Rat Cage window has no style node');
+    assert.ok(ratCage.document.querySelector('.projectcook-sort-line .projectcook-sort'), 'no dropdown');
+    assert.deepEqual(ratCage.__cookingErrors || {}, {}, 'page.js reported an error');
+  });
+
+  test('interface: a pass with the Cooking frame and a Rat Cage window answers the cooking result first', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const root = rootWithoutFrame();
+    withFrames(root, [await loadRatCageWindow(t), cookingWindow]);
+    const result = root.__projectCook.apply();
+    assert.match(result, /^installed/);
+    assert.match(result, /; ratcage: installed/);
+  });
+
   test('interface: an error of the storage pass goes to the errors part of the result, which C# logs', async (t) => {
     const root = rootWithoutFrame();
     const storage = await storageWindow(t);
@@ -255,6 +307,7 @@ if (!gameFilesExist) {
     withFrame(root, cookingWindow);
     root.__projectCook.apply();
     cookingWindow.showItemTip({ name: 'Test', configId: 555, canCook: true });
+    await drawn(cookingWindow);
     assert.match(cookingWindow.document.getElementById('recipeTooltip').textContent, /High-tier/);
   });
 
@@ -352,10 +405,59 @@ if (!gameFilesExist) {
     root.__projectCook.setData({ tips: { 557: 'T1|Tier|High-tier\nSatiety: +8\nHealth: -2' }, tiers: {} });
 
     cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+
+    await drawn(cookingWindow);
     const tip = cookingWindow.document.getElementById('recipeTooltip');
     assert.ok(tip.querySelector('.projectcook-tier-1'), 'the tier name has no projectcook-tier-1');
     assert.equal(tip.querySelector('.projectcook-value-pos').textContent, '+8');
     assert.equal(tip.querySelector('.projectcook-value-neg').textContent, '-2');
+  });
+
+  test('the ingredient tooltip of the mod alone sits in one block below the lines of the game', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'T1|Tier|High-tier\nSatiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    const tip = cookingWindow.document.getElementById('recipeTooltip');
+    const blocks = tip.querySelectorAll('[data-sl-tip]');
+    assert.equal(blocks.length, 1, 'one block of the mod');
+    assert.equal(blocks[0].getAttribute('data-sl-tip'), 'projectcook-ingredient');
+    assert.equal(blocks[0].className, 'projectcook-tip');
+    assert.equal(blocks[0], tip.lastElementChild, 'below the lines of the game');
+    assert.match(blocks[0].textContent, /High-tier/);
+  });
+
+  test('a second hover draws the block once and does not stack its lines', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'Satiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    const tip = cookingWindow.document.getElementById('recipeTooltip');
+    assert.equal(tip.querySelectorAll('[data-sl-tip="projectcook-ingredient"]').length, 1);
+    assert.equal(tip.querySelectorAll('.projectcook-value-pos').length, 1);
+  });
+
+  test('the mod registers one block only, so the dish card tooltip keeps its own drawing', async (t) => {
+    const cookingWindow = await loadCookingWindow(t);
+    const { root } = installPageJs(cookingWindow);
+    root.__projectCook.setData({ tips: { 557: 'Satiety: +8' }, tiers: {} });
+
+    cookingWindow.showItemTip({ name: 'Test', configId: 557, canCook: true });
+    await drawn(cookingWindow);
+
+    // The registry lives in the frame, so its array is of that realm: compare the text, not the array.
+    const ids = cookingWindow.__slTipLines.blocks.map((b: { id: string }) => b.id).join(',');
+    assert.equal(ids, 'projectcook-ingredient', 'the item tooltip only');
+    // The dish card tooltip of the mod is drawn by cardTip.ts and is no block of the library.
+    assert.equal(cookingWindow.document.querySelectorAll('.projectcook-card-tip [data-sl-tip]').length, 0);
   });
 
   test('css: a High bag item gets the bag tier classes that the badge rule selects', async (t) => {

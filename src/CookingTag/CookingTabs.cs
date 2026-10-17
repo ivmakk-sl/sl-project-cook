@@ -65,7 +65,7 @@ namespace ProjectCook
             if (tagIds == null) return false;
             var ids = new List<int>();
             for (var i = 0; i < tagIds.Count; i++) ids.Add(tagIds[i]);
-            return CookingTagLogic.LinksToCooking(ids);
+            return CookingTagLogic.LinksToCooking(ids, TagRow.Disabled);
         }
     }
 }

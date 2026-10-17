@@ -1,0 +1,5 @@
+# Library copy of shared/number-badge. Do not edit it: edit shared/number-badge/, then run tools/shared-sync.ps1 -Mod ProjectCook -Lib number-badge.
+name=number-badge
+version=1.0.1
+sha256 web/numberBadge.css 7b533b63f9f2d0a64773ff5736f30af49f54b6b09d3f7f947b29ecabd6425873
+sha256 web/numberBadge.ts c7cec870bc39edda38b7240b1ca70bb7f32bd20d05514e1b02b8338cc9fb24a3

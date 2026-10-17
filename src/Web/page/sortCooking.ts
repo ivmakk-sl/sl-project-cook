@@ -6,13 +6,34 @@
 // onItemRendered of the grid, so each draw of the game keeps them. The workbench (the pot grid) shows the numbers of
 // the choice on its cells too, so the player can compare them with the container tab; its cells keep their places
 // and are not dimmed. The sort data of the container tab also holds the numbers of the workbench items.
+// The Rat Cage window has the same shape (design D12): its Food Storage grid (the frame global foodBag) takes the
+// place of the workbench, the dropdown goes on a line of the mod under the Leave buttons, Satiety orders by the cage
+// satiety, and it has no dim of uncookable items.
 import { addError, view } from './core';
+import { dimOn, isUncookable, takesFuel } from './dimUncookable';
 import type { SortedGrid } from './dropFilter';
-import { CHOICE, order, pack } from './sortOrder';
+import { CHOICE, column, order, pack } from './sortOrder';
 import { drawCells, drawDropdown, removeDropdown } from './sortUi';
-import type { BagGrid, BagItemData, CookingWindow } from './types';
+import type { BagGrid, BagItemData, GridSortWindow } from './types';
 
-type State = NonNullable<CookingWindow['__projectCookCookSort']>;
+type State = NonNullable<GridSortWindow['__projectCookCookSort']>;
+
+// The class of the line of the dropdown in the Rat Cage window.
+const LINE = 'projectcook-sort-line';
+
+function isRatCage(w: GridSortWindow): boolean {
+  return !w.pot && !!w.foodBag;
+}
+
+// The grid that shows the numbers in place: the workbench, or the Food Storage grid of the cage.
+function secondGrid(w: GridSortWindow): BagGrid | undefined {
+  return w.pot || w.foodBag;
+}
+
+// The column of the numbers of the choice in this window.
+function choiceOf(w: GridSortWindow): number {
+  return column(view.choice, isRatCage(w));
+}
 
 function sortOf(grid: BagGrid) {
   const sort = view.sort;
@@ -21,7 +42,7 @@ function sortOf(grid: BagGrid) {
 
 // Writes the places of the choice into the items of the grid (the real places with Default, with no sort data, or
 // when the items do not fit), and draws the grid again when a place or the look changed.
-function place(w: CookingWindow, state: State): void {
+function place(w: GridSortWindow, state: State): void {
   const grid = w.backpack;
   const items = grid.getItems();
   if (state.items !== items) {
@@ -29,12 +50,13 @@ function place(w: CookingWindow, state: State): void {
     state.real = new Map(items.map((it) => [String(it.id), [it.x || 0, it.y || 0] as [number, number]]));
   }
   const sort = sortOf(grid);
+  const choice = choiceOf(w);
   let places = state.real;
   let dim = new Set<number | string>();
   state.sorted = false;
-  if (sort && view.choice !== CHOICE.default) {
+  if (sort && choice !== CHOICE.default) {
     const gridItems = items.map((it) => ({ id: String(it.id), w: it.w || 1, h: it.h || 1 }));
-    const r = order(gridItems, sort, view.choice);
+    const r = order(gridItems, sort, choice);
     const byId = new Map(gridItems.map((it) => [it.id as number | string, it]));
     const cfg = grid.getConfig();
     const packed = pack(r.ids.map((id) => byId.get(id)!), cfg.cols, cfg.rows);
@@ -52,36 +74,44 @@ function place(w: CookingWindow, state: State): void {
     if (it.y !== p[1]) { it.y = p[1]; changed = true; }
   }
   state.dim = dim;
-  const look = (sort ? sort.owner : '') + '|' + view.choice + '|' + [...dim].join(',');
+  const look = (sort ? sort.owner : '') + '|' + choice + '|' + [...dim].join(',') + '|' + dimOn();
   // New sort data can change a number with the same order, so it draws the badges of both grids again.
   const fresh = state.sortSeen !== view.sort;
   state.sortSeen = view.sort;
   if (changed || fresh || look !== state.drawn) {
     state.drawn = look;
     grid.renderItems();
-    if (w.pot) w.pot.renderItems();
+    const second = secondGrid(w);
+    if (second) second.renderItems();
   }
 }
 
-function install(w: CookingWindow): State {
+function install(w: GridSortWindow): State {
   const state: State = { items: null, real: new Map(), dim: new Set(), drawn: '', sorted: false, sortSeen: undefined };
   w.__projectCookCookSort = state;
   const grid = w.backpack;
+  // The Rat Cage window has its Food and Rat tags at the top left of a cell, so its badges go to the top right.
+  if (isRatCage(w)) w.document.documentElement.classList.add('projectcook-ratcage');
 
   const cfg = grid.getConfig();
   const rendered = cfg.onItemRendered;
   cfg.onItemRendered = function (el: HTMLElement, itemData: BagItemData) {
     if (rendered) rendered(el, itemData);
-    try { drawCells(w.document, [el], [String(itemData.id)], sortOf(grid), view.choice, state.dim); } catch (e) { addError(w, 'cookingSort badge: ' + e); }
+    try {
+      const id = String(itemData.id);
+      const always = !isRatCage(w) && dimOn() && isUncookable(itemData, takesFuel(w)) ? new Set<number | string>([id]) : undefined;
+      drawCells(w.document, [el], [id], sortOf(grid), choiceOf(w), state.dim, undefined, always);
+    } catch (e) { addError(w, 'cookingSort badge: ' + e); }
   };
 
-  if (w.pot) {
-    const potCfg = w.pot.getConfig();
+  const second = secondGrid(w);
+  if (second) {
+    const potCfg = second.getConfig();
     const potRendered = potCfg.onItemRendered;
     const noDim = new Set<number | string>();
     potCfg.onItemRendered = function (el: HTMLElement, itemData: BagItemData) {
       if (potRendered) potRendered(el, itemData);
-      try { drawCells(w.document, [el], [String(itemData.id)], sortOf(grid), view.choice, noDim); } catch (e) { addError(w, 'cookingSort pot badge: ' + e); }
+      try { drawCells(w.document, [el], [String(itemData.id)], sortOf(grid), choiceOf(w), noDim); } catch (e) { addError(w, 'cookingSort pot badge: ' + e); }
     };
   }
 
@@ -113,7 +143,7 @@ function install(w: CookingWindow): State {
   const update = grid.updateItemPosition;
   grid.updateItemPosition = function (itemId: string, containerId: string, col: number, row: number) {
     update.call(grid, itemId, containerId, col, row);
-    if (sortOf(grid) && view.choice !== CHOICE.default) {
+    if (sortOf(grid) && choiceOf(w) !== CHOICE.default) {
       w.setTimeout(() => {
         try {
           state.drawn = '';
@@ -125,9 +155,25 @@ function install(w: CookingWindow): State {
   return state;
 }
 
+// The toolbar of the dropdown: the toolbar of the container grid in the cooking window, and in the Rat Cage window
+// a line of the mod right after the Leave All and Leave by Type buttons (.fill-row), made when it is missing.
+function toolbarOf(w: GridSortWindow): Element | null {
+  const doc = w.document;
+  if (!isRatCage(w)) return doc.querySelector('.bag-toolbar');
+  const row = doc.querySelector('.fill-row');
+  if (!row) return null;
+  let line = row.nextElementSibling;
+  if (!line || !line.classList.contains(LINE)) {
+    line = doc.createElement('div');
+    line.className = LINE;
+    row.after(line);
+  }
+  return line;
+}
+
 // The dropdown in the toolbar of the container grid, for the owner of the open tab.
-function drawToolbar(w: CookingWindow): void {
-  const toolbar = w.document.querySelector('.bag-toolbar');
+function drawToolbar(w: GridSortWindow): void {
+  const toolbar = toolbarOf(w);
   const sort = sortOf(w.backpack);
   if (!sort || !toolbar) {
     removeDropdown(toolbar);
@@ -139,15 +185,15 @@ function drawToolbar(w: CookingWindow): void {
   });
 }
 
-// One pass: the wrappers once, the places, and the dropdown.
-export function applyCookingSort(w: CookingWindow): void {
+// One pass: the wrappers once, the places, and the dropdown. For the cooking window and the Rat Cage window.
+export function applyCookingSort(w: GridSortWindow): void {
   const state = w.__projectCookCookSort || install(w);
   place(w, state);
   drawToolbar(w);
 }
 
 // The container tab of the frame for the drop filter while it shows the packed places, else null.
-export function cookingGrid(w: CookingWindow): SortedGrid | null {
+export function cookingGrid(w: GridSortWindow): SortedGrid | null {
   const state = w.__projectCookCookSort;
   const grid = w.backpack;
   if (!state || !state.sorted || !grid || !sortOf(grid)) return null;
@@ -161,7 +207,8 @@ export function cookingGrid(w: CookingWindow): SortedGrid | null {
       return { id: String(it.id), x: p[0], y: p[1], w: it.w || 1, h: it.h || 1 };
     }),
     sizeOf: (id) => {
-      const it = w.pot && w.pot.getItems().find((i) => String(i.id) === id);
+      const second = secondGrid(w);
+      const it = second && second.getItems().find((i) => String(i.id) === id);
       return it ? [it.w || 1, it.h || 1] : null;
     },
   };

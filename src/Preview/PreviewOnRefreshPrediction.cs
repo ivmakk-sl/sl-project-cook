@@ -21,8 +21,10 @@ namespace ProjectCook
                 PageTick.Request();
                 var words = GameWords.Current();
 
+                long readStart = Timing.Start();
                 string json = state.PredictionListJson.Value;
                 var entries = PreviewLogic.ReadEntries(json);
+                double readMs = Timing.Ms(readStart);
                 if (entries.Count == 0)
                 {
                     // A list with objects but no readable entry means that a game update changed the format.
@@ -34,10 +36,18 @@ namespace ProjectCook
                     return;
                 }
 
-                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, words, out var tips);
+                long buildStart = Timing.Start();
+                // The row split Postfix runs first and rebuilds the list from its plan, one entry for each dish.
+                var plan = RowPlanner.Current;
+                var dishes = plan != null && plan.Dishes.Count == entries.Count ? plan.Dishes : null;
+                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, dishes, words, out var tips, out var portionTexts);
                 if (previews.Count == 0) return;
 
-                state.PredictionListJson.Value = PreviewLogic.AddPreviews(json, previews, tips);
+                string withPreviews = PreviewLogic.AddPreviews(json, previews, tips, portionTexts);
+                double buildMs = Timing.Ms(buildStart);
+                state.PredictionListJson.Value = withPreviews;
+                if (Plugin.Verbose.Value)
+                    Plugin.Log.LogDebug(FormattableString.Invariant($"timing: prediction read {readMs:0.00} ms, build {buildMs:0.00} ms, json {Timing.Kb(json):0.0} KB, entries {entries.Count}"));
             }
             catch (Exception e)
             {

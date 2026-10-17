@@ -81,3 +81,11 @@ test('two sorted grids: a move between them gets a free cell of the target, a mo
   const insideBag = { type: 'DRAG_ITEM', sourcePageId: 'Backpack', data: { itemId: 11, srcOwnerId: 5, dstOwnerId: 5, x: 1, y: 0 } };
   assert.equal(filterMove(insideBag, [bag, grid()]), null);
 });
+
+test('Rat Cage window: a FOOD_MOVE inside the sorted tab is dropped, a move from the Food Storage grid gets a free cell', () => {
+  assert.equal(filterMove({ type: 'FOOD_MOVE', sourcePageId: 'RatCage', data: { itemId: 1, fromOwnerId: 42, toOwnerId: 42, x: 2, y: 1 } }, [grid()]), null);
+  const out = filterMove({ type: 'FOOD_MOVE', sourcePageId: 'RatCage', data: { itemId: 7, fromOwnerId: 3, toOwnerId: 42, x: 2, y: 1 } }, [grid()]) as any;
+  assert.deepEqual([out.data.x, out.data.y], [0, 1]);
+  const toCage = { type: 'FOOD_MOVE', sourcePageId: 'RatCage', data: { itemId: 1, fromOwnerId: 42, toOwnerId: 3, x: 0, y: 0 } };
+  assert.equal(filterMove(toCage, [grid()]), toCage);
+});

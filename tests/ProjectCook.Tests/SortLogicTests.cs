@@ -54,15 +54,15 @@ public class SortLogicTests
     [InlineData(0.04f, "0.1d")]
     public void DaysText(float days, string expected)
     {
-        Assert.Equal(expected, SortLogic.DaysText(days));
+        Assert.Equal(expected, SortLogic.DaysText(days, "{days}d"));
     }
 
     [Fact]
     public void DaysText_TheDayUnitOfTheLanguage()
     {
-        Assert.Equal("3天", SortLogic.DaysText(3.9f, "天"));
-        Assert.Equal("0.5天", SortLogic.DaysText(0.5f, "天"));
-        Assert.Equal("3d", SortLogic.DaysText(3.9f, null));
+        Assert.Equal("3天", SortLogic.DaysText(3.9f, "{days}天"));
+        Assert.Equal("0.5天", SortLogic.DaysText(0.5f, "{days}天"));
+        Assert.Equal("3d", SortLogic.DaysText(3.9f, "{days}d"));
     }
 
     [Fact]
@@ -86,6 +86,44 @@ public class SortLogicTests
     }
 }
 
+// The satiety that the Rat Cage gets from one item (Furniture.GetRatCageFoodSatiety of game 1.1.18293).
+public class CageSatietyTests
+{
+    [Theory]
+    // Watermelon: raw satiety 60, one use
+    [InlineData(null, 60f, 1, 0, 1, 60)]
+    // Hardtack with 2 of 10 uses left: 20 x 2
+    [InlineData(null, 20f, 2, 10, 10, 40)]
+    // A cooked dish: its own satiety, not the raw one, 32.4 x 3 = 97.2
+    [InlineData(32.4f, 5f, 3, 3, 3, 97)]
+    // No uses count: the effective max, the item's own max first
+    [InlineData(null, 10f, 0, 3, 5, 30)]
+    [InlineData(null, 10f, 0, 0, 5, 50)]
+    [InlineData(null, 10f, 0, 0, 0, 10)]
+    // Half away from zero: 2.5 x 1
+    [InlineData(null, 2.5f, 1, 1, 1, 3)]
+    public void SatietyTimesTheUsesLeft(float? instanceFirst, float valueDisplay1, int useTimes, int maxUseTimes, int cfgUses, int expected)
+    {
+        var instance = instanceFirst.HasValue ? new[] { instanceFirst.Value, 1f, 1f, 1f, 1f } : null;
+        Assert.Equal(expected, SortLogic.CageSatiety(instance, valueDisplay1, useTimes, maxUseTimes, cfgUses));
+    }
+
+    [Fact]
+    public void NoSatiety_HasNoNumber()
+    {
+        // a tool, an item with a negative satiety, and a dish whose own satiety is 0 (the raw one does not count)
+        Assert.Null(SortLogic.CageSatiety(null, 0f, 1, 1, 1));
+        Assert.Null(SortLogic.CageSatiety(null, -5f, 1, 1, 1));
+        Assert.Null(SortLogic.CageSatiety(new[] { 0f, 3f }, 20f, 1, 1, 1));
+    }
+
+    [Fact]
+    public void AnEmptyInstanceArray_ReadsTheRawSatiety()
+    {
+        Assert.Equal(35, SortLogic.CageSatiety(new float[0], 35f, 1, 1, 1));
+    }
+}
+
 public class SortDataJsonTests
 {
     private static readonly SortLogic.Words Words = new SortLogic.Words
@@ -93,6 +131,7 @@ public class SortDataJsonTests
         Choices = new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date" },
         Expired = "Expired",
         Sort = "Sort",
+        DaysLeft = "{days}d",
     };
 
     [Fact]
@@ -106,6 +145,7 @@ public class SortDataJsonTests
                 Stats = new int?[] { 14, -3, null, 2 },
                 Trade = 40,
                 Days = SortLogic.DaysLeft.Spoils(0.5f),
+                Cage = 42,
             }),
             new KeyValuePair<long, SortLogic.Numbers>(7, new SortLogic.Numbers
             {
@@ -125,7 +165,7 @@ public class SortDataJsonTests
         var json = PageJson.SortDataJson(4294986608, items, Words);
         Assert.Equal(
             "{\"owner\":\"4294986608\",\"words\":{\"choices\":[\"Default\",\"Satiety\",\"Morale\",\"Stamina\",\"Life\",\"Trade value\",\"Expiration Date\"],\"expired\":\"Expired\",\"sort\":\"Sort\"},"
-            + "\"items\":{\"8589969913\":{\"n\":[14,-3,null,2,40,0.5],\"d\":\"0.5d\",\"c\":2109},\"7\":{\"n\":[null,null,null,null,null,-100000],\"d\":\"Expired\",\"c\":556},\"8\":{\"n\":[5,null,null,null,3,null],\"d\":null,\"c\":556}}}",
+            + "\"items\":{\"8589969913\":{\"n\":[14,-3,null,2,40,0.5,42],\"d\":\"0.5d\",\"c\":2109},\"7\":{\"n\":[null,null,null,null,null,-100000,null],\"d\":\"Expired\",\"c\":556},\"8\":{\"n\":[5,null,null,null,3,null,null],\"d\":null,\"c\":556}}}",
             json);
     }
 
@@ -136,7 +176,7 @@ public class SortDataJsonTests
         {
             new KeyValuePair<long, SortLogic.Numbers>(1, new SortLogic.Numbers { ConfigId = 5, Stats = new int?[4], Days = SortLogic.DaysLeft.Spoils(12.4f) }),
         };
-        var chinese = new SortLogic.Words { Choices = Words.Choices, Expired = "已过期", Sort = "排序", DayUnit = "天" };
+        var chinese = new SortLogic.Words { Choices = Words.Choices, Expired = "已过期", Sort = "排序", DaysLeft = "{days}天" };
         Assert.Contains("\"d\":\"12天\"", PageJson.SortDataJson(1, items, chinese));
     }
 
@@ -152,37 +192,42 @@ public class SortDataJsonTests
 public class SortWordsTests
 {
     [Fact]
-    public void English_GameWordsForTheStatsDefaultExpirationAndExpired()
+    public void English_TheStatsDefaultExpirationExpiredAndTheDaysLeft()
     {
-        var w = SortLogic.WordsFrom(PreviewLogic.EnglishWords, "Default", "Expired", "Expiration Date", false);
+        var w = SortLogic.WordsFrom(TestTexts.English(), TestTexts.EnglishSet());
         Assert.Equal(new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date" }, w.Choices);
         Assert.Equal("Expired", w.Expired);
+        Assert.Equal("Rotten", w.Rotten);
         Assert.Equal("Sort", w.Sort);
-        Assert.Equal("d", w.DayUnit);
+        Assert.Equal("{days}d", w.DaysLeft);
     }
 
     [Fact]
-    public void Chinese_GameWordForExpiration_ModWordForSort()
+    public void Chinese_TheModTextsOfTheLanguage()
     {
-        var w = SortLogic.WordsFrom(WordsTests.Chinese(), "默认", "已过期", "保质期", true);
+        var w = SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.ChineseSet());
         Assert.Equal("默认", w.Choices[0]);
+        Assert.Equal("饱腹", w.Choices[1]);
         Assert.Equal("保质期", w.Choices[6]);
         Assert.Equal("已过期", w.Expired);
+        Assert.Equal("已腐败", w.Rotten);
         Assert.Equal("排序", w.Sort);
-        Assert.Equal("天", w.DayUnit);
+        Assert.Equal("{days}天", w.DaysLeft);
     }
 
     [Fact]
-    public void NoGameText_GivesTheModWord()
+    public void TheGameTextsOfTheTextKeysWin()
     {
-        var w = SortLogic.WordsFrom(PreviewLogic.EnglishWords, "", null, "", false);
-        Assert.Equal("Default", w.Choices[0]);
-        Assert.Equal("Expiration Date", w.Choices[6]);
-        Assert.Equal("Expired", w.Expired);
-        var zh = SortLogic.WordsFrom(WordsTests.Chinese(), null, "", null, true);
-        Assert.Equal("默认", zh.Choices[0]);
-        Assert.Equal("保质期", zh.Choices[6]);
-        Assert.Equal("已过期", zh.Expired);
+        var game = TestTexts.ChineseGameTexts();
+        game["SR_Web_EventChoice_DefaultTag"] = "默认G";
+        game["UI_BattleBag_6"] = "保质期G";
+        game["UI_ItemTips_2"] = "已过期G";
+        game["SR_Web_Backpack_Rotten"] = "已腐败G";
+        var w = SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.Load().For(0, TestTexts.Game(game)));
+        Assert.Equal("默认G", w.Choices[0]);
+        Assert.Equal("保质期G", w.Choices[6]);
+        Assert.Equal("已过期G", w.Expired);
+        Assert.Equal("已腐败G", w.Rotten);
     }
 }
 

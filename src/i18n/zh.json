@@ -1,0 +1,15 @@
+{
+  "tierLabel": "档次",
+  "tradeLabel": "交易价值",
+  "expLabel": "烹饪熟练度",
+  "portionWhole": "整道菜",
+  "portionOne": "每份",
+  "sortDefault": "默认",
+  "expirationDate": "保质期",
+  "expired": "已过期",
+  "rotten": "已腐败",
+  "sort": "排序",
+  "daysLeft": "{days}天",
+  "cookingTagName": "烹饪",
+  "cookingTagDesc": "这里的食物作为烹饪台的一个页签接入，直接取用；不会改变哪些食物放进来。"
+}

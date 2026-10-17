@@ -4,7 +4,7 @@
        This file names the plugin and adds the assemblies that only this mod uses. -->
   <PropertyGroup>
     <AssemblyName>ProjectCook</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <!-- The page script is built from src/Web/ by Vite (package.json at the mod root) into one file,
@@ -16,8 +16,13 @@
 
   <ItemGroup>
     <PageSource Include="Web\**\*.ts;Web\**\*.js;Web\**\*.css;Web\**\*.svg" />
+    <PageSource Include="Shared\**\web\**" />
     <PageSource Include="$(ModRoot)\package.json;$(ModRoot)\package-lock.json;$(ModRoot)\vite.config.ts" />
     <EmbeddedResource Include="$(PageBundle)" LogicalName="ProjectCook.page.js" />
+    <!-- The head bar icon of the cooking tag (the alpha file of tools/browser-check/svg-to-png.mjs, from COOK_ICON). -->
+    <EmbeddedResource Include="CookingTag\cook-tag.alpha" LogicalName="ProjectCook.cook-tag.alpha" />
+    <!-- The i18n files of the mod texts, read by the i18n library copy. -->
+    <EmbeddedResource Include="i18n\*.json" LogicalName="ProjectCook.i18n.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <Target Name="BuildPage" BeforeTargets="BeforeBuild" Inputs="@(PageSource)" Outputs="$(PageBundle)">

@@ -34,16 +34,21 @@ public class PageJsonTests
         Assert.Equal("{\"tips\":{},\"tiers\":{\"1\":1,\"3\":3}}", json);
     }
 
-    [Theory]
-    [InlineData("Salt", "\"Salt\"")]
-    [InlineData("a\"b", "\"a\\\"b\"")]
-    [InlineData("a\\b", "\"a\\\\b\"")]
-    [InlineData("a\nb\rc\td", "\"a\\nb\\rc\\td\"")]
-    [InlineData("a\u0001b", "\"a\\u0001b\"")]
-    [InlineData("饱腹", "\"饱腹\"")]
-    [InlineData(null, "\"\"")]
-    public void Str_is_a_quoted_JSON_string(string text, string expected)
+    // The labels of the portion switch.
+    [Fact]
+    public void DataJson_writes_the_portion_switch_labels()
     {
-        Assert.Equal(expected, PageJson.Str(text));
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), new[] { "portionSwitch" }, new[] { "Whole dish", "Per \"portion\"" });
+
+        Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"portionSwitch\"],\"portion\":[\"Whole dish\",\"Per \\\"portion\\\"\"]}", json);
+    }
+
+    // The page features that are on in the config.
+    [Fact]
+    public void DataJson_lists_the_page_features()
+    {
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), new[] { "separatePieces", "dimUncookable" });
+
+        Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"separatePieces\",\"dimUncookable\"]}", json);
     }
 }

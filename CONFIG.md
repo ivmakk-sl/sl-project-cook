@@ -10,9 +10,17 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 
 | Setting | Mod default | Values | What it does |
 | --- | --- | --- | --- |
-| `DishPreview` | `true` | `true` / `false` | Shows quality chances, eat values, and portion counts on dish cards. Adds dish card tooltips, ingredient tooltip lines, and ingredient tier badges. |
-| `FoodSort` | `true` | `true` / `false` | Lets you sort food by stat, trade value, or expiration date in the storage window and cooking window. Shows the selected value on items, including cooking workbench ingredients. |
+| `DishPreview` | `true` | `true` / `false` | Shows quality chances, eat values, and portion counts on dish cards. Adds dish card tooltips, the portion switch after the "THIS POT" title, ingredient tooltip lines, and ingredient tier badges. |
+| `FoodSort` | `true` | `true` / `false` | Lets you sort food by stat, trade value, or expiration date in the storage window, the cooking window, and the Rat Cage window. Shows the selected value on items, including cooking workbench ingredients. |
+| `RowSplit` | `true` | `true` / `false` | From cooking level 3, matches recipes for each row of the ingredient grid separately. Row splitting has no effect when all ingredients are in one row. |
+| `SeparatePieces` | `true` | `true` / `false` | Keeps a piece of an ingredient with more than one use (for example Wild Rabbit 1/3) separate when you drop it on free cells in the ingredient grid. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual. |
+| `DimUncookable` | `true` | `true` / `false` | Dims items you cannot cook in each tab of the cooking window: items that are not food, products such as Beef Slices, or ingredients that need cutting first. Fuel stays bright at a stove that burns fuel. |
 | `CookingStorages` | `true` | `true` / `false` | Lets you use ingredients directly from home storages tagged Cooking or Food in the cooking window, from cooking level 2. Adds the Cooking tag to storage settings. |
+| `ColdSortFood` | `true` | `true` / `false` | The Store Chilled Food button of the backpack also fills a fridge tagged Food or Cooking, and last a storage tagged Food or Cooking in the Cold Storage room while the room keeps food cold. A storage tagged Chilled still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Off: the button works as without the mod. |
+
+With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
+
+With `RowSplit` off, the game matches recipes against all the ingredients together. If you restart with this setting off while a cook is in progress, it finishes with its saved recipes. The game assigns ingredients to those recipes using its usual rules, so the dishes may differ from the row previews.
 
 **Before turning off `CookingStorages`:** give any storage whose only tag is Cooking a game tag such as Food. Otherwise, it loses its tag rule and the robot no longer puts items there.
 
@@ -25,9 +33,13 @@ For example, to keep the previews and cooking storage tabs but turn off the food
 DishPreview = true
 FoodSort = false
 CookingStorages = true
+RowSplit = true
+SeparatePieces = true
+DimUncookable = true
+ColdSortFood = true
 ```
 
-The sort choice itself is selected in the window, not in this file. It is shared between the storage window and cooking window and resets to Default when you restart the game.
+The sort choice and the choice of the portion switch are selected in the window, not in this file. The sort choice is shared between the storage window, the cooking window, and the Rat Cage window and resets to Default when you restart the game. The portion switch resets to Whole dish when you restart the game.
 
 ## General
 

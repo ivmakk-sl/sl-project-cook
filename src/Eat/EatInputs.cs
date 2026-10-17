@@ -42,9 +42,15 @@ namespace ProjectCook
                 var attributes = AgentTools.GetAgentComponent<AttributeComponent>(role);
                 if (attributes != null)
                 {
+                    // The Add ratios are float attributes (IsSingle): GetBaseValue_Int logs a game error and gives 0.
+                    var raw = new float[5];
                     factors.BasePermille = new int[5];
-                    for (var i = 0; i < 5; i++) factors.BasePermille[i] = attributes.GetBaseValue_Int(AddRatios[i]);
-                    text.Append("base=").Append(string.Join("/", factors.BasePermille));
+                    for (var i = 0; i < 5; i++)
+                    {
+                        raw[i] = attributes.GetBaseValue_Float(AddRatios[i]);
+                        factors.BasePermille[i] = EatLogic.ToPermille(raw[i]);
+                    }
+                    text.Append("base=").Append(string.Join("/", factors.BasePermille)).Append(" (float ").Append(string.Join("/", Array.ConvertAll(raw, v => v.ToString(System.Globalization.CultureInfo.InvariantCulture)))).Append(')');
                 }
 
                 factors.LifeDelta = DifficultyTools.GetVitalityItemAddDelta();

@@ -15,10 +15,13 @@ namespace ProjectCook
         // Index is PreviewLogic.Fail..Perfect. The value is the qualityTier argument of CookingFormula.
         private static readonly int[] FormulaQualityTier = { 0, 1, 2, 3 };
 
-        public static Dictionary<int, string> Build(State_Web_Cooking state, List<PreviewLogic.Entry> entries, Il2CppDict.Dictionary<int, int> workbenchIds, Il2CppDict.Dictionary<int, int> workbenchTags, PreviewLogic.Words words, out Dictionary<int, string> tips)
+        // dishes: the dishes of the row split, one for each entry, or null for the game's own split. portionTexts: the
+        // lines of one portion of each entry, for the portion switch of the page.
+        public static Dictionary<int, string> Build(State_Web_Cooking state, List<PreviewLogic.Entry> entries, Il2CppDict.Dictionary<int, int> workbenchIds, Il2CppDict.Dictionary<int, int> workbenchTags, List<RowPlanner.Dish> dishes, PreviewLogic.Words words, out Dictionary<int, string> tips, out Dictionary<int, string> portionTexts)
         {
             var result = new Dictionary<int, string>();
             tips = new Dictionary<int, string>();
+            portionTexts = new Dictionary<int, string>();
             var config = ConfigManager.Instance;
 
             var talents = TalentInputs.Read();
@@ -27,13 +30,20 @@ namespace ProjectCook
 
             // The interop layer reads the value tuples of PreMatchRecipes and CalcSplit wrongly, so the mod takes
             // the recipes from the prediction list and builds the ingredient set with the game's own method.
-            foreach (var entry in entries)
+            // The texts are keyed by the index of the entry, so two dishes of one recipe each get their own lines.
+            for (int index = 0; index < entries.Count; index++)
             {
+                var entry = entries[index];
                 int recipeId = entry.RecipeId;
                 var recipe = recipeId == 0 ? null : config.Get_Config_CookingRecipe(recipeId);
                 if (recipe == null) continue;
-                var participated = Reducer_Web_Cooking.BuildParticipatedIngredients(recipe, workbenchIds, workbenchTags);
+                // A dish of the row split uses the items of its row. The game's own split takes each dish from the
+                // items that the dishes before it left.
+                var participated = dishes != null
+                    ? dishes[index].Participated
+                    : Reducer_Web_Cooking.BuildParticipatedIngredients(recipe, workbenchIds, workbenchTags);
                 if (participated == null) continue;
+                string row = dishes != null ? dishes[index].Row.ToString() : "-";
 
                 int bonus = qualityBase + (entry.IsExact ? Setting(config, "CookingQuality_ExactMatchBonus") : 0)
                     + PreviewLogic.TalentQualityBonus(talents.PerfectQuality, talents.TagQuality, entry.IsExact);
@@ -41,6 +51,7 @@ namespace ProjectCook
 
                 int[] productIds = { recipe.FailItemID, recipe.NormalItemID, recipe.GoodItemID, recipe.PerfectItemID };
                 var stats = new int[4][];
+                var rawStats = new double[4][];
                 var baseSatiety = new int[4];
                 var rawSatiety = new float[4];
                 var portions = new int[4];
@@ -72,6 +83,7 @@ namespace ProjectCook
                         };
                         var eatValues = EatLogic.EatValues(dish, eat);
                         stats[level] = Array.ConvertAll(eatValues, v => (int)Math.Round(v));
+                        rawStats[level] = Array.ConvertAll(eatValues, v => (double)v);
                         tradeValues[level] = PreviewLogic.TradeValue(product?.TradeValue ?? 0, talents.Appraisal);
                         exps[level] = PreviewLogic.CookExp(recipe.CookExp, talents.ExpRatio, level);
                     }
@@ -82,10 +94,12 @@ namespace ProjectCook
                 }
 
                 var lines = PreviewLogic.Lines(chances, stats, portions, words);
-                result[recipeId] = string.Join("\n", lines);
+                result[index] = string.Join("\n", lines);
+                var portionLines = PreviewLogic.Lines(chances, PreviewLogic.PerPortion(rawStats, portions), portions, words);
+                portionTexts[index] = string.Join("\n", portionLines);
                 var tipLines = PreviewLogic.TipLines(chances, tradeValues, exps[PreviewLogic.Perfect], entry.Tier, words);
-                tips[recipeId] = string.Join("\n", tipLines);
-                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents perfect={talents.PerfectQuality} tag={talents.TagQuality} rotten={talents.RottenReduce} exp={talents.ExpRatio} appraisal={talents.Appraisal} | eat {eatLog} | {string.Join(" | ", lines)} | all levels F/N/G/P sat={baseSatiety[0]}/{baseSatiety[1]}/{baseSatiety[2]}/{baseSatiety[3]} eat={string.Join("/", Array.ConvertAll(stats, l => string.Join(",", l)))} satRaw={string.Join("/", Array.ConvertAll(rawSatiety, v => v.ToString("0.###")))} portions={string.Join("/", portions)} trade={tradeValues[0]}/{tradeValues[1]}/{tradeValues[2]}/{tradeValues[3]} exp={exps[0]}/{exps[1]}/{exps[2]}/{exps[3]}");
+                tips[index] = string.Join("\n", tipLines);
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"preview recipe={recipeId} row={row} tier={entry.Tier} exact={entry.IsExact} {inputs} bonus={bonus} talents perfect={talents.PerfectQuality} tag={talents.TagQuality} rotten={talents.RottenReduce} exp={talents.ExpRatio} appraisal={talents.Appraisal} | eat {eatLog} | {string.Join(" | ", lines)} | per portion {string.Join(" | ", portionLines)} | all levels F/N/G/P sat={baseSatiety[0]}/{baseSatiety[1]}/{baseSatiety[2]}/{baseSatiety[3]} eat={string.Join("/", Array.ConvertAll(stats, l => string.Join(",", l)))} satRaw={string.Join("/", Array.ConvertAll(rawSatiety, v => v.ToString("0.###")))} portions={string.Join("/", portions)} trade={tradeValues[0]}/{tradeValues[1]}/{tradeValues[2]}/{tradeValues[3]} exp={exps[0]}/{exps[1]}/{exps[2]}/{exps[3]}");
             }
             return result;
         }

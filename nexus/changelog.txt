@@ -1,3 +1,19 @@
+v1.3.0 - 2026-10-17
+Added: From cooking level 3, control which dishes cook together by placing their ingredients in separate rows.
+Added: Keep pieces of ingredients with multiple uses separate by dropping them on free cells in the ingredient grid.
+Added: Uncookable items appear dimmed in cooking tabs. Fuel stays bright at stoves that burn it.
+Added: Whole dish / Per portion switch beside the THIS POT title.
+Added: Sort food in the Rat Cage's left panel (Backpack and fridge tabs). Satiety shows what the cage gets from all remaining uses, without talent bonuses.
+Added: The Rat Cage's Food Storage grid shows the selected sort values.
+Added: Store Chilled Food also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while it keeps food cold.
+Added: Store Chilled Food works while you stand in the Cold Storage room.
+Added: The Cooking tag shows its icon above a storage, like the other tags.
+Changed: Dish cards for the same recipe each show previews for their own ingredients.
+Removed: Support for Survival Log versions before 1.1.18902.
+Fixed: Eat values include the base stat bonuses.
+Fixed: Dimmed items larger than one cell no longer show the grid lines through them (without Compact Inventory).
+Fixed: The Sort button is first on the Backpack line again, before Store Chilled Food and Store Materials.
+
 v1.2.0 - 2026-10-03
 Added: Food sort for fridges and home storages tagged Cooking or Food, in the storage window and cooking window. The Backpack can also be sorted in the cooking window, and while one of these storages is open in the storage window. Sort by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date without moving the stored items.
 Added: Numbers on sorted items and cooking workbench ingredients: eat values per use, trade value per stack, or days left. Rotten and expired food come first when sorting by Expiration Date.

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using SlShared.Json;
 
 namespace ProjectCook
 {
@@ -10,8 +11,9 @@ namespace ProjectCook
     public static class PageJson
     {
         // The data of setData: the tooltip lines of each ingredient and the tier of each ingredient that the
-        // page marks (High 1 and Low 3), by config ID.
-        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers)
+        // page marks (High 1 and Low 3), by config ID, the names of the page features that are on in the config, and the
+        // labels of the portion switch.
+        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null)
         {
             var sb = new StringBuilder("{\"tips\":{");
             bool first = true;
@@ -19,7 +21,7 @@ namespace ProjectCook
             {
                 if (!first) sb.Append(',');
                 first = false;
-                sb.Append('"').Append(kv.Key).Append("\":").Append(Str(kv.Value));
+                sb.Append('"').Append(kv.Key).Append("\":").AppendStr(kv.Value);
             }
             sb.Append("},\"tiers\":{");
             first = true;
@@ -30,7 +32,26 @@ namespace ProjectCook
                 first = false;
                 sb.Append('"').Append(kv.Key).Append("\":").Append(kv.Value);
             }
-            sb.Append("}}");
+            sb.Append('}');
+            if (features != null)
+            {
+                sb.Append(",\"features\":[");
+                first = true;
+                foreach (var name in features)
+                {
+                    if (!first) sb.Append(',');
+                    first = false;
+                    sb.AppendStr(name);
+                }
+                sb.Append(']');
+            }
+            if (portion != null)
+            {
+                sb.Append(",\"portion\":[");
+                for (int i = 0; i < portion.Length; i++) sb.Append(i == 0 ? "" : ",").AppendStr(portion[i]);
+                sb.Append(']');
+            }
+            sb.Append('}');
             return sb.ToString();
         }
 
@@ -60,18 +81,18 @@ namespace ProjectCook
             script + ";window.__projectCook.setData(" + json + (sortJson == null ? "" : "," + sortJson) + ");";
 
         // The data of setSortData: the owner of the open storage, the words of the dropdown, and the numbers of each
-        // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, and the sort key of the days
-        // (SortLogic.DaysKey: below 0 for an expired item), with null for no number. "d" is the text of the days
+        // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, the sort key of the days
+        // (SortLogic.DaysKey: below 0 for an expired item), and the cage satiety, with null for no number. "d" is the text of the days
         // badge: the days left, or for an expired item the days until it spoils, the expired word, or the rotten word.
         // "c" is the config id: a tie of the numbers groups the same items. "bag" is the owner of the Backpack side of
         // the storage window, whose items are in "items" too (none in the cooking window).
         public static string SortDataJson(long owner, IEnumerable<KeyValuePair<long, SortLogic.Numbers>> items, SortLogic.Words words, long bag = 0)
         {
-            var sb = new StringBuilder("{\"owner\":").Append(Str(owner.ToString(CultureInfo.InvariantCulture)));
-            if (bag != 0) sb.Append(",\"bag\":").Append(Str(bag.ToString(CultureInfo.InvariantCulture)));
+            var sb = new StringBuilder("{\"owner\":").AppendStr(owner.ToString(CultureInfo.InvariantCulture));
+            if (bag != 0) sb.Append(",\"bag\":").AppendStr(bag.ToString(CultureInfo.InvariantCulture));
             sb.Append(",\"words\":{\"choices\":[");
-            for (int i = 0; i < words.Choices.Length; i++) sb.Append(i == 0 ? "" : ",").Append(Str(words.Choices[i]));
-            sb.Append("],\"expired\":").Append(Str(words.Expired)).Append(",\"sort\":").Append(Str(words.Sort)).Append("},\"items\":{");
+            for (int i = 0; i < words.Choices.Length; i++) sb.Append(i == 0 ? "" : ",").AppendStr(words.Choices[i]);
+            sb.Append("],\"expired\":").AppendStr(words.Expired).Append(",\"sort\":").AppendStr(words.Sort).Append("},\"items\":{");
             bool first = true;
             foreach (var kv in items)
             {
@@ -79,43 +100,21 @@ namespace ProjectCook
                 first = false;
                 var n = kv.Value;
                 sb.Append('"').Append(kv.Key.ToString(CultureInfo.InvariantCulture)).Append("\":{\"n\":[");
-                foreach (var stat in n.Stats) sb.Append(Num(stat)).Append(',');
-                sb.Append(Num(n.Trade)).Append(',');
+                foreach (var stat in n.Stats) sb.Append(JsonText.Num(stat)).Append(',');
+                sb.Append(JsonText.Num(n.Trade)).Append(',');
                 var days = n.Days;
                 var key = SortLogic.DaysKey(days);
                 sb.Append(key.HasValue ? key.Value.ToString("0.###", CultureInfo.InvariantCulture) : "null");
+                sb.Append(',').Append(JsonText.Num(n.Cage));
                 sb.Append("],\"d\":");
-                sb.Append(days.IsRotten ? Str(words.Rotten) : days.HasNumber ? Str(SortLogic.DaysText(days.Days, words.DayUnit)) : days.IsExpired ? Str(words.Expired) : "null");
+                if (days.IsRotten) sb.AppendStr(words.Rotten);
+                else if (days.HasNumber) sb.AppendStr(SortLogic.DaysText(days.Days, words.DaysLeft));
+                else if (days.IsExpired) sb.AppendStr(words.Expired);
+                else sb.Append("null");
                 sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));
                 sb.Append('}');
             }
             return sb.Append("}}").ToString();
-        }
-
-        private static string Num(int? value) => value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : "null";
-
-        // A JSON string literal, with its quotes. Also a JavaScript string literal.
-        internal static string Str(string s)
-        {
-            var sb = new StringBuilder((s ?? "").Length + 2);
-            sb.Append('"');
-            foreach (char c in s ?? "")
-            {
-                switch (c)
-                {
-                    case '"': sb.Append("\\\""); break;
-                    case '\\': sb.Append("\\\\"); break;
-                    case '\n': sb.Append("\\n"); break;
-                    case '\r': sb.Append("\\r"); break;
-                    case '\t': sb.Append("\\t"); break;
-                    default:
-                        if (c < 0x20) sb.Append("\\u").Append(((int)c).ToString("x4"));
-                        else sb.Append(c);
-                        break;
-                }
-            }
-            sb.Append('"');
-            return sb.ToString();
         }
     }
 }

@@ -1,8 +1,9 @@
 // The preview lines: a grid below the name line of each dish card, in place of the game's hint line. The
 // wrapper keeps the game's render function and only adds lines.
-import { addError } from './core';
+import { addError, view } from './core';
 import { attachCardTip } from './cardTip';
 import { FIT_SIZES, fitSize } from './fit';
+import { drawPortionSwitch, portionSwitchOn } from './portionSwitch';
 import type { CookingWindow, PredictionEntry } from './types';
 
 // Builds the aligned grid of the card lines from rows of '|'-split cells. The first cell of a row (the quality
@@ -48,10 +49,14 @@ export function installPreview(w: CookingWindow, cardTipReady: boolean): void {
     original(entries);
     try {
       const cards = w.document.querySelectorAll('#predictionList .pot-card');
+      const switchOn = portionSwitchOn();
       let missingBd = false;
+      let anyPreview = false;
       for (let k = 0; k < cards.length && k < entries.length; k++) {
-        const preview = entries[k].Preview;
+        const portion = switchOn && view.portion ? entries[k].PreviewPortion : undefined;
+        const preview = portion || entries[k].Preview;
         if (!preview) continue;
+        anyPreview = true;
         const hint = cards[k].querySelector('.pot-hint');
         if (hint) hint.classList.add('projectcook-hide');
         const rows = preview.split('\n').map((text) => text.split('|'));
@@ -66,6 +71,7 @@ export function installPreview(w: CookingWindow, cardTipReady: boolean): void {
         if (cardTipReady && previewTip) attachCardTip(w, cards[k], previewTip);
       }
       if (missingBd) addError(w, 'preview: no .pot-bd in a prediction card');
+      drawPortionSwitch(w, switchOn && anyPreview, () => w.renderPredictionList(entries));
     } catch (e) { addError(w, 'preview: ' + e); }
   };
 }

@@ -60,6 +60,10 @@ namespace ProjectCook
             public string DifficultyName;
         }
 
+        // A float attribute of the game (AttributeComponent.GetBaseValue_Float) as per mille. The game stores the raw
+        // per mille and gives it divided by GameKey.Attr_ScalingRatio (1000). Rounded, so 0.1f is 100, not 99.
+        public static int ToPermille(float value) => (int)Math.Round(value * 1000f);
+
         public static float[] EatValues(Dish dish, Factors factors)
         {
             var result = new float[5];

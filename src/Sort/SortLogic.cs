@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using SlShared.I18n;
 
 namespace ProjectCook
 {
@@ -72,6 +73,8 @@ namespace ProjectCook
             public int?[] Stats;
             public int? Trade;
             public DaysLeft Days;
+            // The cage satiety (CageSatiety): the Rat Cage window shows it for the choice Satiety.
+            public int? Cage;
         }
 
         public sealed class Words
@@ -82,9 +85,9 @@ namespace ProjectCook
             public string Expired, Rotten;
             // The text of the dropdown button with Default.
             public string Sort;
-            // The unit of the days on a badge: d in English, 天 in Chinese, as the game writes the shelf life
-            // ({0}d, {0}天 in SR_UI_ItemTips_6).
-            public string DayUnit;
+            // The text of the days on a badge, with the placeholder {days}: {days}d in English, {days}天 in Chinese, as
+            // the game writes the shelf life ({0}d, {0}天 in SR_UI_ItemTips_6).
+            public string DaysLeft;
         }
 
         // oneUse holds the values of one use of the item: the instance values of a cooked dish, else the config
@@ -116,36 +119,48 @@ namespace ProjectCook
             return (float)useTimes / max * uses;
         }
 
-        // The badge of the days left: whole days with the day unit (d when none is given), or one decimal under one day
-        // (at least 0.1).
-        public static string DaysText(float days, string unit = null)
+        // The cage satiety of an item (Furniture.GetRatCageFoodSatiety): the first instance value of a cooked dish or a
+        // ration, else the raw satiety of the config (ValueDisplay1), times the uses left, or with no uses count the
+        // effective max uses (the item's own max, else the config uses, at least 1). Null when the satiety is not
+        // above 0 or the number rounds to 0: the Rat Cage does not take the item.
+        public static int? CageSatiety(float[] instanceValues, float valueDisplay1, int useTimes, int maxUseTimes, int cfgUses)
         {
-            if (string.IsNullOrEmpty(unit)) unit = "d";
-            if (days >= 1f) return ((int)Math.Floor(days)).ToString(CultureInfo.InvariantCulture) + unit;
-            var tenths = Math.Max(0.1, Math.Round(days, 1, MidpointRounding.AwayFromZero));
-            return tenths.ToString("0.0", CultureInfo.InvariantCulture) + unit;
+            float satiety = instanceValues != null && instanceValues.Length > 0 ? instanceValues[0] : valueDisplay1;
+            if (!(satiety > 0f)) return null;
+            int uses = useTimes >= 1 ? useTimes : Math.Max(1, maxUseTimes > 0 ? maxUseTimes : cfgUses);
+            var v = (int)Math.Round((double)satiety * uses, MidpointRounding.AwayFromZero);
+            return v > 0 ? (int?)v : null;
         }
 
-        // The words of the dropdown: the game's Default text (SR_Web_EventChoice_DefaultTag), the game's stat names,
-        // the trade value label of the card tooltip, and the game's word for the shelf life (UI_BattleBag_6,
-        // Expiration Date); the game's expired word (UI_ItemTips_2); the mod's word for the button with Default (the
-        // game's Sort, 整理, is the word of its Auto Organize). A game text that is empty gives the mod's word in the
-        // language.
-        public static Words WordsFrom(PreviewLogic.Words words, string defaultText, string expiredText, string expirationText, bool chinese, string rottenText = null)
+        // The badge of the days left: the daysLeft text with {days} filled by whole days, or by one decimal under one day
+        // (at least 0.1).
+        public static string DaysText(float days, string daysLeft)
+        {
+            if (days >= 1f) return I18nTexts.Fill(daysLeft, ("days", (int)Math.Floor(days)));
+            var tenths = Math.Max(0.1, Math.Round(days, 1, MidpointRounding.AwayFromZero));
+            return I18nTexts.Fill(daysLeft, ("days", tenths.ToString("0.0", CultureInfo.InvariantCulture)));
+        }
+
+        // The words of the dropdown from the mod texts of one language (src/i18n/): the game's Default text
+        // (SR_Web_EventChoice_DefaultTag), the stat names and the trade value label of the preview words, the game's
+        // word for the shelf life (UI_BattleBag_6, Expiration Date), the game's expired and rotten words (UI_ItemTips_2,
+        // SR_Web_Backpack_Rotten), the mod's word for the button with Default (the game's Sort, 整理, is the word of
+        // its Auto Organize), and the text of the days left.
+        internal static Words WordsFrom(PreviewLogic.Words words, I18nTextSet texts)
         {
             return new Words
             {
                 Choices = new[]
                 {
-                    string.IsNullOrEmpty(defaultText) ? (chinese ? "默认" : "Default") : defaultText,
+                    texts["sortDefault"],
                     words.Stat[EatLogic.Satiety], words.Stat[EatLogic.Morale], words.Stat[EatLogic.Stamina], words.Stat[EatLogic.Life],
                     words.TradeLabel,
-                    string.IsNullOrEmpty(expirationText) ? (chinese ? "保质期" : "Expiration Date") : expirationText,
+                    texts["expirationDate"],
                 },
-                Sort = chinese ? "排序" : "Sort",
-                DayUnit = chinese ? "天" : "d",
-                Expired = string.IsNullOrEmpty(expiredText) ? (chinese ? "已过期" : "Expired") : expiredText,
-                Rotten = string.IsNullOrEmpty(rottenText) ? (chinese ? "已腐败" : "Rotten") : rottenText,
+                Sort = texts["sort"],
+                DaysLeft = texts["daysLeft"],
+                Expired = texts["expired"],
+                Rotten = texts["rotten"],
             };
         }
 

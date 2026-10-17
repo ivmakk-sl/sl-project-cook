@@ -7,3 +7,5 @@
 *.gif binary
 *.dll binary
 *.zip binary
+# The sprite data of the head bar icons: raw alpha bytes, which a line end change would break.
+*.alpha binary
