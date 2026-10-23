@@ -1,7 +1,7 @@
 v1.4.0 - 2026-10-23
 Added: Storages tagged Cooking or Food also show as tabs in the Brewing Barrel, Rat Cage, and Ration Press windows. In the Rat Cage window you can sort them like the fridge tabs.
-Added: Storage tabs in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows show storage icons instead of names, so more tabs fit. Point at a tab to see its name.
-Added: Dropping an item on a tab in the cooking window is easier: a drop just above or below the tab counts, and the tab's name shows above the row while you drag.
+Added: Storage tabs at the Cooking Station, Brewing Barrel, Rat Cage, and Ration Press show storage icons instead of names, so more tabs fit. Point at a tab to see its name.
+Added: Dropping an item on a tab at the Cooking Station is easier: a drop just above or below the tab counts, and the tab's name shows above the row while you drag.
 
 v1.3.0 - 2026-10-17
 Added: From cooking level 3, control which dishes cook together by placing their ingredients in separate rows.
