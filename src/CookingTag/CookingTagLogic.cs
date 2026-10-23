@@ -17,6 +17,10 @@ namespace ProjectCook
         // A fridge tab of the cooking window is locked below this cooking level (CookingFridgeInfo.UnlockCookingLevel).
         public const int UnlockCookingLevel = 2;
 
+        // The lock of the fridge tabs of a food window (AE_Open<Window>Panel.CollectFridges): the cooking, Brewing
+        // Barrel, and Ration Press windows lock them below UnlockCookingLevel, the Rat Cage window never locks them.
+        public enum LockRule { LockBelowLevel2, NeverLocked }
+
         public readonly struct Words
         {
             public readonly string Name, Desc;
@@ -52,10 +56,12 @@ namespace ProjectCook
             return false;
         }
 
-        public static List<Tab> ExtraTabs(IReadOnlyList<long> fridgeOwners, IReadOnlyList<Storage> tagged, int cookingLevel)
+        // listedOwners are the owners that the window lists already (the fridges, and the tool cabinets of the Ration
+        // Press), so a listed storage gets no second tab.
+        public static List<Tab> ExtraTabs(IReadOnlyList<long> listedOwners, IReadOnlyList<Storage> tagged, int cookingLevel, LockRule rule)
         {
-            var fridges = new HashSet<long>(fridgeOwners);
-            var locked = cookingLevel < UnlockCookingLevel;
+            var fridges = new HashSet<long>(listedOwners);
+            var locked = rule == LockRule.LockBelowLevel2 && cookingLevel < UnlockCookingLevel;
             var tabs = new List<Tab>();
             foreach (var s in tagged)
                 if (!fridges.Contains(s.OwnerId)) tabs.Add(new Tab(s.OwnerId, s.ConfigId, locked));

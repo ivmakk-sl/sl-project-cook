@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace ProjectCook
 {
-    [BepInPlugin(PluginGuid, "Project Cook", "1.3.0")]
+    [BepInPlugin(PluginGuid, "Project Cook", "1.4.0")]
     [BepInProcess("SurvivalLog.exe")]
     public sealed class Plugin : BasePlugin
     {
@@ -16,7 +16,7 @@ namespace ProjectCook
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
         internal static ConfigEntry<bool> IgnoreCookingTalents;
-        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood;
+        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs;
         // The names of the page features that are on, for the page data (PageJson.DataJson).
         internal static string[] PageFeatures = new string[0];
 
@@ -37,7 +37,7 @@ namespace ProjectCook
                 "The food sort of fridges, cooking storages, and the Backpack, in the storage window, the cooking window, and the Rat Cage window: the dropdown, the numbers on the items, and the sorted view. Needs a game restart.");
             CookingStorages = Config.Bind(
                 "Features", "CookingStorages", true,
-                "The Cooking tag, and the storages with the Cooking tag or the Food tag as tabs of the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save, a storage with only the Cooking tag loses its rule, and turning it on again does not bring the tag back. Needs a game restart.");
+                "The Cooking tag, and the storages with the Cooking tag or the Food tag as tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save, a storage with only the Cooking tag loses its rule, and turning it on again does not bring the tag back. Needs a game restart.");
             RowSplit = Config.Bind(
                 "Features", "RowSplit", true,
                 "From cooking level 3, each row of the cooking station is its own group of ingredients: the game matches the dishes of each row alone, and the seasonings still help every dish. With all ingredients in one row, the cook works as without the mod. Needs a game restart.");
@@ -50,6 +50,9 @@ namespace ProjectCook
             ColdSortFood = Config.Bind(
                 "Features", "ColdSortFood", true,
                 "The Store Chilled Food button of the backpack also fills a fridge with the Food tag or the Cooking tag, and last a storage with one of these tags in the Cold Storage room while the room keeps food cold. A storage with the Chilled tag still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Needs a game restart.");
+            IconTabs = Config.Bind(
+                "Features", "IconTabs", true,
+                "The storage tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press show the icon of each storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Off shows the names as without the mod. Needs a game restart.");
             var features = new System.Collections.Generic.List<string>();
             if (SeparatePieces.Value) features.Add("separatePieces");
             if (DimUncookable.Value) features.Add("dimUncookable");
@@ -75,14 +78,19 @@ namespace ProjectCook
             if (SeparatePieces.Value)
                 patches.AddRange(new[] { typeof(PiecesOnCookingDragMove), typeof(PiecesOnTryMergeIntoOwner), typeof(PiecesOnMoveItem) });
             if (CookingStorages.Value)
-                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs), typeof(SlShared.ModTags.ModTagIconLoad), typeof(SlShared.ModTags.ModTagIconPreload) });
+                patches.AddRange(new[] { typeof(TagRow), typeof(TagMatchOnEvaluate), typeof(TagMatchOnTryGetMatchRank), typeof(TagMatchOnTryGetPutRank), typeof(CookingTabs), typeof(CookingTabsOnBrew), typeof(CookingTabsOnRatCage), typeof(CookingTabsOnCompressor), typeof(SlShared.ModTags.ModTagIconLoad), typeof(SlShared.ModTags.ModTagIconPreload) });
+            // The tab list of each food window: the icon tabs, and the Verbose line of the cooking storage tabs.
+            if (IconTabs.Value || CookingStorages.Value)
+                patches.AddRange(new[] { typeof(IconTabsOnCookingOpen), typeof(IconTabsOnBrewOpen), typeof(IconTabsOnRatCageOpen), typeof(IconTabsOnCompressorOpen) });
+            // The show of the Rat Cage window requests a pass for the food sort and for the icon tabs.
+            if (FoodSort.Value || IconTabs.Value) patches.Add(typeof(PageTickOnRatCageShow));
+            if (IconTabs.Value) patches.AddRange(new[] { typeof(PageTickOnBrewShow), typeof(PageTickOnCompressorShow) });
             if (FoodSort.Value)
                 patches.AddRange(new[]
                 {
                     typeof(StorageSortOnRefresh), typeof(StorageBagSortOnRefresh), typeof(CookingSortOnRefresh),
                     typeof(CookingSortOnOpen), typeof(CookingSortOnSwitchBag), typeof(CookingSortOnRefreshBag),
                     typeof(RatCageSortOnRefresh), typeof(RatCageSortOnOpen), typeof(RatCageSortOnSwitchBag), typeof(RatCageSortOnRefreshBag),
-                    typeof(PageTickOnRatCageShow),
                 });
             // One patch that fails to attach must not stop the others.
             foreach (var type in patches)
@@ -108,8 +116,8 @@ namespace ProjectCook
                     Log.LogWarning($"patch ItemManager.TryRankQuickStoreTarget failed, Store Chilled Food keeps the game's targets: {e.Message}");
                 }
             }
-            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value)
-                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value}");
+            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value)
+                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value}");
             Log.LogInfo("Project Cook loaded.");
         }
     }

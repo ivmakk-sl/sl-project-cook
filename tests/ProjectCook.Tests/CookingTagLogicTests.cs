@@ -45,7 +45,7 @@ public class CookingTagLogicTests
         var tabs = CookingTagLogic.ExtraTabs(
             new long[] { 10, 11 },
             new[] { new CookingTagLogic.Storage(30, 501), new CookingTagLogic.Storage(11, 401), new CookingTagLogic.Storage(20, 502) },
-            2);
+            2, CookingTagLogic.LockRule.LockBelowLevel2);
         Assert.Equal(2, tabs.Count);
         Assert.Equal(30, tabs[0].OwnerId);
         Assert.Equal(501, tabs[0].ConfigId);
@@ -57,14 +57,39 @@ public class CookingTagLogicTests
     [Fact]
     public void ExtraTabs_BelowCookingLevel2_AreLocked()
     {
-        var tabs = CookingTagLogic.ExtraTabs(new long[0], new[] { new CookingTagLogic.Storage(30, 501) }, 1);
+        var tabs = CookingTagLogic.ExtraTabs(new long[0], new[] { new CookingTagLogic.Storage(30, 501) }, 1, CookingTagLogic.LockRule.LockBelowLevel2);
         Assert.True(tabs[0].Locked);
+    }
+
+    // The Rat Cage window never locks its fridge tabs (AE_OpenRatCagePanel.CollectFridges), so its cooking storage tabs
+    // are open at each cooking level.
+    [Fact]
+    public void ExtraTabs_NeverLocked_IsOpenAtCookingLevel1()
+    {
+        var tabs = CookingTagLogic.ExtraTabs(new long[0], new[] { new CookingTagLogic.Storage(30, 501) }, 1, CookingTagLogic.LockRule.NeverLocked);
+        Assert.False(tabs[0].Locked);
+    }
+
+    // The Ration Press lists the tool cabinets after the fridges, so a tool cabinet with the tag Food keeps its one tab.
+    [Fact]
+    public void ExtraTabs_ListedToolCabinet_GetsNoSecondTab()
+    {
+        var fridges = new long[] { 10 };
+        var cabinets = new long[] { 40 };
+        var listed = new List<long>(fridges);
+        listed.AddRange(cabinets);
+        var tabs = CookingTagLogic.ExtraTabs(
+            listed,
+            new[] { new CookingTagLogic.Storage(40, 601), new CookingTagLogic.Storage(30, 501) },
+            2, CookingTagLogic.LockRule.LockBelowLevel2);
+        Assert.Single(tabs);
+        Assert.Equal(30, tabs[0].OwnerId);
     }
 
     [Fact]
     public void ExtraTabs_NoTaggedStorage_IsEmpty()
     {
-        Assert.Empty(CookingTagLogic.ExtraTabs(new long[] { 10 }, new List<CookingTagLogic.Storage>(), 3));
+        Assert.Empty(CookingTagLogic.ExtraTabs(new long[] { 10 }, new List<CookingTagLogic.Storage>(), 3, CookingTagLogic.LockRule.LockBelowLevel2));
     }
 
     [Theory]

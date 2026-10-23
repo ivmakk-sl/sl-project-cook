@@ -16,6 +16,7 @@ namespace ProjectCook
         private static readonly HashSet<string> loggedMissing = new HashSet<string>();
         private static readonly HashSet<string> loggedErrors = new HashSet<string>();
         private static readonly HashSet<string> loggedOther = new HashSet<string>();
+        private static readonly HashSet<string> loggedMismatch = new HashSet<string>();
         private static bool webViewWarned;
 
         // The Vite bundle, embedded by ProjectCook.csproj under this name.
@@ -71,6 +72,49 @@ namespace ProjectCook
                 catch (Exception e) { Plugin.Log.LogError($"Project Cook send failed: {e}"); }
             }))
                 Done(step, null);
+        }
+
+        // Sends the icon tab list of an open (PageJson.IconTabsJson). The page script keeps it and runs a pass, whose
+        // result is checked as the result of each other pass. A root page with no script gets the script with the
+        // list, so the first open of a session waits for no data push.
+        public static void SendIconTabs(string json, bool withScript = false)
+        {
+            var webView = WebView();
+            int id = 0;
+            if (withScript)
+            {
+                // One full send at a time, shared with the data push (SendWithScript).
+                float now = Time.realtimeSinceStartup;
+                if (webView == null || now - fullSendAt < FullSendWaitSeconds)
+                {
+                    IconTabsSending.OnResult(json, webView == null ? null : IconTabsSend.ScriptBusy);
+                    return;
+                }
+                fullSendAt = now;
+                id = ++fullSendId;
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug("ProjectCook page script: sent with the icon tabs");
+            }
+            string command = withScript ? PageJson.SetIconTabsWithScriptCommand(Script(), json) : PageJson.SetIconTabsCommand(json);
+            if (webView == null || !Execute(webView, command, r =>
+            {
+                try
+                {
+                    if (withScript && id == fullSendId) fullSendAt = float.NegativeInfinity;
+                    if (r == PageJson.NoScript && !withScript)
+                    {
+                        SendIconTabs(json, true);
+                        return;
+                    }
+                    IconTabsSending.OnResult(json, r);
+                    LogPageCheck(r);
+                    if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ProjectCook send: icon tabs result={r}");
+                }
+                catch (Exception e) { Plugin.Log.LogError($"Project Cook send failed: {e}"); }
+            }))
+            {
+                if (withScript) fullSendAt = float.NegativeInfinity;
+                IconTabsSending.OnResult(json, null);
+            }
         }
 
         private static void SendWithScript(PushSchedule.Step step)
@@ -131,6 +175,9 @@ namespace ProjectCook
         private static void LogPageCheck(string r)
         {
             if (r == null) return;
+            foreach (var page in PageJson.IconTabMismatches(r))
+                if (loggedMismatch.Add(page))
+                    Plugin.Log.LogWarning($"Project Cook: the tabs of the {page} page do not match the icon tab list (a game update?), the window shows the name tabs.");
             if (r.StartsWith("error: ", StringComparison.Ordinal))
             {
                 if (loggedErrors.Add(r)) Plugin.Log.LogError($"page script error: {r.Substring("error: ".Length)}");
@@ -148,7 +195,10 @@ namespace ProjectCook
             }
             if (errorsAt >= 0)
             {
-                string errors = r.Substring(errorsAt + errorsMarker.Length);
+                // The mismatch part of the icon tabs comes last (install.ts run) and is logged above.
+                int errorsEnd = r.IndexOf("; icontabs: mismatch ", errorsAt, StringComparison.Ordinal);
+                string errors = errorsEnd < 0 ? r.Substring(errorsAt + errorsMarker.Length)
+                    : r.Substring(errorsAt + errorsMarker.Length, errorsEnd - errorsAt - errorsMarker.Length);
                 foreach (var text in errors.Split(new[] { " || " }, StringSplitOptions.None))
                     if (loggedErrors.Add(text)) Plugin.Log.LogError($"page script error: {text}");
             }

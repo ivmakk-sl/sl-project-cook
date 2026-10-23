@@ -472,4 +472,104 @@ if (!gameFilesExist) {
     // The badge rule is '.item.is-food.projectcook-bag-tier-1::after'; a pseudo-element selector matches no element.
     assert.ok(el.matches('.item.is-food.projectcook-bag-tier-1'));
   });
+
+  // The icon tabs (spec icon-tabs): the list of tests/fixtures/icon-tabs.json, which the C# test of
+  // PageJson.IconTabsJson reads too, on the tab row that the page builds from its own message.
+  const ICON_TABS = JSON.parse(fs.readFileSync(path.join(HERE, '..', 'fixtures', 'icon-tabs.json'), 'utf8'));
+  const BREW_HTML = path.join(GAME_DIR, 'SurvivalLog_Data', 'StreamingAssets', 'WebUI', 'UI', 'BrewPanel', 'BrewPanel.html');
+  const FIXTURE_TABS = [
+    { ownerId: 1, name: 'Character Inventory' },
+    { ownerId: 2, name: 'Fridge', locked: true },
+    { ownerId: 3, name: 'Large Storage Rack' }
+  ];
+
+  function feedTabs(w: Win, msg: string, tabs: unknown[]): void {
+    w.dispatchEvent(new w.MessageEvent('message', { data: { type: msg, data: { bagTabs: tabs, bagOwnerId: 1 } } }));
+  }
+
+  function iconTabs(w: Win): boolean[] {
+    return [...w.document.querySelectorAll('#bagTabPinned > .bag-tab, #bagTabsScroll > .bag-tab')]
+      .map((el: Win) => el.classList.contains('projectcook-itab'));
+  }
+
+  async function loadBrewWindow(t: TestContext): Promise<Win> {
+    const dom = new JSDOM(fs.readFileSync(BREW_HTML, 'utf8'), {
+      url: url.pathToFileURL(BREW_HTML).href,
+      runScripts: 'dangerously',
+      resources: 'usable',
+      pretendToBeVisual: true
+    });
+    t.onTestFinished(() => dom.window.close());
+    await new Promise<void>((resolve, reject) => {
+      dom.window.addEventListener('load', () => resolve());
+      setTimeout(() => reject(new Error('BrewPanel.html did not fire load within 5s')), 5000);
+    });
+    return dom.window;
+  }
+
+  test('icon tabs: the Rat Cage window gets the icon tabs of its list with the food sort off', async (t) => {
+    const ratCage = await loadRatCageWindow(t);
+    feedTabs(ratCage, 'WebUI_RatCage_BagMsg', FIXTURE_TABS);
+    const root = rootWithoutFrame();
+    withFrames(root, [ratCage]);
+    assert.match(root.__projectCook.setIconTabs({ ...ICON_TABS, page: 'RatCage' }), /^ratcage: installed/);
+    assert.deepEqual(iconTabs(ratCage), [true, true, true]);
+    assert.ok(ratCage.document.querySelector('.projectcook-itab svg.projectcook-itab-icon'), 'the briefcase of the bag');
+    assert.ok(ratCage.document.querySelector('.projectcook-itab-tip'), 'the tooltip of the page');
+    assert.equal(root.__projectCook.sortData(), null, 'no sort data');
+  });
+
+  test('icon tabs: a pass with a Brewing Barrel window answers its own result, and a list of another page changes no tab', async (t) => {
+    const brew = await loadBrewWindow(t);
+    feedTabs(brew, 'WebUI_Brew_BagMsg', FIXTURE_TABS);
+    const root = rootWithoutFrame();
+    withFrames(root, [brew]);
+    assert.equal(root.__projectCook.setIconTabs({ ...ICON_TABS, page: 'RatCage' }), 'brew: no list');
+    assert.deepEqual(iconTabs(brew), [false, false, false]);
+    assert.equal(root.__projectCook.setIconTabs(ICON_TABS), 'brew: applied');
+    assert.deepEqual(iconTabs(brew), [true, true, true]);
+    assert.ok(brew.document.getElementById('projectcook-style'), 'the Brewing Barrel window has the style node');
+  });
+
+  // The first tab row of a new open: the root page script installs its watch at the load of the frame, before the
+  // page builds its tabs, so the first row shows the icons with no name tabs before them.
+  test('icon tabs: the load of a frame installs the watch, and its first tab row gets the icons with no pass', async (t) => {
+    const brew = await loadBrewWindow(t);
+    const root = rootWithoutFrame();
+    withFrames(root, [brew]);
+    root.__projectCook.setIconTabs(ICON_TABS);
+    root.__projectCook.frameLoaded(brew);
+    feedTabs(brew, 'WebUI_Brew_BagMsg', FIXTURE_TABS);
+    await new Promise((r) => brew.setTimeout(r, 0));
+    assert.deepEqual(iconTabs(brew), [true, true, true]);
+  });
+
+  // A reopen whose new list comes after the load of the frame: the list of the earlier open is not applied at the load
+  // (the tabs can differ), so no mismatch is reported, and the new list applies when it comes.
+  test('icon tabs: the load of a frame does not apply the list that an earlier frame load used', async (t) => {
+    const first = await loadBrewWindow(t);
+    const root = rootWithoutFrame();
+    withFrames(root, [first]);
+    root.__projectCook.setIconTabs(ICON_TABS);
+    root.__projectCook.frameLoaded(first);
+    const second = await loadBrewWindow(t);
+    withFrames(root, [second]);
+    root.__projectCook.frameLoaded(second);
+    feedTabs(second, 'WebUI_Brew_BagMsg', FIXTURE_TABS.slice(0, 2));
+    await new Promise((r) => second.setTimeout(r, 0));
+    assert.deepEqual(iconTabs(second), [false, false]);
+    const list = { ...ICON_TABS, open: ICON_TABS.open + 1, tabs: ICON_TABS.tabs.slice(0, 2) };
+    assert.equal(root.__projectCook.setIconTabs(list), 'brew: applied');
+    assert.deepEqual(iconTabs(second), [true, true]);
+  });
+
+  test('icon tabs: a tab row that does not match the list keeps the name tabs and is reported once', async (t) => {
+    const brew = await loadBrewWindow(t);
+    feedTabs(brew, 'WebUI_Brew_BagMsg', FIXTURE_TABS.slice(0, 2));
+    const root = rootWithoutFrame();
+    withFrames(root, [brew]);
+    assert.equal(root.__projectCook.setIconTabs(ICON_TABS), 'brew: applied; icontabs: mismatch BrewPanel');
+    assert.equal(root.__projectCook.apply(), 'brew: applied');
+    assert.deepEqual(iconTabs(brew), [false, false]);
+  });
 }

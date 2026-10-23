@@ -4,11 +4,14 @@ import pageCss from '../page.css?inline';
 import { dropdownCss } from '../../Shared/dropdown/web/dropdown';
 import { numberBadgeCss } from '../../Shared/number-badge/web/numberBadge';
 import { tooltipLinesCss } from '../../Shared/tooltip-lines/web/tooltipLines';
+import { iconTabsCss } from '../../Shared/icon-tabs/web/iconTabs';
 import { PREFIX as SORT_PREFIX } from './sortUi';
-import type { ModWindow, PageData, SortData } from './types';
+import type { IconTabList, ModWindow, PageData, SortData } from './types';
 
 // The prefix of the block of the mod in the item tooltip, which installItemTip gives the tooltip lines library.
 export const TIP_PREFIX = 'projectcook';
+// The prefix of the classes and the variables of the icon tabs library (tokens.css).
+export const ICON_TABS_PREFIX = 'projectcook';
 
 // Page parts each feature depends on, by feature:
 //   preview:  renderPredictionList, #predictionList, .pot-bd
@@ -54,8 +57,8 @@ const PAGE_OF: Record<Feature, Page> = {
 // when the tiers can have changed since its last draw. sort is the data of the last setSortData, and choice the
 // choice of the food sort (an index of CHOICE), and portion the choice of the portion switch (true: per portion): the
 // root page keeps them for all frames until a browser rebuild.
-export const view: { data: PageData; version: number; sort: SortData | null; choice: number; portion: boolean } =
-  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0, portion: false };
+export const view: { data: PageData; version: number; sort: SortData | null; choice: number; portion: boolean; iconTabs: IconTabList | null } =
+  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0, portion: false, iconTabs: null };
 
 function partExists(w: Window, doc: Document, name: string): boolean {
   if (name.charAt(0) === '#' || name.charAt(0) === '.') return !!doc.querySelector(name);
@@ -105,6 +108,6 @@ export function ensureStyle(doc: Document): void {
   const style = doc.createElement('style');
   style.id = 'projectcook-style';
   style.textContent = [tokensCss, dropdownCss(SORT_PREFIX), numberBadgeCss(SORT_PREFIX),
-    tooltipLinesCss(TIP_PREFIX), pageCss].join('\n');
+    tooltipLinesCss(TIP_PREFIX), iconTabsCss(ICON_TABS_PREFIX), pageCss].join('\n');
   doc.head.appendChild(style);
 }

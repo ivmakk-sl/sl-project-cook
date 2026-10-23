@@ -1,0 +1,9 @@
+{
+  "page": "BrewPanel",
+  "open": 7,
+  "tabs": [
+    { "name": "Character Inventory", "bag": true, "text": "" },
+    { "name": "Fridge", "icon": "../../Res/Furniture/UI_Item_Icon_bingxiang.png", "text": "Fridge", "lock": "Unlocks at \"Cooking\" Lv.2" },
+    { "name": "Large Storage Rack", "text": "Large" }
+  ]
+}

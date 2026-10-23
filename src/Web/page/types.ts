@@ -1,3 +1,4 @@
+import type { IconTabEntry } from '../../Shared/icon-tabs/web/iconTabs';
 // The data that the page script reads: the fields of the Cooking page, and the data of setData.
 
 // One entry of the prediction list of the Cooking page (State.lastPredictionEntries), with the fields
@@ -117,9 +118,20 @@ export interface PageData {
   portion?: string[];
 }
 
+// The icon tab list of the newest open of a food window (PageJson.IconTabsJson in C#): the page id of the window, the
+// open id, and each tab in the order of the page reducer.
+export interface IconTabList {
+  page: string;
+  open: number;
+  tabs: IconTabEntry[];
+}
+
 export interface ProjectCookApi {
   setData(data: PageData, sort?: SortData): string;
   setSortData(sort: SortData): string;
+  setIconTabs(list: IconTabList): string;
+  // The icon tabs of a frame at its load (the watch of the frames of the root page calls it).
+  frameLoaded(w: Window): void;
   apply(): string;
   // The sort data of the last send, for the frames and the tests.
   sortData(): SortData | null;
