@@ -12,7 +12,7 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 - **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
 - **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
 - **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine, and in the Brewing Barrel, Rat Cage, and Ration Press windows. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2, as the fridge tabs; in the Rat Cage window at any level.
-- **Storage icons on tabs.** In the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, each storage tab shows the icon of its storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Clicks and locks work as usual, and dropping an item on a tab in the cooking window is easier: the tab's name shows above the row while you drag.
+- **Compact tabs.** Storage tabs in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows show icons instead of names, so more fit in the row. Point at a tab to see its name. In the cooking window, dropping an item on a tab is easier: a drop just above or below it counts, and its name shows while you drag.
 - **Store Chilled Food.** The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.
 
 ## Preview details
@@ -75,7 +75,7 @@ The sort only changes what the window shows, not the places of the items. One ch
 
 The tag rule of a storage ("What goes in here") gets the tag Cooking in its Status row. A storage with this tag shows as a tab after the fridges in the cooking window, the Brewing Barrel window, the Rat Cage window, and the Ration Press window, so you can use its items there. The tab unlocks with the fridge tabs of the window: from cooking level 2, and at any level in the Rat Cage window. It is for food that keeps long and that you still cook with. A storage with the game's tag Food also shows as a tab, with no Cooking tag needed. The tag does not change what the robot puts in or takes out: with other tags the storage works as with those tags alone, and with only the Cooking tag it works as with the tag Food. It does not change how fast food spoils.
 
-## Storage icons on tabs
+## Compact tabs
 
 The storage tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows show icons in place of names:
 
