@@ -10,9 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Storages tagged Cooking or Food also show as tabs in the Brewing Barrel, Rat Cage (each size), and Ration Press windows, after the fridge tabs. They lock with the fridge tabs of the window: until cooking level 2 in the Brewing Barrel and Ration Press windows, never in the Rat Cage window. Drag items from them as from a fridge tab. Part of `CookingStorages`.
+- Storages tagged Cooking or Food also show as tabs in the Brewing Barrel, Rat Cage (each size), and Ration Press windows, after the fridge tabs. They lock with the fridge tabs of the window: until cooking level 2 in the Brewing Barrel and Ration Press windows, never in the Rat Cage window. Drag items from them as from a fridge tab, and in the Rat Cage window sort them with the Sort dropdown as the fridge tabs. Part of `CookingStorages`.
 - Storage icons on tabs: the storage tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows show the icon of each storage in place of its name, so more tabs fit in the row. The Backpack tab shows the word Inventory, as in the workbench window; a storage with no icon of its own, or with a stand-in icon of the game (a bed on the Medium Storage Rack, a shelf on the pre-installed Refrigerator), shows the icon of the same furniture model or name, or else the first word of its name. Point at a tab to see its name and, on a locked tab, the game's lock text. When you drag an item onto a tab in the cooking window, a drop just above or below the tab also counts, the tab's name shows above the tab row, and the item turns half transparent. Turn this off with `IconTabs`.
-- The Rat Cage food sort works on the tab of a cooking storage too.
 
 ## [1.3.0] - 2026-10-17
 
