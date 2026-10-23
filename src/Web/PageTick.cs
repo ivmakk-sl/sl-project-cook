@@ -49,6 +49,7 @@ namespace ProjectCook
         {
             try
             {
+                if (Plugin.IconTabs.Value) IconTabsSending.Tick();
                 var step = schedule.Tick(Time.realtimeSinceStartup, Build);
                 if (step.Kind == PushSchedule.Kind.None) return;
                 long sendStart = Timing.Start();
@@ -87,6 +88,35 @@ namespace ProjectCook
             {
                 Plugin.Log.LogError($"Project Cook page ready failed: {e}");
             }
+        }
+    }
+
+    // The page ready calls of the Brewing Barrel and Ration Press windows, so a pass applies the icon tabs in their frame.
+    [HarmonyPatch(typeof(WebUI_Brew), "CallShowAction")]
+    internal static class PageTickOnBrewShow
+    {
+        private static void Postfix()
+        {
+            try
+            {
+                PageTick.Request();
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug("ProjectCook page ready: BrewPanel");
+            }
+            catch (Exception e) { Plugin.Log.LogError($"Project Cook page ready failed: {e}"); }
+        }
+    }
+
+    [HarmonyPatch(typeof(WebUI_Compressor), "CallShowAction")]
+    internal static class PageTickOnCompressorShow
+    {
+        private static void Postfix()
+        {
+            try
+            {
+                PageTick.Request();
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug("ProjectCook page ready: Compressor");
+            }
+            catch (Exception e) { Plugin.Log.LogError($"Project Cook page ready failed: {e}"); }
         }
     }
 

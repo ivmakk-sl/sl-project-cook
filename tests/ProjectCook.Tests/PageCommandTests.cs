@@ -28,6 +28,18 @@ public class PageCommandTests
         Assert.EndsWith(";window.__projectCook.setData(" + Json + ");", js);
     }
 
+    // The icon tab list of the first open of a food window in a game session can come before the data: the root page
+    // then has no script, and the list carries it, so the first draw of the tab row has the icons.
+    [Fact]
+    public void The_icon_tab_command_with_the_script_is_the_script_then_the_list()
+    {
+        const string list = "{\"page\":\"BrewPanel\",\"open\":1,\"tabs\":[]}";
+        string js = PageJson.SetIconTabsWithScriptCommand(Script, list);
+
+        Assert.StartsWith(Script, js);
+        Assert.EndsWith(";window.__projectCook.setIconTabs(" + list + ");", js);
+    }
+
     private const string Sort = "{\"owner\":\"1\"}";
 
     [Fact]

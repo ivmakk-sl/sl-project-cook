@@ -1,0 +1,78 @@
+/* Library copy of shared/icon-tabs 1.0.0. Do not edit: see src/Shared/icon-tabs/VERSION. */
+/* The icon tabs of a food window. PFX is the prefix of the mod; iconTabsCss(prefix) replaces it. The mod sets these
+   variables in its tokens.css:
+     --PFX-itab-icon-size  the width and the height of the icon
+     --PFX-itab-pad        the padding of an icon tab (the game tab keeps its frame)
+     --PFX-itab-min-width  the smallest width of an icon tab, frame included (a bigger target for a drop)
+     --PFX-itab-drag-opacity the opacity of the dragged item while it is over a tab
+     --PFX-itab-tip-bg     the background of the tooltip of an icon tab
+     --PFX-itab-tip-border the border of the tooltip
+     --PFX-itab-tip-fg     the text of the name
+     --PFX-itab-tip-lock   the text of the lock line
+     --PFX-itab-tip-size   the text size of the tooltip */
+
+.PFX-itab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--PFX-itab-min-width);
+  padding: var(--PFX-itab-pad);
+}
+
+/* The outline of the game's tab drop (webui-tabdrop.js) inside the tab: outside it, the tab strip clips it, as it
+   clips the edges of the first tab. */
+.PFX-itab.tabdrop-armed {
+  outline-offset: -2px;
+}
+
+.PFX-itab.tabdrop-ok,
+.PFX-itab.tabdrop-no {
+  outline-offset: -3px;
+}
+
+/* The dragged item (the game moves it to the body during a drag) shows the tab under it through itself. */
+body:has(.PFX-itab.tabdrop-ok, .PFX-itab.tabdrop-no) > .item {
+  opacity: var(--PFX-itab-drag-opacity);
+}
+
+.PFX-itab-icon {
+  display: block;
+  flex-shrink: 0;
+  width: var(--PFX-itab-icon-size);
+  height: var(--PFX-itab-icon-size);
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.PFX-itab-text {
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.PFX-itab-name {
+  display: none;
+}
+
+/* The tooltip of an icon tab (tabTooltip.ts): placed by the script, below the tab. It takes no pointer, so it blocks no
+   click and no drop. */
+.PFX-itab-tip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  padding: 4px 8px;
+  border: 1px solid var(--PFX-itab-tip-border);
+  border-radius: 4px;
+  background: var(--PFX-itab-tip-bg);
+  color: var(--PFX-itab-tip-fg);
+  font-size: var(--PFX-itab-tip-size);
+  white-space: nowrap;
+}
+
+.PFX-itab-tip[hidden] {
+  display: none;
+}
+
+.PFX-itab-tip-lock {
+  color: var(--PFX-itab-tip-lock);
+}

@@ -1,0 +1,11 @@
+# Library copy of shared/icon-tabs. Do not edit it: edit shared/icon-tabs/, then run tools/shared-sync.ps1 -Mod ProjectCook -Lib icon-tabs.
+name=icon-tabs
+version=1.0.0
+sha256 cs/FurnitureIconIndex.cs 938ab3c24eaddfa86c0ace0949c946cf1583e39e4c342cf69bb268245662f389
+sha256 cs/IconChoice.cs 22038dd15654c0b66689cdb29aa3da6dde8c7a6e80ccff7d55f77c2ec288c2bb
+sha256 cs-game/FurnitureIcons.cs b1d50242e2ad907e2fb009f442c1e7ad32cd223a9070fe479b554fb32f4f7781
+sha256 web/briefcase.ts 36924a0911938c8a29e131e516b0caab9b98e3134610a849736693f74e9133d4
+sha256 web/dropMargin.ts 042886592bc195a9a814190739dda9fd187d3203f273462aec71454d47d58758
+sha256 web/iconTabs.css 09567c1238d8c0ba1c232dfdaf4f50214cfb4dfee3e88ec7d592ab2dd72f3531
+sha256 web/iconTabs.ts 008213cf71d93b982c526e471e8deed6f3276c3834798136281da1829ab8652e
+sha256 web/tabTooltip.ts e906b7b57c157fdf490f18de596e6b1bcfae15526bb5c4cc5fcb2d8d1f39ef1c

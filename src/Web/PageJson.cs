@@ -76,9 +76,51 @@ namespace ProjectCook
         public static string SetSortDataCommand(string sortJson) =>
             "window.__projectCook?window.__projectCook.setSortData(" + sortJson + "):'" + NoScript + "'";
 
+        // The push of the icon tab list of an open (IconTabsJson): the page script keeps it for the frame of its window.
+        public static string SetIconTabsCommand(string json) =>
+            "window.__projectCook?window.__projectCook.setIconTabs(" + json + "):'" + NoScript + "'";
+
+        // The icon tab list of the open of a food window: the page id of the window, the open id, and each tab in the
+        // order of the page reducer with its name, the bag mark, its icon path, the short text of a tab with no icon or
+        // an icon that does not load, and the game's lock text of a locked tab.
+        public static string IconTabsJson(string page, int openId, IEnumerable<IconTabsLogic.Entry> entries)
+        {
+            var sb = new StringBuilder("{\"page\":").AppendStr(page).Append(",\"open\":").Append(openId).Append(",\"tabs\":[");
+            bool first = true;
+            foreach (var e in entries)
+            {
+                if (!first) sb.Append(',');
+                first = false;
+                sb.Append("{\"name\":").AppendStr(e.Name ?? "");
+                if (e.Bag) sb.Append(",\"bag\":true");
+                if (!string.IsNullOrEmpty(e.Icon)) sb.Append(",\"icon\":").AppendStr(e.Icon);
+                sb.Append(",\"text\":").AppendStr(e.Text ?? "");
+                if (e.Lock != null) sb.Append(",\"lock\":").AppendStr(e.Lock);
+                sb.Append('}');
+            }
+            return sb.Append("]}").ToString();
+        }
+
+        // The pages of the part "icontabs: mismatch <page>,<page>" of a pass result: the tab row of the page did not
+        // match the icon tab list, so the window shows the name tabs.
+        public static string[] IconTabMismatches(string result)
+        {
+            const string marker = "icontabs: mismatch ";
+            int at = result == null ? -1 : result.IndexOf(marker, System.StringComparison.Ordinal);
+            if (at < 0) return new string[0];
+            int start = at + marker.Length;
+            int end = result.IndexOf(';', start);
+            return result.Substring(start, (end < 0 ? result.Length : end) - start).Split(',');
+        }
+
         // The page script, then the push of the data: sent only when a command gave NoScript.
         public static string SetDataWithScriptCommand(string script, string json, string sortJson = null) =>
             script + ";window.__projectCook.setData(" + json + (sortJson == null ? "" : "," + sortJson) + ");";
+
+        // The page script, then the icon tab list: sent only when SetIconTabsCommand gave NoScript (the first open of a
+        // food window before the data push).
+        public static string SetIconTabsWithScriptCommand(string script, string json) =>
+            script + ";window.__projectCook.setIconTabs(" + json + ");";
 
         // The data of setSortData: the owner of the open storage, the words of the dropdown, and the numbers of each
         // item by its logic id. "n" is Satiety, Morale, Stamina, Life, the trade value, the sort key of the days

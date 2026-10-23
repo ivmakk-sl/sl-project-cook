@@ -9,6 +9,7 @@ import { applyCookingSort, cookingGrid } from './sortCooking';
 import { applyStorageSort, storageGrids } from './sortStorage';
 import { installTagIcon } from './tagIcon';
 import { installTierMark, redrawTiers } from './tierMark';
+import { iconTabsResult, runIconTabs } from './iconTabs';
 import type { CookingWindow, PredictionEntry, RatCageWindow, StorageWindow } from './types';
 
 // The start of the result of a pass with a storage window and no Cooking frame (PageJson.StorageResultPrefix in
@@ -16,6 +17,9 @@ import type { CookingWindow, PredictionEntry, RatCageWindow, StorageWindow } fro
 const STORAGE = 'storage: ';
 // The start of the result part of a Rat Cage window, which needs no retry either.
 const RAT_CAGE = 'ratcage: ';
+// The start of the result part of a Brewing Barrel and a Ration Press window, which have only the icon tabs.
+const BREW = 'brew: ';
+const COMPRESSOR = 'compressor: ';
 
 // One pass over the frames: installs the wrappers when a frame does not have them, and draws the bag items of the
 // Cooking frame again when the tiers can have changed since the last draw of the frame. The install can come after
@@ -23,30 +27,43 @@ const RAT_CAGE = 'ratcage: ';
 // not there, C# sends again. The result of the Cooking frame is "installed", "already installed", "no Cooking
 // frame", or "error: ...", with an optional "; missing: ..." and "; errors: ..." part. A storage window adds
 // "; storage: <its result>", or gives "storage: <its result>" when no Cooking frame is there, and a Rat Cage window
-// the same with "ratcage: ".
+// the same with "ratcage: ", a Brewing Barrel window with "brew: ", and a Ration Press window with "compressor: ". A
+// mismatch of an icon tab row adds "icontabs: mismatch <page>" once for each page.
 export function run(): string {
   const frames = document.querySelectorAll('iframe');
   let result = 'no Cooking frame';
   let cookingFound = false;
   let storage = '';
   let ratCage = '';
+  let brew = '';
+  let compressor = '';
   for (let i = 0; i < frames.length; i++) {
     const w = frames[i].contentWindow as Window | null;
     if (!w) continue;
     if (isCooking(w)) {
       const r = runCooking(w as CookingWindow);
-      if (r !== null) { result = r; cookingFound = true; }
+      if (r !== null) { result = r; cookingFound = true; runIconTabsOf(w, 'Cooking'); }
     } else if (isStorage(w)) {
       const r = runStorage(w as StorageWindow);
       if (r !== null) storage = r;
     } else if (isRatCage(w)) {
       const r = runRatCage(w as RatCageWindow);
-      if (r !== null) ratCage = r;
+      if (r !== null) { ratCage = r; runIconTabsOf(w, 'RatCage'); }
+    } else if (isPage(w, 'BrewPanel')) {
+      const r = runIconTabsOf(w, 'BrewPanel');
+      if (r !== null) brew = r;
+    } else if (isPage(w, 'Compressor')) {
+      const r = runIconTabsOf(w, 'Compressor');
+      if (r !== null) compressor = r;
     }
   }
   const parts = [];
   if (storage) parts.push(STORAGE + storage);
   if (ratCage) parts.push(RAT_CAGE + ratCage);
+  if (brew) parts.push(BREW + brew);
+  if (compressor) parts.push(COMPRESSOR + compressor);
+  const mismatch = iconTabsResult();
+  if (mismatch) parts.push(mismatch);
   if (!parts.length) return result;
   return cookingFound ? [result, ...parts].join('; ') : parts.join('; ');
 }
@@ -60,6 +77,35 @@ function isCooking(w: Window): boolean {
 
 function isStorage(w: Window): boolean {
   try { return /BackpackUI\.html/i.test(String(w.location)); } catch { return false; }
+}
+
+// The pages of the food windows, whose frames get the icon tabs.
+const FOOD_PAGES = ['Cooking', 'BrewPanel', 'RatCage', 'Compressor'];
+
+// The icon tabs of a frame at its load, before the page builds its first tab row (the page tells the game that it is
+// ready only after the load, and the game then sends the tabs): the watch is in place for that first row.
+export function iconTabsAtLoad(w: Window): void {
+  const page = FOOD_PAGES.find((p) => isPage(w, p));
+  if (page) runIconTabsOf(w, page, true);
+}
+
+function isPage(w: Window, page: string): boolean {
+  try { return new RegExp(page + '\\.html', 'i').test(String(w.location)); } catch { return false; }
+}
+
+// The icon tabs of a frame of a food window: "applied", "no list" (no list of this page yet), or "failed; errors: ...",
+// or null when the frame is not ready yet. The style node of the mod carries the CSS of the icon tabs.
+function runIconTabsOf(w: Window, page: string, atLoad = false): string | null {
+  try {
+    const doc = w.document;
+    if (doc.readyState !== 'complete') return null;
+    ensureStyle(doc);
+    const has = view.iconTabs?.page === page;
+    runIconTabs(w, page, atLoad);
+    return has ? 'applied' : 'no list';
+  } catch (e) {
+    return 'failed; errors: iconTabs: ' + e;
+  }
 }
 
 function isRatCage(w: Window): boolean {

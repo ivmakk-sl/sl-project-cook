@@ -51,4 +51,40 @@ public class PageJsonTests
 
         Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"separatePieces\",\"dimUncookable\"]}", json);
     }
+
+    // The icon tab list of tests/fixtures/icon-tabs.json, which the page test reads too: the bag with no icon, a locked
+    // fridge with its icon and a lock text with quotes, and a storage with no icon and its short text.
+    [Fact]
+    public void IconTabsJson_matches_the_fixture()
+    {
+        var entries = new[]
+        {
+            new IconTabsLogic.Entry(1, "Character Inventory", true, null).With(null, ""),
+            new IconTabsLogic.Entry(2, "Fridge", false, "Unlocks at \"Cooking\" Lv.2").With("../../Res/Furniture/UI_Item_Icon_bingxiang.png", "Fridge"),
+            new IconTabsLogic.Entry(3, "Large Storage Rack", false, null).With(null, "Large"),
+        };
+        string json = PageJson.IconTabsJson("BrewPanel", 7, entries);
+
+        var expected = JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "fixtures", "icon-tabs.json")));
+        Assert.True(JsonNode.DeepEquals(expected, JsonNode.Parse(json)), json);
+    }
+
+    [Fact]
+    public void SetIconTabsCommand_gives_no_script_without_the_page_script()
+    {
+        Assert.Equal("window.__projectCook?window.__projectCook.setIconTabs({}):'no script'", PageJson.SetIconTabsCommand("{}"));
+    }
+
+    // A pass result names the pages whose tab row did not match the icon tab list (install.ts iconTabsResult).
+    [Theory]
+    [InlineData("installed; brew: applied; icontabs: mismatch BrewPanel", new[] { "BrewPanel" })]
+    [InlineData("ratcage: applied; icontabs: mismatch RatCage,Compressor", new[] { "RatCage", "Compressor" })]
+    [InlineData("icontabs: mismatch Cooking; errors: x", new[] { "Cooking" })]
+    [InlineData("installed; brew: applied", new string[0])]
+    [InlineData(null, new string[0])]
+    public void IconTabMismatches_reads_the_pages_of_a_result(string result, string[] pages)
+    {
+        Assert.Equal(pages, PageJson.IconTabMismatches(result));
+    }
 }
+

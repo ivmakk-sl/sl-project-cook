@@ -11,7 +11,8 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 - **Separate pieces.** Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.
 - **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
 - **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
-- **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2.
+- **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine, and in the Brewing Barrel, Rat Cage, and Ration Press windows. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2, as the fridge tabs; in the Rat Cage window at any level.
+- **Storage icons on tabs.** In the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, each storage tab shows the icon of its storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Clicks and locks work as usual, and dropping an item on a tab in the cooking window is easier: the tab's name shows above the row while you drag.
 - **Store Chilled Food.** The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.
 
 ## Preview details
@@ -66,13 +67,26 @@ A fridge and a cooking storage get a Sort dropdown with a sort icon on the line 
 
 In the cooking window, the items on the workbench show the number of the choice too, at their places, so you can compare them with the open tab.
 
-The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for the Backpack and each fridge tab. Here Satiety shows the satiety that the cage gets from the item, not the eat value: the satiety of the dish itself for a cooked dish or a ration, else the raw satiety, times the uses left, with no talent bonus. So the same item can show a bigger Satiety number here than in the cooking window. Items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the number of the choice at each item.
+The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for the Backpack and each fridge and cooking storage tab. Here Satiety shows the satiety that the cage gets from the item, not the eat value: the satiety of the dish itself for a cooked dish or a ration, else the raw satiety, times the uses left, with no talent bonus. So the same item can show a bigger Satiety number here than in the cooking window. Items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the number of the choice at each item.
 
 The sort only changes what the window shows, not the places of the items. One choice applies to all these windows until you quit the game. While a sort is on, a drag inside the sorted grid does nothing; a drag to or from another grid works as usual, and an item that you put in goes to a free place. Select Default to move items by hand.
 
 ## Cooking tag
 
-The tag rule of a storage ("What goes in here") gets the tag Cooking in its Status row. A storage with this tag shows as a container tab in the cooking window, after the fridges, so you can cook with its items (from cooking level 2, as the fridge tabs). It is for food that keeps long and that you still cook with. A storage with the game's tag Food also shows as a tab, with no Cooking tag needed. The tag does not change what the robot puts in or takes out: with other tags the storage works as with those tags alone, and with only the Cooking tag it works as with the tag Food. It does not change how fast food spoils.
+The tag rule of a storage ("What goes in here") gets the tag Cooking in its Status row. A storage with this tag shows as a tab after the fridges in the cooking window, the Brewing Barrel window, the Rat Cage window, and the Ration Press window, so you can use its items there. The tab unlocks with the fridge tabs of the window: from cooking level 2, and at any level in the Rat Cage window. It is for food that keeps long and that you still cook with. A storage with the game's tag Food also shows as a tab, with no Cooking tag needed. The tag does not change what the robot puts in or takes out: with other tags the storage works as with those tags alone, and with only the Cooking tag it works as with the tag Food. It does not change how fast food spoils.
+
+## Storage icons on tabs
+
+The storage tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows show icons in place of names:
+
+- The Backpack tab shows the word Inventory, as the workbench window does.
+- A fridge, a cooking storage, or a tool cabinet tab shows the icon of its furniture. A furniture with no icon of its own (most furniture found in the world), or with a stand-in icon of the game (the pre-installed Refrigerator shows a shelf in the game data, the Medium Storage Rack a bed), shows the icon of the same furniture model or of a furniture with the same name, or else the first word of its name.
+
+Two storages of the same kind show the same icon, as they show the same name without the mod. Point at a tab to see its name, and for a locked tab the game's lock text. Clicking a tab and the locked look work as usual.
+
+In the cooking window you can drop an item on a tab, as without the mod, and the small tabs make that easier: a drop up to 16 px above or below a tab counts as a drop on it, the name of the tab under the item shows above the tab row, and the item turns half transparent so you see the tab through it.
+
+Turn this off with `IconTabs`.
 
 ## Store Chilled Food
 
@@ -119,8 +133,9 @@ The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written
 - `RowSplit` - each row of the cooking station as its own group of ingredients, from cooking level 3.
 - `SeparatePieces` - a piece that you drop on a free cell of the cooking station stays its own item.
 - `DimUncookable` - dims items you cannot cook in the cooking window's tabs.
-- `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking window. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
+- `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
 - `ColdSortFood` - the fridges with Food or Cooking and the Cold Storage room storages as targets of Store Chilled Food.
+- `IconTabs` - the storage icons in place of the names on the tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows.
 
 See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for editing the file.
 
@@ -132,7 +147,7 @@ If a cook is in progress when you remove the mod or turn off `RowSplit`, it fini
 
 ## Troubleshooting
 
-Project Cook 1.3.0 was verified on Survival Log `1.1.18902` (Steam build `25984240`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
+Project Cook 1.4.0 was verified on Survival Log `1.1.19131` (Steam build `26076180`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
 
 ## Build
 

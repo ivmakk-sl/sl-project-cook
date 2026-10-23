@@ -49,6 +49,18 @@
   --projectcook-tip-size: inherit;
   --projectcook-tip-gap: 2px;
 
+  /* The variables of the icon tabs library (prefix projectcook): the icon in the tab frame of the game, and the
+     tooltip of an icon tab in the look of the item tooltip of the Brewing Barrel and Rat Cage pages. */
+  --projectcook-itab-icon-size: 18px;
+  --projectcook-itab-pad: 4px 8px;
+  --projectcook-itab-min-width: 58px;
+  --projectcook-itab-drag-opacity: 0.4;
+  --projectcook-itab-tip-bg: rgb(30 24 22 / 96%);
+  --projectcook-itab-tip-border: rgb(232 176 75 / 50%);
+  --projectcook-itab-tip-fg: var(--text-main, #e8dcc8);
+  --projectcook-itab-tip-lock: #9a9a9a;
+  --projectcook-itab-tip-size: 12px;
+
   /* The pictures of the tier badges: a triangle that points up (High) or down (Low). */
   --pc-badge-up: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 3 22 20H2z' fill='white'/></svg>");
   --pc-badge-down: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 21 2 4h20z' fill='white'/></svg>");
