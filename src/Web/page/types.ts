@@ -14,6 +14,8 @@ export interface PredictionEntry {
   PreviewTip?: string;
   // The preview lines of one portion, for the portion switch.
   PreviewPortion?: string;
+  // 1: the dish has no codex entry, so the card shows the codex mark.
+  Codex?: number;
 }
 
 // An item that showItemTip shows.
@@ -112,7 +114,8 @@ export type CookingWindow = GridSortWindow & {
 export interface PageData {
   tips: Record<string, string>;
   tiers: Record<string, number>;
-  // The page features that are on in the config (PageJson.DataJson): separatePieces, dimUncookable, portionSwitch.
+  // The page features that are on in the config (PageJson.DataJson): separatePieces, dimUncookable, portionSwitch,
+  // codexMarks.
   features?: string[];
   // The labels of the portion switch: the whole dish, then one portion.
   portion?: string[];
@@ -152,6 +155,8 @@ export interface SortItem {
   d: string | null;
   // The config id: a tie of the numbers groups the same items.
   c?: number;
+  // 1: a food of the codex that the player has never tasted, which shows the codex mark with Codex.
+  x?: number;
 }
 
 export interface SortData {

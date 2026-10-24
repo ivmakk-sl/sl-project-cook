@@ -198,4 +198,40 @@ public class PredictionJsonTests
     {
         Assert.Equal("[]", RowSplitLogic.PredictionJson(new List<RowSplitLogic.PredictionEntry>()));
     }
+
+    [Fact]
+    public void AddCodex_OnlyTheGivenEntries()
+    {
+        var root = JsonDocument.Parse(PreviewLogic.AddCodex(Two, new HashSet<int> { 1 })).RootElement;
+        Assert.False(root[0].TryGetProperty("Codex", out _));
+        Assert.Equal(1, root[1].GetProperty("Codex").GetInt32());
+    }
+
+    [Fact]
+    public void AddCodex_KeepsTheOtherFields()
+    {
+        var entry = JsonDocument.Parse(PreviewLogic.AddCodex(Two, new HashSet<int> { 0 })).RootElement[0];
+        Assert.Equal(7008, entry.GetProperty("RecipeId").GetInt32());
+        Assert.Equal("A \"quoted\" dish", entry.GetProperty("Name").GetString());
+        Assert.Equal("a.png", entry.GetProperty("Icon").GetString());
+        Assert.Equal(1, entry.GetProperty("Codex").GetInt32());
+    }
+
+    [Fact]
+    public void AddCodex_AfterAddPreviews()
+    {
+        string withPreviews = PreviewLogic.AddPreviews(Two, new Dictionary<int, string> { [0] = "p0", [1] = "p1" },
+            new Dictionary<int, string> { [1] = "tip" });
+        var root = JsonDocument.Parse(PreviewLogic.AddCodex(withPreviews, new HashSet<int> { 0, 1 })).RootElement;
+        Assert.Equal("p0", root[0].GetProperty("Preview").GetString());
+        Assert.Equal("tip", root[1].GetProperty("PreviewTip").GetString());
+        Assert.Equal(1, root[0].GetProperty("Codex").GetInt32());
+        Assert.Equal(1, root[1].GetProperty("Codex").GetInt32());
+    }
+
+    [Fact]
+    public void AddCodex_NoIndexNoChange()
+    {
+        Assert.Equal(Two, PreviewLogic.AddCodex(Two, new HashSet<int>()));
+    }
 }

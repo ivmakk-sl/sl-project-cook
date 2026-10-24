@@ -18,6 +18,7 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 | `CookingStorages` | `true` | `true` / `false` | Lets you use ingredients directly from home storages tagged Cooking or Food in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, from cooking level 2 (in the Rat Cage window at any level). Adds the Cooking tag to storage settings. |
 | `ColdSortFood` | `true` | `true` / `false` | The Store Chilled Food button of the backpack also fills a fridge tagged Food or Cooking, and last a storage tagged Food or Cooking in the Cold Storage room while the room keeps food cold. A storage tagged Chilled still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Off: the button works as without the mod. |
 | `IconTabs` | `true` | `true` / `false` | Shows the icon of each storage in place of its name on the storage tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, so more tabs fit in the row. Point at a tab to see its name. Off: the tabs show their names as without the mod. |
+| `CodexMarks` | `true` | `true` / `false` | Shows a gold trophy on each dish card whose dish is not in your Codex yet, and adds the choice Codex to the food sort: the foods you have never tasted come first, each with a trophy. Off: no trophy and no choice Codex. No trophy shows in guide mode and explore mode, where the game keeps the Codex locked. |
 
 With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
 
@@ -39,6 +40,7 @@ SeparatePieces = true
 DimUncookable = true
 ColdSortFood = true
 IconTabs = true
+CodexMarks = true
 ```
 
 The sort choice and the choice of the portion switch are selected in the window, not in this file. The sort choice is shared between the storage window, the cooking window, and the Rat Cage window and resets to Default when you restart the game. The portion switch resets to Whole dish when you restart the game.

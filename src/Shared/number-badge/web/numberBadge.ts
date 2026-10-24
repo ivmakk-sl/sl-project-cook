@@ -1,12 +1,14 @@
-// Library copy of shared/number-badge 1.0.1. Do not edit: see src/Shared/number-badge/VERSION.
+// Library copy of shared/number-badge 1.1.0. Do not edit: see src/Shared/number-badge/VERSION.
 // The number badge of an item cell: a small number at the top left of the cell, with the tone that the mod gives,
 // and the dim of a cell with no number. Each class name comes from the prefix of the mod: <prefix>-badge,
 // <prefix>-<tone>, <prefix>-dim on the cell, and <prefix>-layer for a layer that the mod makes.
 import css from './numberBadge.css?inline';
 
-// The look of one cell. A null text means no badge (dim still applies). id keys the badge in a layer (data-id).
+// The look of one cell. A null text and no icon means no badge (dim still applies). icon is SVG markup that the badge
+// shows in place of the text, in the color of the badge. id keys the badge in a layer (data-id).
 export interface BadgeLook {
   text: string | null;
+  icon?: string | null;
   tone?: string | null;
   dim?: boolean;
   id?: string;
@@ -32,7 +34,7 @@ export function drawBadges(doc: Document, prefix: string, cells: ArrayLike<Eleme
     let badge = (layer
       ? layer.querySelector(':scope > .' + badgeCls + '[data-id="' + id + '"]')
       : cell.querySelector(':scope > .' + badgeCls)) as HTMLElement | null;
-    if (!look || look.text === null) {
+    if (!look || (look.text === null && !look.icon)) {
       if (badge) badge.remove();
     } else {
       if (!badge) {
@@ -41,7 +43,16 @@ export function drawBadges(doc: Document, prefix: string, cells: ArrayLike<Eleme
       }
       const cls = badgeCls + (look.tone ? ' ' + prefix + '-' + look.tone : '');
       if (badge.className !== cls) badge.className = cls;
-      if (badge.textContent !== look.text) badge.textContent = look.text;
+      // data-icon holds the markup of the icon that the badge shows, so an icon is written only when it differs.
+      if (look.icon) {
+        if (badge.dataset.icon !== look.icon) {
+          badge.innerHTML = look.icon;
+          badge.dataset.icon = look.icon;
+        }
+      } else if (badge.dataset.icon !== undefined) {
+        delete badge.dataset.icon;
+        badge.textContent = look.text;
+      } else if (badge.textContent !== look.text) badge.textContent = look.text;
       if (layer) {
         if (badge.style.left !== cell.style.left) badge.style.left = cell.style.left;
         if (badge.style.top !== cell.style.top) badge.style.top = cell.style.top;

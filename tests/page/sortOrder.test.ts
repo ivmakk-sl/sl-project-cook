@@ -99,3 +99,43 @@ test('badgeTone: a stat is positive or negative, the trade value gold, the days 
   assert.equal(badgeTone({ n: [null, null, null, null, null, 3], d: '3d' }, CHOICE.days), null);
   assert.equal(badgeTone(it, CHOICE.default), null);
 });
+
+test('choices: Codex is the eighth choice, and the cage satiety is the hidden column after it', () => {
+  assert.equal(CHOICE.codex, 7);
+  assert.equal(CHOICE.cage, 8);
+});
+
+test('the cage satiety reads the seventh number', () => {
+  const it = { n: [5, null, null, null, 3, 2, 60], d: '2d' };
+  assert.equal(badgeText(it, CHOICE.cage), '+60');
+  assert.equal(badgeTone(it, CHOICE.cage), 'pos');
+});
+
+test('order: Codex puts the items with the codex flag first, grouped by item, then the others in their real order, no dim', () => {
+  const d = data({
+    1: { n: [5, null, null, null, 3, 2, null], d: '2d', c: 30 },
+    2: { n: [null, null, null, null, null, null, null], d: null, c: 20, x: 1 },
+    3: { n: [30, null, null, null, 10, 4, null], d: '4d', c: 10 },
+    4: { n: [1, null, null, null, 1, 1, null], d: '1d', c: 10, x: 1 },
+    5: { n: [1, null, null, null, 1, 1, null], d: '1d', c: 20, x: 1 },
+  });
+  const r = order([item(1), item(2), item(3), item(4), item(5), item(9)], d, CHOICE.codex);
+  assert.deepEqual(r.ids, [4, 2, 5, 1, 3, 9]);
+  assert.equal(r.dim.size, 0);
+});
+
+test('order: Codex with no codex flag keeps the real order', () => {
+  const d = data({
+    1: { n: [5, null, null, null, 3, 2, null], d: '2d', c: 30 },
+    2: { n: [30, null, null, null, 10, 4, null], d: '4d', c: 10 },
+  });
+  assert.deepEqual(order([item(1), item(2)], d, CHOICE.codex).ids, [1, 2]);
+});
+
+test('badge: Codex has no text, and the codex tone only on an item with the codex flag', () => {
+  const flagged = { n: [5, null, null, null, 3, 2, null], d: '2d', x: 1 };
+  const plain = { n: [5, null, null, null, 3, 2, null], d: '2d' };
+  assert.equal(badgeText(flagged, CHOICE.codex), null);
+  assert.equal(badgeTone(flagged, CHOICE.codex), 'codex');
+  assert.equal(badgeTone(plain, CHOICE.codex), null);
+});

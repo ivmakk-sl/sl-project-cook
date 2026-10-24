@@ -1,6 +1,6 @@
 The cooking window tells you which dish you get, but not how good it will be. See whether better ingredients or more seasoning are worth using, and arrange ingredients by row to choose which dishes you cook together.
 
-[size=5]Main features[/size]
+[size=4][b]Main features[/b][/size]
 [list]
 [*][b]Dish previews.[/b] Each dish card in "THIS POT" shows quality chances, eat values, and portion counts. This includes drinks from the Juicer and Coffee Machine. Eat values include fixed talents and the difficulty's Life factor; temporary effects and stat limits can change the actual gain.[/*]
 [*][b]Portion switch.[/b] Switch the dish cards between the stats of the whole dish and of one portion.[/*]
@@ -9,12 +9,13 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 [*][b]Separate pieces.[/b] Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.[/*]
 [*][b]Dim uncookable items.[/b] Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.[/*]
 [*][b]Food sort.[/b] Sort food by stats per use, trade value per stack, or expiration date, with values on each item. Sorting changes only the displayed order. In the Rat Cage window, Satiety counts all remaining uses without talent bonuses.[/*]
+[*][b]Codex marks.[/b] A gold trophy on a dish card marks a dish that is not in your Codex yet, and the Codex choice of the food sort puts the foods you have never tasted first, each with a trophy. Creative Cook raises the tier of a dish from ingredient types, so its lower-tier dishes need a run without the talent to enter the Codex.[/*]
 [*][b]Cook from home storages.[/b] Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine, and in the Brewing Barrel, Rat Cage, and Ration Press windows. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2, as the fridge tabs; in the Rat Cage window at any level.[/*]
 [*][b]Compact tabs.[/b] Storage tabs show icons instead of names, so more fit in the row: at the Cooking Station (Electric Oven, Juicer, and other cooking furniture), the Brewing Barrel, the Rat Cage, and the Ration Press. Point at a tab to see its name. At the Cooking Station, dropping an item on a tab is easier: a drop just above or below it counts, and its name shows while you drag.[/*]
 [*][b]Store Chilled Food.[/b] Extends the game's button to fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while it keeps food cold.[/*]
 [/list]
 
-[size=5]How the ingredient tier works[/size]
+[size=4][b]How the ingredient tier works[/b][/size]
 Tier (High-end, Mid-tier, Low-grade) is separate from quality: a High-end dish can still turn out Failed.
 [list]
 [*]Tier matters for recipes using ingredient types, such as Meat + Vegetables. Recipes requiring specific items have fixed stats and ignore tier.[/*]
@@ -22,25 +23,30 @@ Tier (High-end, Mid-tier, Low-grade) is separate from quality: a High-end dish c
 [*]A High-end ingredient with weak stats, such as Enoki Mushrooms, can raise trade value while lowering the dish's stats. Compare the previews before using better ingredients.[/*]
 [/list]
 
-[size=5]Requirements[/size]
+[size=4][b]Requirements[/b][/size]
 [list]
 [*]Survival Log 1.1.18902 or later.[/*]
-[*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Install it first.[/*]
+[*][url=https://www.nexusmods.com/survivallog/mods/12]BepInEx for Survival Log[/url]. Vortex installs it for you.[/*]
 [/list]
 
-[size=5]Installation[/size]
+[size=4][b]Installation[/b][/size]
+[b]Vortex (recommended):[/b]
 [list=1]
-[*]Install [url=https://www.nexusmods.com/survivallog/mods/12]BepInEx[/url] [i](if no other mods were installed before, start the game once so BepInEx finishes setup, then quit)[/i].[/*]
+[*]Click [b]Vortex[/b] at the top of this page [i](needs the [url=https://www.nexusmods.com/site/mods/2471]Survival Log Vortex Extension[/url], which also installs BepInEx)[/i].[/*][/list]
+
+[b]Manual installation:[/b]
+[list=1]
+[*]Install [url=https://www.nexusmods.com/survivallog/mods/12]BepInEx[/url].[/*]
 [*]Extract this mod's zip into the game folder (the folder with the game .exe). The DLL lands in BepInEx\plugins. Full path example:
 [code]C:\Program Files (x86)\Steam\steamapps\common\Survival Log\BepInEx\plugins\ProjectCook.dll[/code][/*][/list]
 
-[size=5]Uninstall[/size]
-Delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
+[size=4][b]Uninstall[/b][/size]
+In Vortex, remove the mod on the Mods page. After a manual install, delete [font=Courier New]ProjectCook.dll[/font] from the [font=Courier New]BepInEx\plugins[/font] folder. The game then drops the Cooking tag. A storage with only the Cooking tag loses its rule, so give it a game tag (for example Food) before you uninstall.
 
-[size=5]Configuration[/size]
+[size=4][b]Configuration[/b][/size]
 All features are on by default and can be turned off separately. The portion switch is part of the dish preview. To change mod settings, edit [font=Courier New]BepInEx\config\com.ivmakk.survivallog.projectcook.cfg[/font] while the game is closed (see [url=https://github.com/ivmakk-sl/sl-project-cook/blob/main/CONFIG.md]CONFIG.md[/url] for every setting). The file is created the first time you start the game with the mod. Changes apply at the next game start.
 
 Before turning off [font=Courier New]CookingStorages[/font], give any storage with only Cooking a game tag such as Food. Turning this feature off removes Cooking tags from the save, just like uninstalling; turning it back on does not restore them.
 
-[size=5]Source and license[/size]
+[size=4][b]Source and license[/b][/size]
 Open source under GPL-3.0: [url=https://github.com/ivmakk-sl/sl-project-cook]github.com/ivmakk-sl/sl-project-cook[/url]

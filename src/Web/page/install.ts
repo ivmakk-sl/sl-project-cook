@@ -1,5 +1,6 @@
 // The pass over the Cooking frame and the storage window frame, and its result for C#.
 import { addError, ensureStyle, hasFeature, missingText, newErrorsText, view } from './core';
+import { installCodexMark } from './codexMark';
 import { installItemTip } from './itemTip';
 import { installPieces } from './pieces';
 import { refreshPortionSwitch } from './portionSwitch';
@@ -144,7 +145,11 @@ function runCooking(w: CookingWindow): string | null {
     if (w.__cookingPreview) {
       result = 'already installed';
     } else {
-      if (hasFeature(w, doc, 'preview')) installPreview(w, hasFeature(w, doc, 'cardTip'));
+      if (hasFeature(w, doc, 'preview')) {
+        installPreview(w, hasFeature(w, doc, 'cardTip'));
+        // The config feature codexMarks is read at each render: the data can come after the install.
+        installCodexMark(w);
+      }
       if (hasFeature(w, doc, 'itemTip')) installItemTip(w);
       if (hasFeature(w, doc, 'tierMark')) installTierMark(w);
       // The switch is read at each drop, so the wrapper is installed also before the data comes.

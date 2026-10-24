@@ -31,6 +31,11 @@
   --pc-ico-days: #9fd18b;
   --pc-text-shadow: 1px 1px 2px var(--pc-black);
 
+  /* The codex mark: a gold trophy on a round, opaque dark coin with a gold ring. */
+  --pc-codex: var(--pc-sort-gold);
+  --pc-codex-bg: #2a211c;
+  --pc-codex-shadow: 0 1px 2px rgb(from var(--pc-black) r g b / 60%);
+
   /* The variables of the dropdown library and the number badge library (prefix projectcook-sort). The badge is
      above the frost of a freezer in a cell (z-index 3) and below the open list of a dropdown. */
   --projectcook-sort-fg: var(--pc-white);

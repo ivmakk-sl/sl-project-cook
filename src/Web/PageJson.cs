@@ -154,6 +154,7 @@ namespace ProjectCook
                 else if (days.IsExpired) sb.AppendStr(words.Expired);
                 else sb.Append("null");
                 sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));
+                if (n.Codex) sb.Append(",\"x\":1");
                 sb.Append('}');
             }
             return sb.Append("}}").ToString();

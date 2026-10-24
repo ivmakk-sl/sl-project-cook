@@ -16,7 +16,7 @@ namespace ProjectCook
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
         internal static ConfigEntry<bool> IgnoreCookingTalents;
-        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs;
+        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs, CodexMarks;
         // The names of the page features that are on, for the page data (PageJson.DataJson).
         internal static string[] PageFeatures = new string[0];
 
@@ -53,7 +53,11 @@ namespace ProjectCook
             IconTabs = Config.Bind(
                 "Features", "IconTabs", true,
                 "The storage tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press show the icon of each storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Off shows the names as without the mod. Needs a game restart.");
+            CodexMarks = Config.Bind(
+                "Features", "CodexMarks", true,
+                "A trophy on each dish card of the cooking window whose dish is not in the Codex yet, and the Codex choice of the food sort: the foods that you have never tasted come first, each with a trophy. Off shows no trophy and no Codex choice. Needs a game restart.");
             var features = new System.Collections.Generic.List<string>();
+            if (CodexMarks.Value) features.Add("codexMarks");
             if (SeparatePieces.Value) features.Add("separatePieces");
             if (DimUncookable.Value) features.Add("dimUncookable");
             // The portion switch is part of the dish preview.
@@ -72,7 +76,8 @@ namespace ProjectCook
                 typeof(PageTickOnCallShowAction),
                 typeof(PageTickOnStorageShow),
             };
-            if (DishPreview.Value) patches.Add(typeof(PreviewOnRefreshPrediction));
+            // The prediction Postfix adds the preview lines and the codex flags of the dish cards.
+            if (DishPreview.Value || CodexMarks.Value) patches.Add(typeof(PreviewOnRefreshPrediction));
             if (RowSplit.Value)
                 patches.AddRange(new[] { typeof(RowSplitOnRefreshPrediction), typeof(RowSplitOnStart), typeof(RowSplitOnValidate), typeof(RowSplitOnSettle), typeof(RowSplitOnAdmission) });
             if (SeparatePieces.Value)
@@ -116,8 +121,9 @@ namespace ProjectCook
                     Log.LogWarning($"patch ItemManager.TryRankQuickStoreTarget failed, Store Chilled Food keeps the game's targets: {e.Message}");
                 }
             }
-            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value)
-                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value}");
+            // Logged when a feature differs from its default.
+            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value || !CodexMarks.Value)
+                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value} CodexMarks={CodexMarks.Value}");
             Log.LogInfo("Project Cook loaded.");
         }
     }

@@ -11,6 +11,7 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 - **Separate pieces.** Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.
 - **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
 - **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
+- **Codex marks.** A gold trophy on a dish card marks a dish that is not in your Codex yet, and the Codex choice of the food sort puts the foods you have never tasted first, each with a trophy.
 - **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine, and in the Brewing Barrel, Rat Cage, and Ration Press windows. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2, as the fridge tabs; in the Rat Cage window at any level.
 - **Compact tabs.** Storage tabs show icons instead of names, so more fit in the row: at the Cooking Station (Electric Oven, Juicer, and other cooking furniture), the Brewing Barrel, the Rat Cage, and the Ration Press. Point at a tab to see its name. At the Cooking Station, dropping an item on a tab is easier: a drop just above or below it counts, and its name shows while you drag.
 - **Store Chilled Food.** The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.
@@ -70,6 +71,17 @@ In the cooking window, the items on the workbench show the number of the choice 
 The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for the Backpack and each fridge and cooking storage tab. Here Satiety shows the satiety that the cage gets from the item, not the eat value: the satiety of the dish itself for a cooked dish or a ration, else the raw satiety, times the uses left, with no talent bonus. So the same item can show a bigger Satiety number here than in the cooking window. Items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the number of the choice at each item.
 
 The sort only changes what the window shows, not the places of the items. One choice applies to all these windows until you quit the game. While a sort is on, a drag inside the sorted grid does nothing; a drag to or from another grid works as usual, and an item that you put in goes to a free place. Select Default to move items by hand.
+
+## Codex marks
+
+See what is still missing from your Codex:
+
+- Each dish card in "THIS POT" whose dish is not in the Codex yet shows a gold trophy at the top left of its icon. This includes new combinations and "???" cards. A dish that is in the Codex from any of its recipes shows no trophy.
+- The food sort of the storage window and the Rat Cage window gets the choice Codex, with a trophy icon. It puts the foods that you have never tasted first, each with a trophy, and the other items after them in their real order. Nothing is dimmed. The items in the Food Storage of the Rat Cage show the trophy at their places. The cooking window has no choice Codex, because cooking an ingredient does not add it to the Codex: there the trophy marks only the dishes.
+
+The trophies follow the Codex of all your runs. After you cook a dish or eat a food for the first time, its trophy is gone at the next refresh of the window. In guide mode and explore mode the game keeps the Codex locked, so no trophy shows.
+
+Creative Cook (Medium) and Creative Cook (Premium) raise the tier of a dish from ingredient types (for example Meat + Vegetables), so the card shows the higher-tier dish and its trophy. The lower-tier dishes of these recipes (for example Simple Stew) need a run without the talent to enter the Codex.
 
 ## Cooking tag
 
@@ -136,6 +148,7 @@ The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written
 - `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
 - `ColdSortFood` - the fridges with Food or Cooking and the Cold Storage room storages as targets of Store Chilled Food.
 - `IconTabs` - the storage icons in place of the names on the tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows.
+- `CodexMarks` - the trophy on the dish cards whose dish is not in the Codex, and the Codex choice of the food sort.
 
 See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for editing the file.
 
@@ -191,3 +204,5 @@ dotnet build src/ProjectCook.csproj -c Release -p:Package=true
 Licensed under the GNU General Public License v3.0. Copyright (C) 2026 ivmakk. See [LICENSE](LICENSE).
 
 You may reuse and modify this mod, but you must keep it open under the same license and give credit. Do not reupload it without credit.
+
+The trophy icon (`src/Web/page/icons/codex.svg`) is from [Lucide](https://lucide.dev), ISC License, Copyright (c) Lucide Contributors.

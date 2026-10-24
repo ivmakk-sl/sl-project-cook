@@ -1,4 +1,4 @@
-/* Library copy of shared/number-badge 1.0.1. Do not edit: see src/Shared/number-badge/VERSION. */
+/* Library copy of shared/number-badge 1.1.0. Do not edit: see src/Shared/number-badge/VERSION. */
 /* The number badge of an item cell. PFX is the prefix of the mod; numberBadgeCss(prefix) replaces it. The mod sets
    these variables in its tokens.css:
      --PFX-badge-fg      the color of a number with no tone
@@ -25,6 +25,15 @@
   background: var(--PFX-badge-bg);
   text-shadow: var(--PFX-badge-shadow);
   pointer-events: none;
+}
+
+/* An icon in place of the number: the height of the number line, drawn in the color of the badge (the tone). */
+.PFX-badge > svg {
+  display: block;
+  width: 9px;
+  height: 9px;
+  margin: 1px 0;
+  stroke: currentColor;
 }
 
 /* A layer over a grid, above a layer of the game (the frost of a freezer: z-index 3, 11 on a selected item). Each

@@ -121,6 +121,27 @@
   color: var(--pc-ico-days);
 }
 
+/* The icon of the choice Codex: the coin of the codex mark, as big as the Lucide circles of the other round icons in
+   the 14 px icon box (a circle of about 13 px, a ring of about 1.2 px). */
+.projectcook-sort-ico[data-choice="7"] {
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 13px;
+  height: 13px;
+  margin: 0.5px;
+  border: 1.2px solid var(--pc-codex);
+  border-radius: 50%;
+  background: var(--pc-codex-bg);
+  color: var(--pc-codex);
+}
+
+.projectcook-sort-ico[data-choice="7"] > svg {
+  width: 7.5px;
+  height: 7.5px;
+  stroke-width: 2.4;
+}
+
 /* The Rat Cage window draws its Food and Rat tags at the top left of a cell and leaves the top right free. */
 .projectcook-ratcage .projectcook-sort-badge {
   right: 1px;
@@ -159,4 +180,64 @@
 .projectcook-portion-opt.projectcook-portion-on {
   color: var(--pc-black);
   background: var(--pc-sort-gold);
+}
+
+/* The codex mark: a gold trophy on a round, opaque dark coin with a gold ring, the same on a dish card, in a cell
+   badge, and as the dropdown icon of Codex. On a dish card it hangs 4 px out of the top left corner of the dish icon, as
+   in a cell: a wrapper holds the icon and the coin, because the icon box cuts off its content. The pointer goes through
+   the coin to the card. */
+.pot-card .projectcook-codex-wrap {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* The coin of the dish card and of the cell badge. */
+.pot-card .projectcook-codex-wrap > .projectcook-codex,
+.projectcook-sort-badge.projectcook-sort-codex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--pc-codex);
+  border-radius: 50%;
+  background: var(--pc-codex-bg);
+  color: var(--pc-codex);
+  box-shadow: var(--pc-codex-shadow);
+}
+
+.pot-card .projectcook-codex-wrap > .projectcook-codex {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* The cell badge of the number badge library, with the tone codex: the coin in place of the number box. It hangs
+   4 px out of the top left corner, a mirror of the game's food tile at the top right of a cooking window cell (15 px
+   at top -4px, right -4px). The badge sits at top 1px, left 1px of its cell, or in a layer at the place of its cell
+   with a margin of 1px, so the margin moves it 4 px out in both cases. */
+.projectcook-sort-badge.projectcook-sort-codex {
+  margin: -5px 0 0 -5px;
+  padding: 0;
+}
+
+.projectcook-sort-layer > .projectcook-sort-badge.projectcook-sort-codex {
+  margin: -4px 0 0 -4px;
+}
+
+/* The Rat Cage window keeps its badges at the top right (its tags take the top left), with the same overhang. */
+.projectcook-ratcage .projectcook-sort-badge.projectcook-sort-codex {
+  margin: -5px -5px 0 0;
+}
+
+.projectcook-sort-badge.projectcook-sort-codex > svg,
+.pot-card .projectcook-codex-wrap > .projectcook-codex > svg {
+  width: 9px;
+  height: 9px;
+  margin: 0;
+  stroke-width: 2.4;
 }

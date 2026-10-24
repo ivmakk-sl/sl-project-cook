@@ -362,3 +362,40 @@ test('storage sort: after a choice change the badges follow the cells that Vue m
   assert.equal(badge.style.left, '0px');
   assert.equal(w.document.querySelector('.projectcook-sort-layer [data-id="1"]').style.left, '50px');
 });
+
+const CODEX_WORDS = { ...WORDS, choices: [...WORDS.choices, 'Codex'] };
+
+test('storage sort: no Codex choice when the words have no Codex', () => {
+  const w = storageWindow();
+  view.sort = sortData('42');
+  applyStorageSort(w);
+  const opts = toolbarB(w).querySelectorAll('.projectcook-sort-opt');
+  assert.equal(opts.length, 7);
+  assert.equal(toolbarB(w).querySelector('.projectcook-sort-ico[data-choice="7"]'), null);
+});
+
+test('storage sort: Codex puts the untasted foods first with the codex mark, and dims nothing', () => {
+  const w = storageWindow();
+  const data = sortData('42');
+  data.words = CODEX_WORDS;
+  data.items[2].x = 1;
+  view.sort = data;
+  applyStorageSort(w);
+  const opts = toolbarB(w).querySelectorAll('.projectcook-sort-opt');
+  assert.equal(opts.length, 8);
+  assert.equal(opts[7].textContent, 'Codex');
+  assert.ok(opts[7].querySelector('.projectcook-sort-ico[data-choice="7"] svg'), 'the trophy icon of the choice');
+
+  select(w, 7);
+  assert.deepEqual(place(w, 2), [0, 0]);
+  assert.deepEqual(place(w, 1), [1, 0]);
+  assert.deepEqual(place(w, 3), [2, 0]);
+  const panel = w.document.querySelector('.bag-panel.is-storage');
+  const badges = panel.querySelectorAll('.projectcook-sort-badge');
+  assert.equal(badges.length, 1);
+  assert.ok(badges[0].classList.contains('projectcook-sort-codex'));
+  assert.ok(badges[0].querySelector(':scope > svg'));
+  assert.equal(badges[0].textContent, '');
+  assert.equal(w.document.querySelector('.projectcook-sort-dim'), null);
+  assert.ok(toolbarB(w).querySelector('.projectcook-sort-btn .projectcook-sort-ico[data-choice="7"] svg'));
+});

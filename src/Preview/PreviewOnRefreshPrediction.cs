@@ -19,7 +19,6 @@ namespace ProjectCook
                 // Also with an empty workbench, because the ingredient tooltips need the page script. Each window
                 // open refreshes the prediction, so the send also finds a new Cooking frame.
                 PageTick.Request();
-                var words = GameWords.Current();
 
                 long readStart = Timing.Start();
                 string json = state.PredictionListJson.Value;
@@ -37,15 +36,20 @@ namespace ProjectCook
                 }
 
                 long buildStart = Timing.Start();
-                // The row split Postfix runs first and rebuilds the list from its plan, one entry for each dish.
-                var plan = RowPlanner.Current;
-                var dishes = plan != null && plan.Dishes.Count == entries.Count ? plan.Dishes : null;
-                var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, dishes, words, out var tips, out var portionTexts);
-                if (previews.Count == 0) return;
-
-                string withPreviews = PreviewLogic.AddPreviews(json, previews, tips, portionTexts);
+                string result = json;
+                if (Plugin.DishPreview.Value)
+                {
+                    // The row split Postfix runs first and rebuilds the list from its plan, one entry for each dish.
+                    var plan = RowPlanner.Current;
+                    var dishes = plan != null && plan.Dishes.Count == entries.Count ? plan.Dishes : null;
+                    var previews = Preview.Build(state, entries, workbenchIds, workbenchTags, dishes, GameWords.Current(), out var tips, out var portionTexts);
+                    if (previews.Count > 0) result = PreviewLogic.AddPreviews(result, previews, tips, portionTexts);
+                }
+                // The preview fields do not change the entries, so the indexes of entries stay valid.
+                if (Plugin.CodexMarks.Value) result = AddCodex(result, entries);
+                if (ReferenceEquals(result, json)) return;
                 double buildMs = Timing.Ms(buildStart);
-                state.PredictionListJson.Value = withPreviews;
+                state.PredictionListJson.Value = result;
                 if (Plugin.Verbose.Value)
                     Plugin.Log.LogDebug(FormattableString.Invariant($"timing: prediction read {readMs:0.00} ms, build {buildMs:0.00} ms, json {Timing.Kb(json):0.0} KB, entries {entries.Count}"));
             }
@@ -53,6 +57,19 @@ namespace ProjectCook
             {
                 Plugin.Log.LogError($"Project Cook failed: {e}");
             }
+        }
+
+        // The codex flag of each dish card whose dish has no codex entry.
+        private static string AddCodex(string json, System.Collections.Generic.List<PreviewLogic.Entry> entries)
+        {
+            var reader = CodexReader.Take();
+            var marked = new System.Collections.Generic.HashSet<int>();
+            if (reader != null)
+                for (int i = 0; i < entries.Count; i++)
+                    if (reader.DishMark(entries[i].RecipeId)) marked.Add(i);
+            if (Plugin.Verbose.Value)
+                Plugin.Log.LogDebug($"codex: locked={(reader == null ? "unread" : reader.Locked.ToString())} dishes={entries.Count} marked={marked.Count}");
+            return PreviewLogic.AddCodex(json, marked);
         }
     }
 }

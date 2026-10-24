@@ -9,6 +9,7 @@ import defaultIcon from '../../Shared/icons/web/default.svg?raw';
 import sortIcon from '../../Shared/icons/web/sort.svg?raw';
 import tradeIcon from '../../Shared/icons/web/trade.svg?raw';
 import expirationIcon from './icons/expiration.svg?raw';
+import { CODEX_ICON } from './codexIcon';
 
 export const PREFIX = 'projectcook-sort';
 
@@ -18,7 +19,7 @@ export const PREFIX = 'projectcook-sort';
 // trim: a file ends with a line break, which would be a text node of the button.
 const ICONS: Record<string, string> = {
   1: '🍖', 2: '🧠', 3: '⚡', 4: '❤️',
-  sort: sortIcon.trim(), 0: defaultIcon.trim(), 5: tradeIcon.trim(), 6: expirationIcon.trim(),
+  sort: sortIcon.trim(), 0: defaultIcon.trim(), 5: tradeIcon.trim(), 6: expirationIcon.trim(), [CHOICE.codex]: CODEX_ICON,
 };
 
 function icon(key: string): DropdownIcon {
@@ -66,7 +67,9 @@ export function drawCells(doc: Document, cells: ArrayLike<Element>, ids: (number
       continue;
     }
     const item = sort!.items[String(ids[i])];
-    looks.push({ text: badgeText(item, choice), tone: badgeTone(item, choice), dim: kept || dim.has(ids[i]), id: String(ids[i]) });
+    // Codex: the codex mark in place of a number, on the untasted foods only.
+    const icon = choice === CHOICE.codex && item && item.x ? CODEX_ICON : null;
+    looks.push({ text: badgeText(item, choice), icon, tone: badgeTone(item, choice), dim: kept || dim.has(ids[i]), id: String(ids[i]) });
   }
   drawBadges(doc, PREFIX, cells, looks, layer);
 }
