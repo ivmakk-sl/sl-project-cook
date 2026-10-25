@@ -1,10 +1,10 @@
 v1.5.0 - 2026-10-26
-Added: A gold trophy on a dish card in THIS POT marks a dish that is not in your Codex yet, also on new combinations and "???" cards.
-Added: The food sort gets the choice Codex: the foods you have never tasted come first, each with a trophy. Also in the Rat Cage's Food Storage.
-Added: Recipe Book rows show the same trophy. The Codex button in the Recipe Book title shows only those recipes; click it again to show all.
-Added: Load in the Recipe Book also takes the ingredients from the other storage tabs of the cooking window when the open tab does not have them all. Locked tabs give nothing.
-Added: A dish that a cooking station cooks now leaves the Codex list until its cook ends, so you do not cook the same new dish twice at two stations.
-Added: The Codex list also shows the recipes you have not learned yet whose ingredients you have, each with a grey "?" and Load. The first cook teaches the recipe. Turn on UnknownRecipesWithoutIngredients to also see the ones you cannot cook yet.
+Added: New dishes for your Codex are easy to spot: in the cooking window, a small gold trophy icon marks each dish you have never cooked, both in the dishes your pot will make and in the Recipe Book. Cook it once and the icon is gone.
+Added: A Codex button at the top of the Recipe Book shows only the recipes of dishes you have never cooked. Click it again to show all recipes.
+Added: With the Codex button on, the Recipe Book also lists recipes you have not learned yet, when your storage has their ingredients. Each shows a grey "?" and Load, and your first cook teaches you the recipe. To also list the ones you cannot cook yet, turn on UnknownRecipesWithoutIngredients.
+Added: A dish that one of your cooking stations is cooking right now leaves the Codex list until it is done, so you do not cook the same new dish twice.
+Added: Load in the Recipe Book also takes ingredients from your other storage tabs (Backpack, fridges, cooking storages) when the open tab does not have them all. Locked tabs give nothing.
+Added: The food sort has a new Codex choice: the foods you have never eaten come first, each with the trophy icon.
 
 v1.4.0 - 2026-10-23
 Added: Storages tagged Cooking or Food also show as tabs in the Brewing Barrel, Rat Cage, and Ration Press windows. In the Rat Cage window you can sort them like the fridge tabs.
