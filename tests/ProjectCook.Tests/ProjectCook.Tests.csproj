@@ -24,6 +24,7 @@
     <Compile Include="..\..\src\ColdSort\ColdSortLogic.cs" Link="ColdSortLogic.cs" />
     <Compile Include="..\..\src\IconTabs\IconTabsLogic.cs" Link="IconTabsLogic.cs" />
     <Compile Include="..\..\src\Codex\CodexLogic.cs" Link="CodexLogic.cs" />
+    <Compile Include="..\..\src\LoadAll\LoadAllLogic.cs" Link="LoadAllLogic.cs" />
     <None Include="..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

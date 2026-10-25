@@ -16,7 +16,7 @@ namespace ProjectCook
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
         internal static ConfigEntry<bool> IgnoreCookingTalents;
-        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs, CodexMarks;
+        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs, CodexMarks, LoadFromAllTabs;
         // The names of the page features that are on, for the page data (PageJson.DataJson).
         internal static string[] PageFeatures = new string[0];
 
@@ -55,7 +55,10 @@ namespace ProjectCook
                 "The storage tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press show the icon of each storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Off shows the names as without the mod. Needs a game restart.");
             CodexMarks = Config.Bind(
                 "Features", "CodexMarks", true,
-                "A trophy on each dish card of the cooking window whose dish is not in the Codex yet, and the Codex choice of the food sort: the foods that you have never tasted come first, each with a trophy. Off shows no trophy and no Codex choice. Needs a game restart.");
+                "A trophy on each dish card and each Recipe Book row of the cooking window whose dish is not in the Codex yet, the Codex button in the Recipe Book title that shows only those recipes, and the Codex choice of the food sort: the foods that you have never tasted come first, each with a trophy. Off shows no trophy, no Codex button, and no Codex choice. Needs a game restart.");
+            LoadFromAllTabs = Config.Bind(
+                "Features", "LoadFromAllTabs", true,
+                "Load in the Recipe Book of the cooking window also takes the ingredients from the other tabs of the window (the bag, each fridge, and each cooking storage that is not locked), when the open tab does not have them all. The Recipe Book then counts the ingredients of all these tabs. Off fills only from the open tab, as without the mod. Needs a game restart.");
             var features = new System.Collections.Generic.List<string>();
             if (CodexMarks.Value) features.Add("codexMarks");
             if (SeparatePieces.Value) features.Add("separatePieces");
@@ -103,6 +106,14 @@ namespace ProjectCook
                 try { harmony.CreateClassProcessor(type).Patch(); }
                 catch (Exception e) { Log.LogError($"patch {type.Name} failed: {e.Message}"); }
             }
+            if (LoadFromAllTabs.Value) PatchGroup(harmony, LoadAllPatches.Types, "Load from all tabs is off, the fill takes only the open tab");
+            // The timing lines of the Recipe Book also run with LoadFromAllTabs off, for the time without the feature.
+            if (Verbose.Value)
+                foreach (var type in new[] { typeof(LoadAllTimingOnRefresh), typeof(LoadAllTimingOnRecipeClick) })
+                {
+                    try { harmony.CreateClassProcessor(type).Patch(); }
+                    catch (Exception e) { Log.LogError($"patch {type.Name} failed: {e.Message}"); }
+                }
             if (IgnoreCookingTalents.Value)
             {
                 try
@@ -122,9 +133,38 @@ namespace ProjectCook
                 }
             }
             // Logged when a feature differs from its default.
-            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value || !CodexMarks.Value)
-                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value} CodexMarks={CodexMarks.Value}");
+            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value || !CodexMarks.Value || !LoadFromAllTabs.Value)
+                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value} CodexMarks={CodexMarks.Value} LoadFromAllTabs={LoadFromAllTabs.Value}");
             Log.LogInfo("Project Cook loaded.");
+        }
+
+        // Patches all classes of a feature, or none: when one target is missing (a game update), the patches already
+        // applied are taken off again, and one warning names the class that failed. Patch() gives the replacement
+        // methods, not the originals, so the patches of the group are found by their declaring class instead; only these
+        // patch methods come off, so another patch of the mod on the same original stays.
+        private static void PatchGroup(Harmony harmony, Type[] types, string offText)
+        {
+            foreach (var type in types)
+            {
+                try { harmony.CreateClassProcessor(type).Patch(); }
+                catch (Exception e)
+                {
+                    var group = new System.Collections.Generic.HashSet<Type>(types);
+                    foreach (var original in new System.Collections.Generic.List<System.Reflection.MethodBase>(harmony.GetPatchedMethods()))
+                    {
+                        var info = Harmony.GetPatchInfo(original);
+                        var patches = new System.Collections.Generic.List<Patch>();
+                        patches.AddRange(info.Prefixes);
+                        patches.AddRange(info.Postfixes);
+                        patches.AddRange(info.Transpilers);
+                        patches.AddRange(info.Finalizers);
+                        foreach (var patch in patches)
+                            if (patch.owner == harmony.Id && group.Contains(patch.PatchMethod.DeclaringType)) harmony.Unpatch(original, patch.PatchMethod);
+                    }
+                    Log.LogWarning($"patch {type.Name} failed, its target method is missing. {offText}: {e.Message}");
+                    return;
+                }
+            }
         }
     }
 }

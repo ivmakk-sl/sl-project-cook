@@ -7,20 +7,23 @@ namespace ProjectCook
 {
     // The data of setData: the tooltip lines and the tier of each ingredient, by config ID, read from the Item
     // table. The words and the trade value with the appraisal are part of the tooltip lines, so the data is read again
-    // only when the words or the appraisal change.
+    // only when the words or the appraisal change. A new book data writes the JSON again from the same lines.
     internal static class IngredientData
     {
         private static PreviewLogic.Words words;
         private static float appraisal;
+        private static Dictionary<int, string> tips;
+        private static Dictionary<int, int> tiers;
+        private static PageJson.Book book;
         private static string json;
 
         // The tiers are the game's tiers 1 to 3; PageJson keeps only the tiers that the page marks.
-        public static string Json(PreviewLogic.Words current, float currentAppraisal)
+        public static string Json(PreviewLogic.Words current, float currentAppraisal, PageJson.Book currentBook)
         {
-            if (json == null || !current.SameAs(words) || currentAppraisal != appraisal)
+            if (tips == null || !current.SameAs(words) || currentAppraisal != appraisal)
             {
-                var tips = new Dictionary<int, string>();
-                var tiers = new Dictionary<int, int>();
+                tips = new Dictionary<int, string>();
+                tiers = new Dictionary<int, int>();
                 var e = ConfigManager.Instance._Config_Item_Dict.GetEnumerator();
                 while (e.MoveNext())
                 {
@@ -37,10 +40,15 @@ namespace ProjectCook
                     if (tip != null) tips[item.ID] = tip;
                     if (tier >= 1 && tier <= 3) tiers[item.ID] = tier;
                 }
-                json = PageJson.DataJson(tips, tiers, Plugin.PageFeatures, current.Portion);
                 words = current;
                 appraisal = currentAppraisal;
+                json = null;
                 if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ingredient tips: {tips.Count} items, {tiers.Count} with a tier, appraisal={currentAppraisal}");
+            }
+            if (json == null || !ReferenceEquals(currentBook, book))
+            {
+                json = PageJson.DataJson(tips, tiers, Plugin.PageFeatures, current.Portion, currentBook);
+                book = currentBook;
             }
             return json;
         }

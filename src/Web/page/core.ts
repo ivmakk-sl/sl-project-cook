@@ -23,6 +23,7 @@ export const ICON_TABS_PREFIX = 'projectcook';
 //   pieces:   pot.checkValidity, pot.getOccupiedSlots, pot.getItems, backpack.getItems
 //   tagIcon:  #app (storage window)
 //   storageSort: Vue.watch, .grid-container, .toolbar (storage window; bagB is in the setup state of #app)
+//   codexBook: renderRecipeListFromData, updateRecipeCount, #recipeCountDisplay, #recipePanelTitle
 // #predictionList .pot-bd exists only after a render, so it is checked in the render wrapper instead of here.
 // tagIconSvg is in the setup state of the #app component, so installTagIcon checks it.
 export const FEATURES = {
@@ -34,7 +35,8 @@ export const FEATURES = {
   ratCageSort: ['backpack.refresh', 'backpack._flushPendingRefresh', 'backpack.updateItemPosition', 'foodBag.getConfig', '.fill-row'],
   pieces: ['pot.checkValidity', 'pot.getOccupiedSlots', 'pot.getItems', 'backpack.getItems'],
   tagIcon: ['#app'],
-  storageSort: ['Vue.watch', '.grid-container', '.toolbar']
+  storageSort: ['Vue.watch', '.grid-container', '.toolbar'],
+  codexBook: ['renderRecipeListFromData', 'updateRecipeCount', '#recipeCountDisplay', '#recipePanelTitle']
 };
 
 export type Feature = keyof typeof FEATURES;
@@ -50,15 +52,17 @@ const PAGE_OF: Record<Feature, Page> = {
   ratCageSort: 'ratcage',
   pieces: 'cooking',
   tagIcon: 'storage',
-  storageSort: 'storage'
+  storageSort: 'storage',
+  codexBook: 'cooking'
 };
 
 // The data of the last setData; the version counts the setData calls, so a frame draws its bag items again
 // when the tiers can have changed since its last draw. sort is the data of the last setSortData, and choice the
-// choice of the food sort (an index of CHOICE), and portion the choice of the portion switch (true: per portion): the
-// root page keeps them for all frames until a browser rebuild.
-export const view: { data: PageData; version: number; sort: SortData | null; choice: number; portion: boolean; iconTabs: IconTabList | null } =
-  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0, portion: false, iconTabs: null };
+// choice of the food sort (an index of CHOICE), portion the choice of the portion switch (true: per portion), and
+// codexFilter the Codex filter of the Recipe Book (true: on): the root page keeps them for all frames until a browser
+// rebuild.
+export const view: { data: PageData; version: number; sort: SortData | null; choice: number; portion: boolean; iconTabs: IconTabList | null; codexFilter: boolean } =
+  { data: { tips: {}, tiers: {} }, version: 0, sort: null, choice: 0, portion: false, iconTabs: null, codexFilter: false };
 
 function partExists(w: Window, doc: Document, name: string): boolean {
   if (name.charAt(0) === '#' || name.charAt(0) === '.') return !!doc.querySelector(name);

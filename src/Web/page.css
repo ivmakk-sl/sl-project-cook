@@ -121,6 +121,68 @@
   color: var(--pc-ico-days);
 }
 
+/* The Codex filter at the right end of the title of the Recipe Book, in place of the game's "Unlocked A / B" (the
+   design canvas "Recipe Book Codex Filter"): the size of the game's Load button, the trophy and the text centered by
+   flex. The title is uppercase with letter spacing, so the button sets its own text. */
+.projectcook-codex-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: 22px;
+  margin-left: auto;
+  padding: 0 8px;
+  border: 1px solid var(--pc-codex-filter-border);
+  border-radius: 4px;
+  background: var(--pc-codex-filter-bg);
+  color: var(--pc-codex);
+  font: inherit;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: normal;
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* A long title (Chinese, a large HUD scale) shrinks with an ellipsis, so the button stays on the title line. */
+#recipePanelTitle > #recipeBookTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.projectcook-codex-filter[aria-pressed="true"] {
+  border-color: var(--pc-codex);
+  background: var(--pc-codex);
+  color: var(--pc-codex-filter-on-fg);
+  font-weight: bold;
+}
+
+.projectcook-codex-filter > svg,
+.projectcook-codex-filter > span {
+  display: block;
+}
+
+.projectcook-codex-filter > svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.4;
+}
+
+/* The line of an empty filtered list, in the middle of the list. */
+.projectcook-codex-empty {
+  margin: auto 0;
+  padding: 0 10px;
+  color: var(--pc-codex-empty);
+  font-size: 13px;
+  text-align: center;
+}
+
 /* The icon of the choice Codex: the coin of the codex mark, as big as the Lucide circles of the other round icons in
    the 14 px icon box (a circle of about 13 px, a ring of about 1.2 px). */
 .projectcook-sort-ico[data-choice="7"] {
@@ -185,14 +247,16 @@
 /* The codex mark: a gold trophy on a round, opaque dark coin with a gold ring, the same on a dish card, in a cell
    badge, and as the dropdown icon of Codex. On a dish card it hangs 4 px out of the top left corner of the dish icon, as
    in a cell: a wrapper holds the icon and the coin, because the icon box cuts off its content. The pointer goes through
-   the coin to the card. */
+   the coin to the card. A Recipe Book row has the same coin at its icon. */
+.book-item .projectcook-codex-wrap,
 .pot-card .projectcook-codex-wrap {
   position: relative;
   display: flex;
   flex-shrink: 0;
 }
 
-/* The coin of the dish card and of the cell badge. */
+/* The coin of the dish card, of the Recipe Book row, and of the cell badge. */
+.book-item .projectcook-codex-wrap > .projectcook-codex,
 .pot-card .projectcook-codex-wrap > .projectcook-codex,
 .projectcook-sort-badge.projectcook-sort-codex {
   display: flex;
@@ -208,6 +272,7 @@
   box-shadow: var(--pc-codex-shadow);
 }
 
+.book-item .projectcook-codex-wrap > .projectcook-codex,
 .pot-card .projectcook-codex-wrap > .projectcook-codex {
   position: absolute;
   top: -4px;
@@ -235,6 +300,7 @@
 }
 
 .projectcook-sort-badge.projectcook-sort-codex > svg,
+.book-item .projectcook-codex-wrap > .projectcook-codex > svg,
 .pot-card .projectcook-codex-wrap > .projectcook-codex > svg {
   width: 9px;
   height: 9px;

@@ -18,7 +18,8 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 | `CookingStorages` | `true` | `true` / `false` | Lets you use ingredients directly from home storages tagged Cooking or Food in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, from cooking level 2 (in the Rat Cage window at any level). Adds the Cooking tag to storage settings. |
 | `ColdSortFood` | `true` | `true` / `false` | The Store Chilled Food button of the backpack also fills a fridge tagged Food or Cooking, and last a storage tagged Food or Cooking in the Cold Storage room while the room keeps food cold. A storage tagged Chilled still comes first, and a fridge with no tag comes before the Cold Storage room. In the Cold Storage room, the button counts the food in the backpack by its days at the normal speed. Off: the button works as without the mod. |
 | `IconTabs` | `true` | `true` / `false` | Shows the icon of each storage in place of its name on the storage tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, so more tabs fit in the row. Point at a tab to see its name. Off: the tabs show their names as without the mod. |
-| `CodexMarks` | `true` | `true` / `false` | Shows a gold trophy on each dish card whose dish is not in your Codex yet, and adds the choice Codex to the food sort: the foods you have never tasted come first, each with a trophy. Off: no trophy and no choice Codex. No trophy shows in guide mode and explore mode, where the game keeps the Codex locked. |
+| `CodexMarks` | `true` | `true` / `false` | Shows a gold trophy on each dish card and each Recipe Book row whose dish is not in your Codex yet, puts the Codex button ("Codex A / B") in the Recipe Book title in place of "Unlocked A / B" (click it to show only the rows with a trophy), and adds the choice Codex to the food sort: the foods you have never tasted come first, each with a trophy. Off: no trophy, no Codex button, and no choice Codex. No trophy and no Codex button show in guide mode and explore mode, where the game keeps the Codex locked. |
+| `LoadFromAllTabs` | `true` | `true` / `false` | Load in the Recipe Book also takes the ingredients from the other storage tabs of the cooking window (the Backpack, each fridge, and each cooking storage that is not locked) when the open tab does not have them all, and the Recipe Book counts all these tabs. With a full home, a refresh of the Recipe Book can take a few milliseconds more. Off: Load takes only the open tab, as without the mod. |
 
 With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
 
@@ -41,9 +42,10 @@ DimUncookable = true
 ColdSortFood = true
 IconTabs = true
 CodexMarks = true
+LoadFromAllTabs = true
 ```
 
-The sort choice and the choice of the portion switch are selected in the window, not in this file. The sort choice is shared between the storage window, the cooking window, and the Rat Cage window and resets to Default when you restart the game. The portion switch resets to Whole dish when you restart the game.
+The sort choice and the choice of the portion switch are selected in the window, not in this file. The sort choice is shared between the storage window, the cooking window, and the Rat Cage window and resets to Default when you restart the game. The portion switch resets to Whole dish when you restart the game. The Codex button of the Recipe Book is off (all rows) after each restart.
 
 ## General
 

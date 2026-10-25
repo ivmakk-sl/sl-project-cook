@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
@@ -60,6 +61,38 @@ namespace ProjectCook
             if (Locked || broken) return false;
             try { return CodexLogic.ShowMark(false, true, FoodUnlocked(configId)); }
             catch (Exception e) { broken = true; Warn(e); return false; }
+        }
+
+        // The unlocked and the total count of the dish entries of the codex. False when they cannot be read.
+        internal bool DishCounts(out int unlocked, out int total)
+        {
+            unlocked = total = 0;
+            if (broken) return false;
+            try { ReadDishCounts(out unlocked, out total); return true; }
+            catch (Exception e) { broken = true; Warn(e); return false; }
+        }
+
+        // The ids of the recipes of the game whose dish has no codex entry, by the rule of the dish cards. Null when the
+        // recipe config or a codex member cannot be read.
+        internal HashSet<int> BookIds()
+        {
+            if (Locked || broken) return null;
+            try
+            {
+                var ids = new HashSet<int>();
+                var e = ConfigManager.Instance._Config_CookingRecipe_Dict.GetEnumerator();
+                while (e.MoveNext())
+                    if (e.Current.Value != null && DishMark(e.Current.Key)) ids.Add(e.Current.Key);
+                return broken ? null : ids;
+            }
+            catch (Exception e) { broken = true; Warn(e); return null; }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ReadDishCounts(out int unlocked, out int total)
+        {
+            unlocked = manager.GetUnlockedCount(CodexCategory.Dish);
+            total = manager.GetTotalCount(CodexCategory.Dish);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

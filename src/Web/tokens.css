@@ -36,6 +36,13 @@
   --pc-codex-bg: #2a211c;
   --pc-codex-shadow: 0 1px 2px rgb(from var(--pc-black) r g b / 60%);
 
+  /* The Codex filter of the Recipe Book, in the look of the game's Load button: gold text and a gold outline on a light
+     gold fill, and solid gold with dark text while it is on. The empty line in the text color of the tooltips. */
+  --pc-codex-filter-bg: rgb(from var(--pc-codex) r g b / 12%);
+  --pc-codex-filter-border: rgb(from var(--pc-codex) r g b / 45%);
+  --pc-codex-filter-on-fg: #231c18;
+  --pc-codex-empty: var(--text-main, #e8e2dc);
+
   /* The variables of the dropdown library and the number badge library (prefix projectcook-sort). The badge is
      above the frost of a freezer in a cell (z-index 3) and below the open list of a dropdown. */
   --projectcook-sort-fg: var(--pc-white);

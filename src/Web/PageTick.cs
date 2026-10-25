@@ -25,22 +25,31 @@ namespace ProjectCook
         public static void OnResult(PushSchedule.Step step, string result) =>
             schedule.OnResult(step, result, Time.realtimeSinceStartup);
 
-        // Built at the first use, after Load has set the page features.
+        // Built at the first use, after Load has set the page features, and again for a new book data.
         private static string noIngredientData;
-        private static string NoIngredientData => noIngredientData ?? (noIngredientData = PageJson.DataJson(
-            new System.Collections.Generic.KeyValuePair<int, string>[0], new System.Collections.Generic.KeyValuePair<int, int>[0], Plugin.PageFeatures));
+        private static PageJson.Book noIngredientBook;
+        private static string NoIngredientData(PageJson.Book book)
+        {
+            if (noIngredientData == null || !ReferenceEquals(book, noIngredientBook))
+            {
+                noIngredientData = PageJson.DataJson(new KeyValuePair<int, string>[0], new KeyValuePair<int, int>[0], Plugin.PageFeatures, null, book);
+                noIngredientBook = book;
+            }
+            return noIngredientData;
+        }
 
         // The time of the last data build, for the timing line.
         private static double buildMs;
 
-        // With the dish preview off the page gets no ingredient data, and still its script for the food sort.
-        // A static delegate, so the tick of each frame allocates no closure.
+        // With the dish preview off the page gets no ingredient data, and still its script for the food sort and the
+        // book data of the codex marks. A static delegate, so the tick of each frame allocates no closure.
         private static readonly Func<string> Build = () =>
         {
             long buildStart = Timing.Start();
+            var book = BookData.Current;
             string json = Plugin.DishPreview.Value
-                ? IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal())
-                : NoIngredientData;
+                ? IngredientData.Json(GameWords.Current(), TalentInputs.ReadAppraisal(), book)
+                : NoIngredientData(book);
             buildMs = Timing.Ms(buildStart);
             return json;
         };

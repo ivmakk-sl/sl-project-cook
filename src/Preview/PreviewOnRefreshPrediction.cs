@@ -15,7 +15,10 @@ namespace ProjectCook
         {
             try
             {
-                if (state == null || state.HotPotMode.Value) return;
+                if (state == null) return;
+                // Before the returns for the hot pot and an empty cooking station: the Recipe Book shows in both.
+                if (Plugin.CodexMarks.Value) BookData.Update();
+                if (state.HotPotMode.Value) return;
                 // Also with an empty workbench, because the ingredient tooltips need the page script. Each window
                 // open refreshes the prediction, so the send also finds a new Cooking frame.
                 PageTick.Request();

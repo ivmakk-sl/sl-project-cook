@@ -16,7 +16,7 @@ import type { IconTabList, PageData, SortData } from './types';
 // Stores the ingredient tooltip lines and tiers, and the numbers of the food sort when C# sends them in the same
 // call, and applies them in one pass.
 function setData(data: PageData, sort?: SortData): string {
-  view.data = { tips: (data && data.tips) || {}, tiers: (data && data.tiers) || {}, features: (data && data.features) || [], portion: data && data.portion };
+  view.data = { tips: (data && data.tips) || {}, tiers: (data && data.tiers) || {}, features: (data && data.features) || [], portion: data && data.portion, book: data && data.book };
   view.version++;
   if (sort) view.sort = sort;
   return run();

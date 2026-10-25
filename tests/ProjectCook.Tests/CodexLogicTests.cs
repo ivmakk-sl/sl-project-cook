@@ -1,3 +1,4 @@
+using ProjectCook;
 using Xunit;
 using static ProjectCook.CodexLogic;
 
@@ -27,4 +28,13 @@ public class CodexLogicTests
     [InlineData(false, true, false, true)]
     public void ShowMark_OnlyForAnEntryNotUnlockedWhileOpen(bool locked, bool isEntry, bool unlocked, bool expected) =>
         Assert.Equal(expected, ShowMark(locked, isEntry, unlocked));
+
+    [Fact]
+    public void BookKey_SameLockAndCount_IsEqual() => Assert.Equal(new BookKey(false, 41), new BookKey(false, 41));
+
+    [Fact]
+    public void BookKey_NewDishEntry_Differs() => Assert.NotEqual(new BookKey(false, 41), new BookKey(false, 42));
+
+    [Fact]
+    public void BookKey_LockChange_Differs() => Assert.NotEqual(new BookKey(false, 41), new BookKey(true, 41));
 }

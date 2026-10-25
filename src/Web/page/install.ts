@@ -1,5 +1,6 @@
 // The pass over the Cooking frame and the storage window frame, and its result for C#.
 import { addError, ensureStyle, hasFeature, missingText, newErrorsText, view } from './core';
+import { installCodexBook, redrawBook } from './codexBook';
 import { installCodexMark } from './codexMark';
 import { installItemTip } from './itemTip';
 import { installPieces } from './pieces';
@@ -11,7 +12,7 @@ import { applyStorageSort, storageGrids } from './sortStorage';
 import { installTagIcon } from './tagIcon';
 import { installTierMark, redrawTiers } from './tierMark';
 import { iconTabsResult, runIconTabs } from './iconTabs';
-import type { CookingWindow, PredictionEntry, RatCageWindow, StorageWindow } from './types';
+import type { CookingWindow, PredictionEntry, RatCageWindow, RecipeRow, StorageWindow } from './types';
 
 // The start of the result of a pass with a storage window and no Cooking frame (PageJson.StorageResultPrefix in
 // C#): the storage window needs no retry.
@@ -154,13 +155,19 @@ function runCooking(w: CookingWindow): string | null {
       if (hasFeature(w, doc, 'tierMark')) installTierMark(w);
       // The switch is read at each drop, so the wrapper is installed also before the data comes.
       if (hasFeature(w, doc, 'pieces')) installPieces(w);
+      // The feature codexMarks and the book data are read at each draw: the data can come after the install.
+      if (hasFeature(w, doc, 'codexBook')) installCodexBook(w);
 
       w.__cookingPreview = true;
       result = 'installed';
       try { w.renderPredictionList(w.eval('State.lastPredictionEntries') as PredictionEntry[]); } catch (e) { result = 'installed, no redraw: ' + e; }
+      if (w.__projectCookBook) {
+        try { w.renderRecipeListFromData(w.eval('State.lastRecipes') as RecipeRow[]); } catch (e) { addError(w, 'codexBook: no redraw: ' + e); }
+      }
     }
 
     if (w.__cookingTierMark && w.__projectCookDrawn !== view.version) redrawTiers(w);
+    try { redrawBook(w); } catch (e) { addError(w, 'codexBook: ' + e); }
     try { refreshPortionSwitch(w); } catch (e) { addError(w, 'portionSwitch: ' + e); }
     if (hasFeature(w, doc, 'cookingSort')) {
       try { applyCookingSort(w); } catch (e) { addError(w, 'cookingSort: ' + e); }

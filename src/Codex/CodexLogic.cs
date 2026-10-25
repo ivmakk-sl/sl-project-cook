@@ -23,4 +23,18 @@ namespace ProjectCook
         // for an entry that is already unlocked.
         public static bool ShowMark(bool locked, bool isEntry, bool unlocked) => !locked && isEntry && !unlocked;
     }
+
+    // The key of the cached book data of the Recipe Book: the set of the recipes with no codex entry changes only with
+    // a new dish entry (the unlocked count of the dish category) or a change of the lock (another game mode).
+    public readonly struct BookKey : System.IEquatable<BookKey>
+    {
+        public readonly bool Locked;
+        public readonly int Unlocked;
+
+        public BookKey(bool locked, int unlocked) { Locked = locked; Unlocked = unlocked; }
+
+        public bool Equals(BookKey other) => Locked == other.Locked && Unlocked == other.Unlocked;
+        public override bool Equals(object obj) => obj is BookKey other && Equals(other);
+        public override int GetHashCode() => (Locked ? 1 : 0) ^ (Unlocked << 1);
+    }
 }
