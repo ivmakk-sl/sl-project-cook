@@ -11,17 +11,44 @@ namespace ProjectCook
     public static class PageJson
     {
         // The book data of the Recipe Book: the lock of the codex, the unlocked and the total count of the dish entries,
-        // the ids of the recipes whose dish has no codex entry, and the words of the Codex filter.
+        // the ids of the recipes whose dish has no codex entry, the words of the Codex filter, and the unknown recipe
+        // rows of the Codex filter (null while both switches of the unknown recipes are off).
         public sealed class Book
         {
             public readonly bool Locked;
             public readonly int Unlocked, Total;
             public readonly IReadOnlyCollection<int> Ids;
             public readonly BookWords Words;
+            public readonly IReadOnlyList<UnknownRow> Unknown;
 
-            public Book(bool locked, int unlocked, int total, IReadOnlyCollection<int> ids, BookWords words = null)
+            public Book(bool locked, int unlocked, int total, IReadOnlyCollection<int> ids, BookWords words = null, IReadOnlyList<UnknownRow> unknown = null)
             {
-                Locked = locked; Unlocked = unlocked; Total = total; Ids = ids; Words = words;
+                Locked = locked; Unlocked = unlocked; Total = total; Ids = ids; Words = words; Unknown = unknown;
+            }
+        }
+
+        // One unknown recipe row of the Codex filter: the fields of a row of the game (Data_Web_Cooking_Recipe) that
+        // the game's texts and status give; the dish key as its group.
+        public sealed class UnknownRow
+        {
+            public readonly int RecipeId, GroupId, Status;
+            public readonly string Name, CostText, EffectText;
+
+            public UnknownRow(int recipeId, int groupId, string name, string costText, string effectText, int status)
+            {
+                RecipeId = recipeId; GroupId = groupId; Name = name; CostText = costText; EffectText = effectText; Status = status;
+            }
+
+            public bool SameAs(UnknownRow other) => other != null && RecipeId == other.RecipeId && GroupId == other.GroupId
+                && Status == other.Status && Name == other.Name && CostText == other.CostText && EffectText == other.EffectText;
+
+            public static bool SameRows(IReadOnlyList<UnknownRow> a, IReadOnlyList<UnknownRow> b)
+            {
+                if (a == null || b == null) return a == b;
+                if (a.Count != b.Count) return false;
+                for (int i = 0; i < a.Count; i++)
+                    if (!a[i].SameAs(b[i])) return false;
+                return true;
             }
         }
 
@@ -104,6 +131,18 @@ namespace ProjectCook
                         sb.Append(",\"words\":{\"codex\":").AppendStr(w.Codex).Append(",\"title\":").AppendStr(w.Title)
                             .Append(",\"missing\":").AppendStr(w.Missing).Append(",\"showOnly\":").AppendStr(w.ShowOnly)
                             .Append(",\"showAll\":").AppendStr(w.ShowAll).Append(",\"empty\":").AppendStr(w.Empty).Append('}');
+                    if (book.Unknown != null)
+                    {
+                        sb.Append(",\"unknown\":[");
+                        for (int i = 0; i < book.Unknown.Count; i++)
+                        {
+                            var r = book.Unknown[i];
+                            sb.Append(i == 0 ? "{" : ",{").Append("\"recipeId\":").Append(r.RecipeId).Append(",\"groupId\":").Append(r.GroupId)
+                                .Append(",\"name\":").AppendStr(r.Name).Append(",\"costText\":").AppendStr(r.CostText)
+                                .Append(",\"effectText\":").AppendStr(r.EffectText).Append(",\"status\":").Append(r.Status).Append('}');
+                        }
+                        sb.Append(']');
+                    }
                 }
                 sb.Append('}');
             }

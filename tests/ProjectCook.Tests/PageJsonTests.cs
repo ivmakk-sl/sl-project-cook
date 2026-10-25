@@ -62,6 +62,40 @@ public class PageJsonTests
         Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"codexMarks\"],\"book\":{\"locked\":false,\"unlocked\":41,\"total\":88,\"ids\":[1203,1301]}}", json);
     }
 
+    // The unknown recipe rows go into the book data, after the ids.
+    [Fact]
+    public void DataJson_writes_the_unknown_recipe_rows()
+    {
+        var unknown = new[] { new PageJson.UnknownRow(1205, 1204, "Carrot \"Juice\"", "Carrot x1", "Thirst +10", 1) };
+        var book = new PageJson.Book(false, 41, 88, new[] { 1205 }, null, unknown);
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), null, null, book);
+
+        Assert.EndsWith("\"ids\":[1205],\"unknown\":[{\"recipeId\":1205,\"groupId\":1204,\"name\":\"Carrot \\\"Juice\\\"\",\"costText\":\"Carrot x1\",\"effectText\":\"Thirst +10\",\"status\":1}]}}", json);
+    }
+
+    // With the switch off, the book has no unknown list and the data no unknown field; an empty list is sent as empty.
+    [Fact]
+    public void DataJson_has_no_unknown_field_without_the_list()
+    {
+        string off = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), null, null, new PageJson.Book(false, 1, 2, new[] { 7 }));
+        string empty = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), null, null, new PageJson.Book(false, 1, 2, new[] { 7 }, null, new PageJson.UnknownRow[0]));
+
+        Assert.DoesNotContain("unknown", off);
+        Assert.Contains("\"unknown\":[]", empty);
+    }
+
+    // The same rows: no new book data, so no send.
+    [Fact]
+    public void UnknownRow_SameAs_compares_each_field()
+    {
+        var a = new PageJson.UnknownRow(1, 1, "A", "c", "e", 1);
+        Assert.True(a.SameAs(new PageJson.UnknownRow(1, 1, "A", "c", "e", 1)));
+        Assert.False(a.SameAs(new PageJson.UnknownRow(1, 1, "A", "c", "e", 0)));
+        Assert.True(PageJson.UnknownRow.SameRows(new[] { a }, new[] { new PageJson.UnknownRow(1, 1, "A", "c", "e", 1) }));
+        Assert.False(PageJson.UnknownRow.SameRows(new[] { a }, null));
+        Assert.True(PageJson.UnknownRow.SameRows(null, null));
+    }
+
     // The book data keeps the other fields.
     [Fact]
     public void DataJson_with_the_book_keeps_the_other_fields()

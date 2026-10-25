@@ -88,6 +88,48 @@ namespace ProjectCook
             catch (Exception e) { broken = true; Warn(e); return null; }
         }
 
+        // The dish of a recipe by the same-dish rule of the codex (the representative recipe of its dish).
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static int DishOf(int recipeId) => DishCodexGrouping.Representative(CodexLogic.DishSource(recipeId));
+
+        private static bool cookWarned;
+
+        // The recipe ids that the cooking stations of the home cook now, running or paused (a paused cook keeps
+        // IsCooking, a stopped cook clears it). Empty when the stations cannot be read, with one warning.
+        internal static List<int> CookingRecipeIds()
+        {
+            var ids = new List<int>();
+            try { ReadCookingRecipeIds(ids); }
+            catch (Exception e)
+            {
+                ids.Clear();
+                if (!cookWarned)
+                {
+                    cookWarned = true;
+                    Plugin.Log.LogWarning($"Project Cook cannot read the cooking stations, so a dish that cooks keeps its codex mark: {e.Message}");
+                }
+            }
+            return ids;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ReadCookingRecipeIds(List<int> ids)
+        {
+            var furnitures = BaseSingleton<BattleLogicWorld>.Instance?._AgentManager?.GetHomeCookingFurnitures();
+            if (furnitures == null) return;
+            for (int i = 0; i < furnitures.Count; i++)
+            {
+                var furniture = furnitures[i];
+                if (furniture == null) continue;
+                var cooking = AgentTools.GetAgentComponent<CookingComponent>(furniture);
+                if (cooking == null || !cooking.IsCooking) continue;
+                var matched = cooking.MatchedRecipeIds;
+                if (matched != null && matched.Count > 0)
+                    for (int j = 0; j < matched.Count; j++) ids.Add(matched[j]);
+                else if (cooking.MatchedRecipeId > 0) ids.Add(cooking.MatchedRecipeId);
+            }
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void ReadDishCounts(out int unlocked, out int total)
         {

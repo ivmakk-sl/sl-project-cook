@@ -280,3 +280,131 @@ test('codex filter: the button is 22 px high with its content vertically centere
   assert.match(rule[1], /white-space:\s*nowrap/);
   assert.match(css, /\.projectcook-codex-filter\[aria-pressed="true"\]\s*\{/, 'a pressed look');
 });
+
+// The unknown recipe rows of the Codex filter (design D2 of change 0103): rows of the book data for the recipes that the
+// character does not know. 2002 and 2003 are two recipes of one dish (2002).
+const U_READY = { recipeId: 2001, groupId: 2001, name: 'Carrot Juice', costText: 'Carrot', effectText: 'Thirst +10', status: 2 };
+const U_LOAD = { recipeId: 2002, groupId: 2002, name: 'Potato Stew', costText: 'Potato|Carrot', effectText: 'Satiety +20', status: 1 };
+const U_LOAD2 = { recipeId: 2003, groupId: 2002, name: 'Potato Stew (spicy)', costText: 'Potato|Chili', effectText: '', status: 1 };
+const U_NOT = { recipeId: 3001, groupId: 3001, name: 'Mushroom Soup', costText: 'Mushroom', effectText: '', status: 0 };
+const UNKNOWN = [U_READY, U_LOAD, U_LOAD2, U_NOT];
+const UNKNOWN_FEATURES = ['codexMarks', 'unknownCodexRecipes'];
+const unknownBook = (unknown: unknown[] = UNKNOWN, ids = [1301, 1203, 1401, 1501, 2001, 2002, 2003, 3001]) => book(ids, { unknown });
+
+function unknownWindow() {
+  view.data = { tips: {}, tiers: {}, features: UNKNOWN_FEATURES, book: unknownBook() };
+}
+
+const errors = (w: Win) => Object.keys(w.__cookingErrors || {});
+
+test.skipIf(!gameFilesExist)('unknown recipes: the filtered list is Ready, then Load, then the rest, the known rows first in each part', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  assert.deepEqual(names(w), [
+    'Fried Rice with Egg', 'Carrot Juice',
+    'Braised Pork Belly', 'Vegetable Soup', 'Potato Stew', 'Potato Stew (spicy)',
+    'Hot Pot', 'Mushroom Soup',
+  ]);
+  assert.deepEqual(errors(w), []);
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: a row with the game\'s "?", the coin, its name and cost line, Load, and the game tooltip', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  const clicks: number[] = [];
+  w.sendRecipeClick = (id: number) => clicks.push(id);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  const row = rows(w).find((r) => r.querySelector('.book-nm')!.textContent === 'Potato Stew')!;
+  assert.ok(row.querySelector('.book-ico .ico-ph'), 'the game\'s "?" icon');
+  assert.equal(row.querySelector('.ico-ph')!.textContent, '?');
+  assert.equal(coins(row).length, 1, 'the codex coin');
+  assert.match(row.textContent!, /Potato · Carrot/, 'the cost line');
+  assert.ok(row.querySelector('.st-fill'), 'Load');
+  row.click();
+  assert.deepEqual(clicks, [2002], 'a click sends its recipe');
+  row.dispatchEvent(new w.MouseEvent('mouseenter'));
+  assert.match(tooltip(w).textContent, /^Potato Stew\nSatiety \+20\nPotato\nCarrot\n/, 'the game tooltip of a row');
+  const not = rows(w).find((r) => r.querySelector('.book-nm')!.textContent === 'Mushroom Soup')!;
+  assert.equal(not.querySelector('.st-fill'), null, 'no Load for status 0');
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: no row with the filter off, the feature off, or no unknown data', async (t) => {
+  const w = await cookingWindow(t);
+  unknownWindow();
+  rowMessage(w, ROWS);
+  assert.deepEqual(names(w), ROWS.map((r) => r.name), 'the filter off');
+  for (const data of [
+    { tips: {}, tiers: {}, features: ['codexMarks'], book: unknownBook() },
+    { tips: {}, tiers: {}, features: UNKNOWN_FEATURES, book: book([1301, 1203, 1401, 1501]) },
+  ]) {
+    view.data = data;
+    view.codexFilter = true;
+    view.version++;
+    rowMessage(w, ROWS);
+    assert.deepEqual(names(w), ['Fried Rice with Egg', 'Braised Pork Belly', 'Vegetable Soup', 'Hot Pot'], JSON.stringify(data.features));
+  }
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: State.lastRecipes stays the game rows', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  assert.equal(rows(w).length, ROWS.length + UNKNOWN.length);
+  assert.deepEqual(w.eval('State').lastRecipes.map((r: { recipeId: number }) => r.recipeId), ROWS.map((r) => r.recipeId));
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: the tooltip counts each dish of the unknown rows once', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  rowMessage(w, ROWS);
+  filter(w)!.dispatchEvent(new w.MouseEvent('mouseenter'));
+  // 4 marked dishes of the game rows (groups 10 to 13) and 3 of the unknown rows (2001, 2002, 3001).
+  assert.match(tooltip(w).textContent, /\n7 of the missing dishes are in your Recipe Book\.\n/);
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: a row whose recipe leaves the ids (a dish in progress) leaves the filtered list', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  view.data = { tips: {}, tiers: {}, features: UNKNOWN_FEATURES, book: unknownBook(UNKNOWN, [1301, 1401, 1501, 2001, 3001]) };
+  view.version++;
+  redrawBook(w);
+  assert.deepEqual(names(w), ['Fried Rice with Egg', 'Carrot Juice', 'Vegetable Soup', 'Hot Pot', 'Mushroom Soup']);
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: a row without a field turns off only the unknown rows, with one error', async (t) => {
+  view.data = { tips: {}, tiers: {}, features: UNKNOWN_FEATURES, book: unknownBook([U_READY, { recipeId: 2002, groupId: 2002, status: 1 }]) };
+  const w = await cookingWindow(t);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  assert.deepEqual(names(w), ['Fried Rice with Egg', 'Braised Pork Belly', 'Vegetable Soup', 'Hot Pot']);
+  assert.deepEqual(errors(w), ['codexBook: an unknown recipe row without a field']);
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: a game render with no "?" icon turns off only the unknown rows, with one error', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  const render = w.__projectCookBook.render;
+  w.__projectCookBook.render = (recipes: Record<string, unknown>[]) => render(recipes.map((r) => ({ ...r, icon: 'dish.png' })));
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  assert.deepEqual(names(w), ['Fried Rice with Egg', 'Braised Pork Belly', 'Vegetable Soup', 'Hot Pot']);
+  rowMessage(w, ROWS);
+  assert.deepEqual(names(w), ['Fried Rice with Egg', 'Braised Pork Belly', 'Vegetable Soup', 'Hot Pot'], 'still off after a new row message');
+  assert.deepEqual(errors(w), ['codexBook: no .ico-ph in an unknown recipe row']);
+});
+
+test.skipIf(!gameFilesExist)('unknown recipes: a missing part of the game shows in the page check, and no unknown row shows', async (t) => {
+  unknownWindow();
+  const w = await cookingWindow(t);
+  w.sendRecipeClick = undefined;
+  assert.match(missingText(w, w.document, 'cooking'), /unknownBook\(sendRecipeClick\)/);
+  rowMessage(w, ROWS);
+  filter(w)!.click();
+  assert.deepEqual(names(w), ['Fried Rice with Egg', 'Braised Pork Belly', 'Vegetable Soup', 'Hot Pot']);
+});

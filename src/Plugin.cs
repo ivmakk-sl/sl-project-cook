@@ -16,7 +16,7 @@ namespace ProjectCook
         internal static new ManualLogSource Log;
         internal static ConfigEntry<bool> Verbose;
         internal static ConfigEntry<bool> IgnoreCookingTalents;
-        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs, CodexMarks, LoadFromAllTabs;
+        internal static ConfigEntry<bool> DishPreview, FoodSort, CookingStorages, RowSplit, SeparatePieces, DimUncookable, ColdSortFood, IconTabs, CodexMarks, LoadFromAllTabs, UnknownRecipesWithIngredients, UnknownRecipesWithoutIngredients;
         // The names of the page features that are on, for the page data (PageJson.DataJson).
         internal static string[] PageFeatures = new string[0];
 
@@ -55,12 +55,20 @@ namespace ProjectCook
                 "The storage tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press show the icon of each storage in place of its name, so more tabs fit in the row. Point at a tab to see its name. Off shows the names as without the mod. Needs a game restart.");
             CodexMarks = Config.Bind(
                 "Features", "CodexMarks", true,
-                "A trophy on each dish card and each Recipe Book row of the cooking window whose dish is not in the Codex yet, the Codex button in the Recipe Book title that shows only those recipes, and the Codex choice of the food sort: the foods that you have never tasted come first, each with a trophy. Off shows no trophy, no Codex button, and no Codex choice. Needs a game restart.");
+                "A trophy on each dish card and each Recipe Book row of the cooking window whose dish is not in the Codex yet, the Codex button in the Recipe Book title that shows only those recipes (a dish that a cooking station cooks now leaves them until its cook ends), and the Codex choice of the food sort: the foods that you have never tasted come first, each with a trophy. Off shows no trophy, no Codex button, and no Codex choice. Needs a game restart.");
             LoadFromAllTabs = Config.Bind(
                 "Features", "LoadFromAllTabs", true,
                 "Load in the Recipe Book of the cooking window also takes the ingredients from the other tabs of the window (the bag, each fridge, and each cooking storage that is not locked), when the open tab does not have them all. The Recipe Book then counts the ingredients of all these tabs. Off fills only from the open tab, as without the mod. Needs a game restart.");
+            UnknownRecipesWithIngredients = Config.Bind(
+                "Features", "UnknownRecipesWithIngredients", true,
+                "With the Codex button of the Recipe Book on, the list also shows the recipes that you have not learned yet, whose dish is not in the Codex, and whose ingredients the cooking station and the open tab hold (with LoadFromAllTabs, all the storage tabs): each with a grey \"?\" icon, the trophy, the dish name, the ingredients, and Load. A first cook teaches the recipe. Only at a cooking station where you know at least one dish, and not for a recipe that needs a cooking level or an event first. Needs CodexMarks. Needs a game restart.");
+            UnknownRecipesWithoutIngredients = Config.Bind(
+                "Features", "UnknownRecipesWithoutIngredients", false,
+                "With the Codex button of the Recipe Book on, the list also shows the recipes that you have not learned yet whose ingredients you do not have, after the recipes with Load: every recipe that the cooking station can cook. Same rules as UnknownRecipesWithIngredients. Needs CodexMarks. Needs a game restart.");
+            bool unknownRecipes = UnknownRecipesWithIngredients.Value || UnknownRecipesWithoutIngredients.Value;
             var features = new System.Collections.Generic.List<string>();
             if (CodexMarks.Value) features.Add("codexMarks");
+            if (CodexMarks.Value && unknownRecipes) features.Add("unknownCodexRecipes");
             if (SeparatePieces.Value) features.Add("separatePieces");
             if (DimUncookable.Value) features.Add("dimUncookable");
             // The portion switch is part of the dish preview.
@@ -107,6 +115,16 @@ namespace ProjectCook
                 catch (Exception e) { Log.LogError($"patch {type.Name} failed: {e.Message}"); }
             }
             if (LoadFromAllTabs.Value) PatchGroup(harmony, LoadAllPatches.Types, "Load from all tabs is off, the fill takes only the open tab");
+            if (unknownRecipes && !CodexMarks.Value)
+                Log.LogInfo("UnknownRecipesWithIngredients or UnknownRecipesWithoutIngredients is on, but CodexMarks is off, so the Recipe Book shows no unknown recipe.");
+            else if (unknownRecipes)
+            {
+                string missing = UnknownRecipes.MissingRowMethod();
+                if (missing != null)
+                    Log.LogWarning($"Reducer_Web_Cooking.{missing} is missing, so the Codex filter shows no unknown recipe.");
+                else
+                    PatchGroup(harmony, UnknownRecipes.Types, "The Codex filter shows no unknown recipe");
+            }
             // The timing lines of the Recipe Book also run with LoadFromAllTabs off, for the time without the feature.
             if (Verbose.Value)
                 foreach (var type in new[] { typeof(LoadAllTimingOnRefresh), typeof(LoadAllTimingOnRecipeClick) })
@@ -133,8 +151,8 @@ namespace ProjectCook
                 }
             }
             // Logged when a feature differs from its default.
-            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value || !CodexMarks.Value || !LoadFromAllTabs.Value)
-                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value} CodexMarks={CodexMarks.Value} LoadFromAllTabs={LoadFromAllTabs.Value}");
+            if (!DishPreview.Value || !FoodSort.Value || !CookingStorages.Value || !RowSplit.Value || !SeparatePieces.Value || !DimUncookable.Value || !ColdSortFood.Value || !IconTabs.Value || !CodexMarks.Value || !LoadFromAllTabs.Value || !UnknownRecipesWithIngredients.Value || UnknownRecipesWithoutIngredients.Value)
+                Log.LogInfo($"Project Cook features: DishPreview={DishPreview.Value} FoodSort={FoodSort.Value} CookingStorages={CookingStorages.Value} RowSplit={RowSplit.Value} SeparatePieces={SeparatePieces.Value} DimUncookable={DimUncookable.Value} ColdSortFood={ColdSortFood.Value} IconTabs={IconTabs.Value} CodexMarks={CodexMarks.Value} LoadFromAllTabs={LoadFromAllTabs.Value} UnknownRecipesWithIngredients={UnknownRecipesWithIngredients.Value} UnknownRecipesWithoutIngredients={UnknownRecipesWithoutIngredients.Value}");
             Log.LogInfo("Project Cook loaded.");
         }
 

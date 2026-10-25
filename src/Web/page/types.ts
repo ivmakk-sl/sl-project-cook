@@ -103,7 +103,8 @@ export type CookingWindow = GridSortWindow & {
   bindRecipeTooltip?(el: HTMLElement, buildTip: () => string): void;
   // The wrapper of the Recipe Book: the game's render and count, the last rows that the game gave (unfiltered), and
   // the data version of the last draw.
-  __projectCookBook?: { render: (recipes: RecipeRow[]) => void; count: () => void; rows: RecipeRow[]; drawn: number };
+  // unknownOff: a draw found no "?" icon on an unknown recipe row, so the frame shows no unknown row.
+  __projectCookBook?: { render: (recipes: RecipeRow[]) => void; count: () => void; rows: RecipeRow[]; drawn: number; unknownOff?: boolean };
   showItemTip(item: TipItem): void;
   moveTooltip(e: MouseEvent): void;
   pot: BagGrid;
@@ -140,6 +141,19 @@ export interface BookData {
   total?: number;
   ids?: number[];
   words?: BookWords;
+  // The unknown recipe rows of the Codex filter (UnknownRecipesWithIngredients, UnknownRecipesWithoutIngredients), in the order of C#; no field while it is off.
+  unknown?: UnknownRow[];
+}
+
+// One unknown recipe row (PageJson.UnknownRow in C#): the fields of a game row that the game's texts and status give,
+// with the dish key as its group.
+export interface UnknownRow {
+  recipeId: number;
+  groupId: number;
+  name: string;
+  costText: string;
+  effectText: string;
+  status: number;
 }
 
 // The words of the Codex filter (PageJson.BookWords in C#): the game's word Codex, the first line of the tooltip
@@ -162,6 +176,12 @@ export interface RecipeRow {
   status?: number;
   craftLocked?: boolean;
   name?: string;
+  // The fields that the game's render reads; an unknown recipe row sets them.
+  costText?: string;
+  effectText?: string;
+  icon?: string;
+  craftLockText?: string;
+  variantsJson?: string;
 }
 
 // The icon tab list of the newest open of a food window (PageJson.IconTabsJson in C#): the page id of the window, the
@@ -181,6 +201,8 @@ export interface ProjectCookApi {
   apply(): string;
   // The sort data of the last send, for the frames and the tests.
   sortData(): SortData | null;
+  // The book data of the last send, for the tests.
+  bookData(): BookData | null;
 }
 
 declare global {

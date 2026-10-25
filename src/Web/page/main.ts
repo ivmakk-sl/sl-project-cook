@@ -52,7 +52,7 @@ function watchFrames(): void {
 }
 
 if (!window.__projectCook) {
-  window.__projectCook = { setData, setSortData, setIconTabs, frameLoaded: iconTabsAtLoad, apply: run, sortData: () => view.sort };
+  window.__projectCook = { setData, setSortData, setIconTabs, frameLoaded: iconTabsAtLoad, apply: run, sortData: () => view.sort, bookData: () => view.data.book ?? null };
   // The pages send their moves through the postMessage of this root page; the filter keeps the sorted grids real.
   installDropFilter(window, sortedGrids);
   watchFrames();
