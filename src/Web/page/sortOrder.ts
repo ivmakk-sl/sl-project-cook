@@ -5,9 +5,13 @@ import type { SortData, SortItem } from './types';
 export { pack } from '../../Shared/grid-pack/web/gridPack';
 
 // The index of a choice in the words of the sort data. The numbers of an item ("n") have the order of the
-// choices 1 to 6: Satiety, Morale, Stamina, Life, Trade value, Expiration Date. cage is not a choice of the
-// dropdown: it is the seventh number, the cage satiety, which the Rat Cage window shows for the choice Satiety.
-export const CHOICE = { default: 0, satiety: 1, morale: 2, stamina: 3, life: 4, trade: 5, days: 6, cage: 7 } as const;
+// choices 1 to 6: Satiety, Morale, Stamina, Life, Trade value, Expiration Date. Codex (the last choice, only with the
+// codex marks) has no number: it reads the codex flag ("x"). cage is not a choice of the dropdown: it is the seventh
+// number, the cage satiety, which the Rat Cage window shows for the choice Satiety.
+export const CHOICE = { default: 0, satiety: 1, morale: 2, stamina: 3, life: 4, trade: 5, days: 6, codex: 7, cage: 8 } as const;
+
+// The index in "n" of the cage satiety.
+const CAGE_NUMBER = 6;
 
 // The column of the numbers that a choice orders and badges by: in the Rat Cage window, Satiety is the cage
 // satiety (design D12); else the choice itself.
@@ -18,15 +22,24 @@ export function column(choice: number, ratCage: boolean): number {
 export interface GridItem { id: number | string; w: number; h: number }
 
 function key(item: SortItem | undefined, choice: number): number | null {
-  if (!item || choice < 1 || choice > CHOICE.cage) return null;
-  const v = item.n[choice - 1];
+  if (!item || choice < 1 || choice > CHOICE.cage || choice === CHOICE.codex) return null;
+  const v = item.n[choice === CHOICE.cage ? CAGE_NUMBER : choice - 1];
   return typeof v === 'number' ? v : null;
 }
 
 // The items in the order of the choice, and the items with no number (dimmed, last). Stats and the trade value go
 // highest first; the days left go lowest first, so an expired item (a key below 0) is first. A tie groups the same
-// items (config id), then keeps the real order.
+// items (config id), then keeps the real order. Codex: the items with the codex flag first, grouped by item, then
+// the others in their real order, and no item dimmed.
 export function order(items: GridItem[], sort: SortData, choice: number): { ids: (number | string)[]; dim: Set<number | string> } {
+  if (choice === CHOICE.codex) {
+    const flagged = items.map((it, i) => {
+      const s = sort.items[String(it.id)];
+      return { id: it.id, i, x: !!(s && s.x), c: (s && s.c) || 0 };
+    });
+    flagged.sort((a, b) => Number(b.x) - Number(a.x) || (a.x ? a.c - b.c : 0) || a.i - b.i);
+    return { ids: flagged.map((k) => k.id), dim: new Set() };
+  }
   const sign = choice === CHOICE.days ? 1 : -1;
   const keyed = items.map((it, i) => {
     const s = sort.items[String(it.id)];
@@ -41,7 +54,9 @@ export function order(items: GridItem[], sort: SortData, choice: number): { ids:
 
 // The color of a badge, null for the plain (white) text: a stat or the cage satiety above 0 is positive and below 0
 // negative, the trade value is gold, and the days are plain or negative for an expired item (its key is below 0).
-export function badgeTone(item: SortItem | undefined, choice: number): 'pos' | 'neg' | 'gold' | null {
+// The codex mark has its own tone, which page.css draws as a coin.
+export function badgeTone(item: SortItem | undefined, choice: number): 'pos' | 'neg' | 'gold' | 'codex' | null {
+  if (choice === CHOICE.codex) return item && item.x ? 'codex' : null;
   const v = key(item, choice);
   if (v === null) return null;
   if (choice === CHOICE.trade) return 'gold';
@@ -50,7 +65,7 @@ export function badgeTone(item: SortItem | undefined, choice: number): 'pos' | '
 }
 
 // The text of the badge of a cell: a stat or the cage satiety with its sign, the trade value plain, the days text;
-// null for no badge.
+// null for no badge. Codex has no text: its badge is an icon (sortUi).
 export function badgeText(item: SortItem | undefined, choice: number): string | null {
   if (!item) return null;
   if (choice === CHOICE.days) return item.d;

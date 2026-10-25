@@ -181,6 +181,18 @@ public class SortDataJsonTests
     }
 
     [Fact]
+    public void TheCodexFlag_OnlyOnAnItemWithTheCodexMark()
+    {
+        var items = new List<KeyValuePair<long, SortLogic.Numbers>>
+        {
+            new KeyValuePair<long, SortLogic.Numbers>(1, new SortLogic.Numbers { ConfigId = 5, Stats = new int?[4], Days = SortLogic.DaysLeft.NoSpoil, Codex = true }),
+            new KeyValuePair<long, SortLogic.Numbers>(2, new SortLogic.Numbers { ConfigId = 6, Stats = new int?[4], Days = SortLogic.DaysLeft.NoSpoil }),
+        };
+        Assert.Contains("\"items\":{\"1\":{\"n\":[null,null,null,null,null,null,null],\"d\":null,\"c\":5,\"x\":1},\"2\":{\"n\":[null,null,null,null,null,null,null],\"d\":null,\"c\":6}}",
+            PageJson.SortDataJson(1, items, Words));
+    }
+
+    [Fact]
     public void TheBagOwnerOfTheStorageWindow_FollowsTheOwner()
     {
         var json = PageJson.SortDataJson(42, new List<KeyValuePair<long, SortLogic.Numbers>>(), Words, 5);
@@ -216,9 +228,20 @@ public class SortWordsTests
     }
 
     [Fact]
+    public void TheCodexWord_LastOnlyWithTheCodexMarks()
+    {
+        Assert.Equal(7, SortLogic.WordsFrom(TestTexts.English(), TestTexts.EnglishSet()).Choices.Length);
+        var en = SortLogic.WordsFrom(TestTexts.English(), TestTexts.EnglishSet(), codex: true);
+        Assert.Equal(new[] { "Default", "Satiety", "Morale", "Stamina", "Life", "Trade value", "Expiration Date", "Codex" }, en.Choices);
+        Assert.Equal("图鉴", SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.ChineseSet(), codex: true).Choices[7]);
+    }
+
+    [Fact]
     public void TheGameTextsOfTheTextKeysWin()
     {
         var game = TestTexts.ChineseGameTexts();
+        game["SR_Web_OutSetting_Codex"] = "图鉴G";
+        Assert.Equal("图鉴G", SortLogic.WordsFrom(TestTexts.Chinese(), TestTexts.Load().For(0, TestTexts.Game(game)), codex: true).Choices[7]);
         game["SR_Web_EventChoice_DefaultTag"] = "默认G";
         game["UI_BattleBag_6"] = "保质期G";
         game["UI_ItemTips_2"] = "已过期G";

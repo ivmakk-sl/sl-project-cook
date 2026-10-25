@@ -166,3 +166,24 @@ test.skipIf(!gameFilesExist)('rat cage sort: the other choices use the same numb
   assert.equal(badge(w, 3)!.textContent, '12');
   assert.equal(badge(w, 9)!.textContent, '5');
 });
+
+test.skipIf(!gameFilesExist)('rat cage sort: Codex marks the untasted foods, also in the Food Storage grid, and Satiety keeps the cage satiety', async (t) => {
+  const w = await ratCageWindow(t);
+  const data = sortData(OWNER);
+  data.words = { ...data.words, choices: [...data.words.choices, 'Codex'] };
+  data.items[2].x = 1;
+  data.items[9].x = 1;
+  view.sort = data;
+  applyCookingSort(w);
+  select(w, 7);
+  assert.deepEqual(place(w.backpack, 2), [0, 0]);
+  assert.ok(badge(w, 2)!.querySelector(':scope > svg'));
+  assert.ok(badge(w, 2)!.classList.contains('projectcook-sort-codex'));
+  assert.equal(badge(w, 1), null);
+  assert.ok(badge(w, 9)!.querySelector(':scope > svg'));
+  assert.equal(w.document.querySelector('.projectcook-sort-dim'), null);
+
+  select(w, 1);
+  assert.equal(badge(w, 1)!.textContent, '+60');
+  assert.equal(badge(w, 9)!.textContent, '+35');
+});

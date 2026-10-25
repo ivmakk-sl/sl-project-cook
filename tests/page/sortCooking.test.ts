@@ -186,3 +186,25 @@ test.skipIf(!gameFilesExist)('cooking sort: the workbench shows the numbers of t
   select(w, 0);
   assert.equal(w.document.querySelector('#mainPotGrid .projectcook-sort-badge'), null);
 });
+
+// The cooking window cooks its ingredients, and the dish cards mark the dish codex: the choice Codex (the food codex,
+// foods that the player has eaten) is not in its dropdown. Codex chosen in another window shows here as Default.
+test.skipIf(!gameFilesExist)('cooking sort: no choice Codex, and Codex chosen elsewhere shows the real order with no mark', async (t) => {
+  const w = await cookingWindow(t);
+  w.pot.setOwnerId(99);
+  w.pot.refresh([{ itemId: 9, x: 2, y: 0, w: 1, h: 1, name: 'D', configId: 558 }]);
+  const data = sortData(OWNER);
+  data.words = { ...WORDS, choices: [...WORDS.choices, 'Codex'] };
+  data.items[3].x = 1;
+  data.items[9] = { n: [12, null, null, null, 4, 3], d: '3d', x: 1 };
+  view.sort = data;
+  applyCookingSort(w);
+  assert.equal(toolbar(w).querySelectorAll('.projectcook-sort-opt').length, WORDS.choices.length, 'the choices from Default to Expiration Date');
+  assert.equal(toolbar(w).querySelector('.projectcook-sort-ico[data-choice="7"]'), null);
+  view.choice = 7;
+  applyCookingSort(w);
+  assert.deepEqual(place(w, 1), [0, 0], 'the real order');
+  assert.equal(w.document.querySelector('.projectcook-sort-badge'), null, 'no codex mark on the tab or the workbench');
+  assert.equal(toolbar(w).querySelector('.projectcook-sort-btn.projectcook-sort-active'), null, 'the button reads Sort');
+  assert.equal(view.choice, 7, 'the choice stays for the other windows');
+});

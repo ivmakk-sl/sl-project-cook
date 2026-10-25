@@ -113,10 +113,13 @@ namespace ProjectCook
 
         private static List<KeyValuePair<long, SortLogic.Numbers>> Numbers(Il2CppDict.List<Data_Item> items, float currentHours, out string eatLog)
         {
+            long start = Timing.Start();
             var config = ConfigManager.Instance;
             var factors = EatInputs.Read(out eatLog);
             float appraisal = TalentInputs.ReadAppraisal();
             var perfect = PerfectIds(config);
+            var codex = Plugin.CodexMarks.Value ? CodexReader.Take() : null;
+            int foods = 0, marked = 0;
             var numbers = new List<KeyValuePair<long, SortLogic.Numbers>>();
             for (int i = 0; i < items.Count; i++)
             {
@@ -137,7 +140,19 @@ namespace ProjectCook
                     Days(item, cfg, currentHours));
                 n.ConfigId = cfg.ID;
                 n.Cage = SortLogic.CageSatiety(FirstInstanceValue(item), cfg.ValueDisplay1, item.UseTimes, item.MaxUseTimes, cfg.UseTimes);
+                if (codex != null && codex.IsFoodEntry(cfg))
+                {
+                    foods++;
+                    n.Codex = codex.FoodMark(cfg.ID);
+                    if (n.Codex) marked++;
+                }
                 numbers.Add(new KeyValuePair<long, SortLogic.Numbers>(item.LogicId, n));
+            }
+            if (Plugin.Verbose.Value)
+            {
+                Plugin.Log.LogDebug(FormattableString.Invariant($"timing: sort numbers {Timing.Ms(start):0.00} ms, items {items.Count}"));
+                if (Plugin.CodexMarks.Value)
+                    Plugin.Log.LogDebug($"codex: locked={(codex == null ? "unread" : codex.Locked.ToString())} foods={foods} marked={marked}");
             }
             return numbers;
         }
@@ -210,7 +225,7 @@ namespace ProjectCook
         private static SortLogic.Words Words()
         {
             var texts = ModTexts.Current();
-            return SortLogic.WordsFrom(PreviewLogic.WordsFrom(texts), texts);
+            return SortLogic.WordsFrom(PreviewLogic.WordsFrom(texts), texts, Plugin.CodexMarks.Value);
         }
     }
 }

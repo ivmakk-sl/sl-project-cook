@@ -14,5 +14,6 @@
   "sortDefault": "SR_Web_EventChoice_DefaultTag",
   "expirationDate": "UI_BattleBag_6",
   "expired": "UI_ItemTips_2",
-  "rotten": "SR_Web_Backpack_Rotten"
+  "rotten": "SR_Web_Backpack_Rotten",
+  "codex": "SR_Web_OutSetting_Codex"
 }

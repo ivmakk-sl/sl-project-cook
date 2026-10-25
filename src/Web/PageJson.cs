@@ -10,10 +10,71 @@ namespace ProjectCook
     // BepInEx type here.
     public static class PageJson
     {
+        // The book data of the Recipe Book: the lock of the codex, the unlocked and the total count of the dish entries,
+        // the ids of the recipes whose dish has no codex entry, the words of the Codex filter, and the unknown recipe
+        // rows of the Codex filter (null while both switches of the unknown recipes are off).
+        public sealed class Book
+        {
+            public readonly bool Locked;
+            public readonly int Unlocked, Total;
+            public readonly IReadOnlyCollection<int> Ids;
+            public readonly BookWords Words;
+            public readonly IReadOnlyList<UnknownRow> Unknown;
+
+            public Book(bool locked, int unlocked, int total, IReadOnlyCollection<int> ids, BookWords words = null, IReadOnlyList<UnknownRow> unknown = null)
+            {
+                Locked = locked; Unlocked = unlocked; Total = total; Ids = ids; Words = words; Unknown = unknown;
+            }
+        }
+
+        // One unknown recipe row of the Codex filter: the fields of a row of the game (Data_Web_Cooking_Recipe) that
+        // the game's texts and status give; the dish key as its group.
+        public sealed class UnknownRow
+        {
+            public readonly int RecipeId, GroupId, Status;
+            public readonly string Name, CostText, EffectText;
+
+            public UnknownRow(int recipeId, int groupId, string name, string costText, string effectText, int status)
+            {
+                RecipeId = recipeId; GroupId = groupId; Name = name; CostText = costText; EffectText = effectText; Status = status;
+            }
+
+            public bool SameAs(UnknownRow other) => other != null && RecipeId == other.RecipeId && GroupId == other.GroupId
+                && Status == other.Status && Name == other.Name && CostText == other.CostText && EffectText == other.EffectText;
+
+            public static bool SameRows(IReadOnlyList<UnknownRow> a, IReadOnlyList<UnknownRow> b)
+            {
+                if (a == null || b == null) return a == b;
+                if (a.Count != b.Count) return false;
+                for (int i = 0; i < a.Count; i++)
+                    if (!a[i].SameAs(b[i])) return false;
+                return true;
+            }
+        }
+
+        // The words of the Codex filter in the display language: the button word (the game's Codex), the first line of
+        // its tooltip, the line of the missing dishes, the click line while it is off and while it is on, and the line
+        // of an empty filtered list.
+        public sealed class BookWords
+        {
+            public readonly string Codex, Title, Missing, ShowOnly, ShowAll, Empty;
+
+            public BookWords(string codex, string title, string missing, string showOnly, string showAll, string empty)
+            {
+                Codex = codex; Title = title; Missing = missing; ShowOnly = showOnly; ShowAll = showAll; Empty = empty;
+            }
+
+            internal static BookWords From(SlShared.I18n.I18nTextSet texts) => new BookWords(texts["codex"], texts["codexFilterTitle"],
+                texts["codexFilterMissing"], texts["codexFilterShowOnly"], texts["codexFilterShowAll"], texts["codexFilterEmpty"]);
+
+            public bool SameAs(BookWords other) => other != null && Codex == other.Codex && Title == other.Title
+                && Missing == other.Missing && ShowOnly == other.ShowOnly && ShowAll == other.ShowAll && Empty == other.Empty;
+        }
+
         // The data of setData: the tooltip lines of each ingredient and the tier of each ingredient that the
-        // page marks (High 1 and Low 3), by config ID, the names of the page features that are on in the config, and the
-        // labels of the portion switch.
-        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null)
+        // page marks (High 1 and Low 3), by config ID, the names of the page features that are on in the config, the
+        // labels of the portion switch, and the book data (a locked codex sends the lock alone).
+        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null, Book book = null)
         {
             var sb = new StringBuilder("{\"tips\":{");
             bool first = true;
@@ -50,6 +111,40 @@ namespace ProjectCook
                 sb.Append(",\"portion\":[");
                 for (int i = 0; i < portion.Length; i++) sb.Append(i == 0 ? "" : ",").AppendStr(portion[i]);
                 sb.Append(']');
+            }
+            if (book != null)
+            {
+                sb.Append(",\"book\":{\"locked\":").Append(book.Locked ? "true" : "false");
+                if (!book.Locked)
+                {
+                    sb.Append(",\"unlocked\":").Append(book.Unlocked).Append(",\"total\":").Append(book.Total).Append(",\"ids\":[");
+                    first = true;
+                    foreach (var id in book.Ids)
+                    {
+                        if (!first) sb.Append(',');
+                        first = false;
+                        sb.Append(id);
+                    }
+                    sb.Append(']');
+                    var w = book.Words;
+                    if (w != null)
+                        sb.Append(",\"words\":{\"codex\":").AppendStr(w.Codex).Append(",\"title\":").AppendStr(w.Title)
+                            .Append(",\"missing\":").AppendStr(w.Missing).Append(",\"showOnly\":").AppendStr(w.ShowOnly)
+                            .Append(",\"showAll\":").AppendStr(w.ShowAll).Append(",\"empty\":").AppendStr(w.Empty).Append('}');
+                    if (book.Unknown != null)
+                    {
+                        sb.Append(",\"unknown\":[");
+                        for (int i = 0; i < book.Unknown.Count; i++)
+                        {
+                            var r = book.Unknown[i];
+                            sb.Append(i == 0 ? "{" : ",{").Append("\"recipeId\":").Append(r.RecipeId).Append(",\"groupId\":").Append(r.GroupId)
+                                .Append(",\"name\":").AppendStr(r.Name).Append(",\"costText\":").AppendStr(r.CostText)
+                                .Append(",\"effectText\":").AppendStr(r.EffectText).Append(",\"status\":").Append(r.Status).Append('}');
+                        }
+                        sb.Append(']');
+                    }
+                }
+                sb.Append('}');
             }
             sb.Append('}');
             return sb.ToString();
@@ -154,6 +249,7 @@ namespace ProjectCook
                 else if (days.IsExpired) sb.AppendStr(words.Expired);
                 else sb.Append("null");
                 sb.Append(",\"c\":").Append(n.ConfigId.ToString(CultureInfo.InvariantCulture));
+                if (n.Codex) sb.Append(",\"x\":1");
                 sb.Append('}');
             }
             return sb.Append("}}").ToString();

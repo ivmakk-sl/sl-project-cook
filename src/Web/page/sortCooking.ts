@@ -30,9 +30,15 @@ function secondGrid(w: GridSortWindow): BagGrid | undefined {
   return w.pot || w.foodBag;
 }
 
+// The cooking window has no choice Codex: it cooks its ingredients, and its dish cards mark the dish codex, while the
+// choice marks the food codex (the foods that the player has eaten). Codex chosen in another window shows Default here.
+function shownChoice(w: GridSortWindow): number {
+  return !isRatCage(w) && view.choice === CHOICE.codex ? CHOICE.default : view.choice;
+}
+
 // The column of the numbers of the choice in this window.
 function choiceOf(w: GridSortWindow): number {
-  return column(view.choice, isRatCage(w));
+  return column(shownChoice(w), isRatCage(w));
 }
 
 function sortOf(grid: BagGrid) {
@@ -179,7 +185,8 @@ function drawToolbar(w: GridSortWindow): void {
     removeDropdown(toolbar);
     return;
   }
-  drawDropdown(w.document, toolbar, sort, view.choice, (choice) => {
+  const shown = isRatCage(w) ? sort : { ...sort, words: { ...sort.words, choices: sort.words.choices.slice(0, CHOICE.codex) } };
+  drawDropdown(w.document, toolbar, shown, shownChoice(w), (choice) => {
     view.choice = choice;
     applyCookingSort(w);
   });

@@ -190,6 +190,26 @@ namespace ProjectCook
             }
         }
 
+        // Adds "Codex":1 to each entry whose index (in the list of ReadEntries) is in codexIndexes: the dish card shows
+        // the codex mark. Returns the input unchanged when no entry gets the field or when anything fails.
+        public static string AddCodex(string json, ICollection<int> codexIndexes)
+        {
+            if (codexIndexes == null || codexIndexes.Count == 0) return json;
+            try
+            {
+                var entries = EntriesWithStart(json);
+                var sb = new StringBuilder(json);
+                // Last entry first, so an insert does not move the start of an entry that is still to do.
+                for (int i = entries.Count - 1; i >= 0; i--)
+                    if (codexIndexes.Contains(i)) sb.Insert(entries[i].Key + 1, "\"Codex\":1,");
+                return entries.Count == 0 ? json : sb.ToString();
+            }
+            catch (Exception)
+            {
+                return json;
+            }
+        }
+
         private static string Escape(string text)
         {
             var sb = new StringBuilder();

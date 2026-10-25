@@ -14,6 +14,8 @@ export interface PredictionEntry {
   PreviewTip?: string;
   // The preview lines of one portion, for the portion switch.
   PreviewPortion?: string;
+  // 1: the dish has no codex entry, so the card shows the codex mark.
+  Codex?: number;
 }
 
 // An item that showItemTip shows.
@@ -94,6 +96,15 @@ export type RatCageWindow = GridSortWindow & { foodBag: BagGrid };
 // The Cooking frame: the page functions that the script wraps or calls, and the marks of the script.
 export type CookingWindow = GridSortWindow & {
   renderPredictionList(entries: PredictionEntry[]): void;
+  // The rows of the Recipe Book, and the count "Unlocked A / B" in its title.
+  renderRecipeListFromData(recipes: RecipeRow[]): void;
+  updateRecipeCount(): void;
+  // The game's tooltip of the Recipe Book rows: the text of buildTip in #recipeTooltip while the pointer is on el.
+  bindRecipeTooltip?(el: HTMLElement, buildTip: () => string): void;
+  // The wrapper of the Recipe Book: the game's render and count, the last rows that the game gave (unfiltered), and
+  // the data version of the last draw.
+  // unknownOff: a draw found no "?" icon on an unknown recipe row, so the frame shows no unknown row.
+  __projectCookBook?: { render: (recipes: RecipeRow[]) => void; count: () => void; rows: RecipeRow[]; drawn: number; unknownOff?: boolean };
   showItemTip(item: TipItem): void;
   moveTooltip(e: MouseEvent): void;
   pot: BagGrid;
@@ -112,10 +123,65 @@ export type CookingWindow = GridSortWindow & {
 export interface PageData {
   tips: Record<string, string>;
   tiers: Record<string, number>;
-  // The page features that are on in the config (PageJson.DataJson): separatePieces, dimUncookable, portionSwitch.
+  // The page features that are on in the config (PageJson.DataJson): separatePieces, dimUncookable, portionSwitch,
+  // codexMarks.
   features?: string[];
   // The labels of the portion switch: the whole dish, then one portion.
   portion?: string[];
+  // The book data of the Recipe Book (PageJson.Book in C#); no book data while the codex cannot be read.
+  book?: BookData;
+}
+
+// The codex of the Recipe Book: the dish entries that are unlocked and all dish entries, and the ids of the recipes
+// whose dish has no codex entry, and the words of the Codex filter. A locked codex (guide mode, explore mode) has the
+// lock alone.
+export interface BookData {
+  locked: boolean;
+  unlocked?: number;
+  total?: number;
+  ids?: number[];
+  words?: BookWords;
+  // The unknown recipe rows of the Codex filter (UnknownRecipesWithIngredients, UnknownRecipesWithoutIngredients), in the order of C#; no field while it is off.
+  unknown?: UnknownRow[];
+}
+
+// One unknown recipe row (PageJson.UnknownRow in C#): the fields of a game row that the game's texts and status give,
+// with the dish key as its group.
+export interface UnknownRow {
+  recipeId: number;
+  groupId: number;
+  name: string;
+  costText: string;
+  effectText: string;
+  status: number;
+}
+
+// The words of the Codex filter (PageJson.BookWords in C#): the game's word Codex, the first line of the tooltip
+// ("Dish Codex {0} / {1}"), the line of the missing dishes ({0}), the click line while it is off and while it is on,
+// and the line of an empty filtered list.
+export interface BookWords {
+  codex: string;
+  title: string;
+  missing: string;
+  showOnly: string;
+  showAll: string;
+  empty: string;
+}
+
+// One row of the Recipe Book as the game's RecipeMsg gives it (renderRecipeListFromData of Cooking.html).
+export interface RecipeRow {
+  recipeId: number;
+  groupId: number;
+  variantCount?: number;
+  status?: number;
+  craftLocked?: boolean;
+  name?: string;
+  // The fields that the game's render reads; an unknown recipe row sets them.
+  costText?: string;
+  effectText?: string;
+  icon?: string;
+  craftLockText?: string;
+  variantsJson?: string;
 }
 
 // The icon tab list of the newest open of a food window (PageJson.IconTabsJson in C#): the page id of the window, the
@@ -135,6 +201,8 @@ export interface ProjectCookApi {
   apply(): string;
   // The sort data of the last send, for the frames and the tests.
   sortData(): SortData | null;
+  // The book data of the last send, for the tests.
+  bookData(): BookData | null;
 }
 
 declare global {
@@ -152,6 +220,8 @@ export interface SortItem {
   d: string | null;
   // The config id: a tie of the numbers groups the same items.
   c?: number;
+  // 1: a food of the codex that the player has never tasted, which shows the codex mark with Codex.
+  x?: number;
 }
 
 export interface SortData {

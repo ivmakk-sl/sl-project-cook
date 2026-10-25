@@ -11,6 +11,9 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 - **Separate pieces.** Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.
 - **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
 - **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
+- **Codex marks.** A gold trophy on a dish card or a Recipe Book row marks a dish that is not in your Codex yet. The Codex button in the Recipe Book title shows only those recipes. A dish that a cooking station cooks now leaves that list until its cook ends, so you do not cook the same new dish twice. The Codex choice of the food sort puts the foods you have never tasted first, each with a trophy.
+- **Unknown recipes in the Codex list.** With the Codex button on, the Recipe Book also lists the recipes you have not learned yet whose ingredients you have, each with a grey "?" and Load. Turn it off with `UnknownRecipesWithIngredients`. To also see the ones whose ingredients you do not have (a full spoiler), turn on `UnknownRecipesWithoutIngredients`.
+- **Load from all tabs.** Load in the Recipe Book also takes the ingredients from the other storage tabs of the cooking window, when the open tab does not have them all. The Recipe Book counts all these tabs, so a row shows Load whichever tab is open. Locked tabs give nothing.
 - **Cook from home storages.** Use ingredients directly from cabinets and other home storages in the cooking window, including the Juicer and Coffee Machine, and in the Brewing Barrel, Rat Cage, and Ration Press windows. Add the Cooking tag to a storage, or use its existing Food tag. Available from cooking level 2, as the fridge tabs; in the Rat Cage window at any level.
 - **Compact tabs.** Storage tabs show icons instead of names, so more fit in the row: at the Cooking Station (Electric Oven, Juicer, and other cooking furniture), the Brewing Barrel, the Rat Cage, and the Ration Press. Point at a tab to see its name. At the Cooking Station, dropping an item on a tab is easier: a drop just above or below it counts, and its name shows while you drag.
 - **Store Chilled Food.** The snowflake button in your Backpack also fills fridges tagged Food or Cooking, then storage with either tag in the Cold Storage room while the room keeps food cold. Storage tagged Chilled still comes first, followed by tagged fridges, untagged fridges, and finally the Cold Storage room.
@@ -70,6 +73,42 @@ In the cooking window, the items on the workbench show the number of the choice 
 The Rat Cage window has the dropdown too, under the Leave All and Leave by Type buttons, for the Backpack and each fridge and cooking storage tab. Here Satiety shows the satiety that the cage gets from the item, not the eat value: the satiety of the dish itself for a cooked dish or a ration, else the raw satiety, times the uses left, with no talent bonus. So the same item can show a bigger Satiety number here than in the cooking window. Items that the cage does not take come last and are dimmed. The Food Storage grid of the cage shows the number of the choice at each item.
 
 The sort only changes what the window shows, not the places of the items. One choice applies to all these windows until you quit the game. While a sort is on, a drag inside the sorted grid does nothing; a drag to or from another grid works as usual, and an item that you put in goes to a free place. Select Default to move items by hand.
+
+## Codex marks
+
+See what is still missing from your Codex:
+
+- Each dish card in "THIS POT" whose dish is not in the Codex yet shows a gold trophy at the top left of its icon. This includes new combinations and "???" cards. A dish that is in the Codex from any of its recipes shows no trophy.
+- Each Recipe Book row of such a dish shows the same trophy at its icon, also a craft-locked row. A row of several recipes of one dish shows one trophy.
+- The title of the Recipe Book shows the button "Codex A / B" in place of "Unlocked A / B": A is the dishes in your Codex, B is all dishes of the Codex. Click it to show only the rows with a trophy, in the same order; click it again to show all rows. Load and the other clicks of a row work as usual. The choice stays until you quit the game. Point at the button to see how many of the missing dishes are in your Recipe Book.
+- While a cooking station of your home cooks a dish (also when the cook pauses for lack of power or fuel), its Recipe Book rows show no trophy, the Codex button does not show them, and its tooltip does not count the dish. So when you cook at several stations, you do not pick the same new dish twice. When the cook ends, the dish is in the Codex. When you stop the cook, the trophy comes back. "Codex A / B" and the dish cards change only when the cook ends.
+- The food sort of the storage window and the Rat Cage window gets the choice Codex, with a trophy icon. It puts the foods that you have never tasted first, each with a trophy, and the other items after them in their real order. Nothing is dimmed. The items in the Food Storage of the Rat Cage show the trophy at their places. The cooking window has no choice Codex, because cooking an ingredient does not add it to the Codex: there the trophy marks only the dishes.
+
+The trophies follow the Codex of all your runs. After you cook a dish or eat a food for the first time, its trophy is gone at the next refresh of the window. In guide mode and explore mode the game keeps the Codex locked, so no trophy shows.
+
+### Unknown recipes in the Codex list
+
+The Recipe Book lists only the dishes of which you know a recipe. The game teaches a recipe only when you cook it for the first time or reach its cooking level, so a new dish usually means a guess of its ingredients. With the Codex button on, the Recipe Book also lists the recipes that you have not learned yet:
+
+- Only a recipe whose dish is not in your Codex, whose dish has no row in the Recipe Book, and whose ingredients the cooking station and the storage tabs hold (with Load from all tabs, all its tabs; without it, the open tab).
+- Each row has the game's grey "?" in place of the dish picture, the trophy, the dish name, its ingredients, Load, and the game's tooltip. Load fills the cooking station as for any recipe, and the first cook teaches you the recipe.
+- The list shows the rows with Ready first, then the rows with Load, then the others. In each part, your known recipes come first.
+- Only at a cooking station where you know at least one dish. A recipe that needs a cooking level or an event first does not show.
+- `UnknownRecipesWithIngredients` (on by default) shows the unknown recipes whose ingredients you have. `UnknownRecipesWithoutIngredients` (off by default) shows the ones whose ingredients you do not have, after the rows with Load. With both on, the list shows every recipe that the station can cook. Each switch works alone.
+
+The recipes, the ingredients, and the cook come from the game: the costs, times, and results stay the same as by hand.
+
+Creative Cook (Medium) and Creative Cook (Premium) raise the tier of a dish from ingredient types (for example Meat + Vegetables), so the card shows the higher-tier dish and its trophy. The lower-tier dishes of these recipes (for example Simple Stew) need a run without the talent to enter the Codex.
+
+## Load from all tabs
+
+The game's Load in the Recipe Book takes the ingredients only from the cooking station and the open storage tab. With Project Cook:
+
+- When those two do not have all the ingredients, Load also takes them from the other storage tabs of the cooking window: the Backpack, each fridge, and each cooking storage, from left to right as the tab row shows them. Each ingredient leaves the tab it came from.
+- When the open tab has them all, Load works as without the mod and takes nothing from another tab.
+- A locked tab (a fridge or a cooking storage below cooking level 2) gives nothing.
+- The Recipe Book counts the ingredients of all these tabs, so a row shows Load, and keeps its place in the list, whichever tab is open.
+- The game still picks the items in each tab, also the ingredient tier of a recipe of ingredient types, and still moves the unused items on the cooking station to the open tab.
 
 ## Cooking tag
 
@@ -136,6 +175,10 @@ The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written
 - `CookingStorages` - the Cooking tag and the tabs of Cooking and Food storages in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save (see [Uninstall](#uninstall)), and turning it on again does not bring the tag back.
 - `ColdSortFood` - the fridges with Food or Cooking and the Cold Storage room storages as targets of Store Chilled Food.
 - `IconTabs` - the storage icons in place of the names on the tabs of the cooking, Brewing Barrel, Rat Cage, and Ration Press windows.
+- `CodexMarks` - the trophy on the dish cards and the Recipe Book rows whose dish is not in the Codex, the Codex button of the Recipe Book, and the Codex choice of the food sort.
+- `LoadFromAllTabs` - Load in the Recipe Book also takes the ingredients from the other storage tabs of the cooking window.
+- `UnknownRecipesWithIngredients` - the Codex list of the Recipe Book also shows the recipes you have not learned yet whose ingredients you have.
+- `UnknownRecipesWithoutIngredients` (off by default) - the Codex list of the Recipe Book also shows the recipes you have not learned yet whose ingredients you do not have.
 
 See [CONFIG.md](CONFIG.md) for all settings, defaults, and instructions for editing the file.
 
@@ -191,3 +234,5 @@ dotnet build src/ProjectCook.csproj -c Release -p:Package=true
 Licensed under the GNU General Public License v3.0. Copyright (C) 2026 ivmakk. See [LICENSE](LICENSE).
 
 You may reuse and modify this mod, but you must keep it open under the same license and give credit. Do not reupload it without credit.
+
+The trophy icon (`src/Web/page/icons/codex.svg`) is from [Lucide](https://lucide.dev), ISC License, Copyright (c) Lucide Contributors.

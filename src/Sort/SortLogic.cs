@@ -75,11 +75,13 @@ namespace ProjectCook
             public DaysLeft Days;
             // The cage satiety (CageSatiety): the Rat Cage window shows it for the choice Satiety.
             public int? Cage;
+            // The item shows the codex mark: a food of the codex that the player has never tasted.
+            public bool Codex;
         }
 
         public sealed class Words
         {
-            // Default, Satiety, Morale, Stamina, Life, Trade value, Expiration Date.
+            // Default, Satiety, Morale, Stamina, Life, Trade value, Expiration Date, and Codex with the codex marks.
             public string[] Choices;
             // The game's words on the cell of an expired item with no time until it spoils, and of a rotten item.
             public string Expired, Rotten;
@@ -145,18 +147,21 @@ namespace ProjectCook
         // (SR_Web_EventChoice_DefaultTag), the stat names and the trade value label of the preview words, the game's
         // word for the shelf life (UI_BattleBag_6, Expiration Date), the game's expired and rotten words (UI_ItemTips_2,
         // SR_Web_Backpack_Rotten), the mod's word for the button with Default (the game's Sort, 整理, is the word of
-        // its Auto Organize), and the text of the days left.
-        internal static Words WordsFrom(PreviewLogic.Words words, I18nTextSet texts)
+        // its Auto Organize), and the text of the days left. With codex (the codex marks are on), the game's word for
+        // the codex (SR_Web_OutSetting_Codex) is the last choice.
+        internal static Words WordsFrom(PreviewLogic.Words words, I18nTextSet texts, bool codex = false)
         {
+            var choices = new List<string>
+            {
+                texts["sortDefault"],
+                words.Stat[EatLogic.Satiety], words.Stat[EatLogic.Morale], words.Stat[EatLogic.Stamina], words.Stat[EatLogic.Life],
+                words.TradeLabel,
+                texts["expirationDate"],
+            };
+            if (codex) choices.Add(texts["codex"]);
             return new Words
             {
-                Choices = new[]
-                {
-                    texts["sortDefault"],
-                    words.Stat[EatLogic.Satiety], words.Stat[EatLogic.Morale], words.Stat[EatLogic.Stamina], words.Stat[EatLogic.Life],
-                    words.TradeLabel,
-                    texts["expirationDate"],
-                },
+                Choices = choices.ToArray(),
                 Sort = texts["sort"],
                 DaysLeft = texts["daysLeft"],
                 Expired = texts["expired"],
