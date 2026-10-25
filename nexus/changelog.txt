@@ -1,3 +1,11 @@
+v1.5.0 - 2026-10-26
+Added: A gold trophy on a dish card in THIS POT marks a dish that is not in your Codex yet, also on new combinations and "???" cards.
+Added: The food sort gets the choice Codex: the foods you have never tasted come first, each with a trophy. Also in the Rat Cage's Food Storage.
+Added: Recipe Book rows show the same trophy. The Codex button in the Recipe Book title shows only those recipes; click it again to show all.
+Added: Load in the Recipe Book also takes the ingredients from the other storage tabs of the cooking window when the open tab does not have them all. Locked tabs give nothing.
+Added: A dish that a cooking station cooks now leaves the Codex list until its cook ends, so you do not cook the same new dish twice at two stations.
+Added: The Codex list also shows the recipes you have not learned yet whose ingredients you have, each with a grey "?" and Load. The first cook teaches the recipe. Turn on UnknownRecipesWithoutIngredients to also see the ones you cannot cook yet.
+
 v1.4.0 - 2026-10-23
 Added: Storages tagged Cooking or Food also show as tabs in the Brewing Barrel, Rat Cage, and Ration Press windows. In the Rat Cage window you can sort them like the fridge tabs.
 Added: Storage tabs at the Cooking Station, Brewing Barrel, Rat Cage, and Ration Press show storage icons instead of names, so more tabs fit. Point at a tab to see its name.

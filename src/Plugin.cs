@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace ProjectCook
 {
-    [BepInPlugin(PluginGuid, "Project Cook", "1.4.0")]
+    [BepInPlugin(PluginGuid, "Project Cook", "1.5.0")]
     [BepInProcess("SurvivalLog.exe")]
     public sealed class Plugin : BasePlugin
     {

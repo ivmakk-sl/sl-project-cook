@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-26
+
 ### Added
 
 - Codex marks: a gold trophy at the top left of a dish card's icon in "THIS POT" marks a dish that is not in your Codex yet, also on new combinations and "???" cards. The food sort gets the choice Codex: the foods you have never tasted come first, each with a trophy, and nothing is dimmed. The Food Storage of the Rat Cage shows the trophy too. The cooking window has no choice Codex: there the trophy marks only the dishes. No trophy shows in guide mode and explore mode, where the game keeps the Codex locked. Turn this off with `CodexMarks`.
