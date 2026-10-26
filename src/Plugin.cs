@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace ProjectCook
 {
-    [BepInPlugin(PluginGuid, "Project Cook", "1.5.0")]
+    [BepInPlugin(PluginGuid, "Project Cook", "1.5.1")]
     [BepInProcess("SurvivalLog.exe")]
     public sealed class Plugin : BasePlugin
     {
@@ -115,6 +115,7 @@ namespace ProjectCook
                 catch (Exception e) { Log.LogError($"patch {type.Name} failed: {e.Message}"); }
             }
             if (LoadFromAllTabs.Value) PatchGroup(harmony, LoadAllPatches.Types, "Load from all tabs is off, the fill takes only the open tab");
+            PatchGroup(harmony, FastLoadPatches.Types, "A click on Load refreshes the cooking window after each moved item");
             if (unknownRecipes && !CodexMarks.Value)
                 Log.LogInfo("UnknownRecipesWithIngredients or UnknownRecipesWithoutIngredients is on, but CodexMarks is off, so the Recipe Book shows no unknown recipe.");
             else if (unknownRecipes)
