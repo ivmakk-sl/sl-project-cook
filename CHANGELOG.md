@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - Load in the Recipe Book is faster on a full home: the cooking window updates once after the last ingredient moves, not after each one. The ingredients and the window after the fill are the same as before.
+- A feature setting takes effect while you play, with no game restart: at once in an in-game config manager, or after an edit of the config file at the next save load or when you open Settings. `CookingStorages` and `IgnoreCookingTalents` still apply at the next game start.
 
 ## [1.5.0] - 2026-10-26
 

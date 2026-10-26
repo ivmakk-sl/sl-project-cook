@@ -71,6 +71,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Data_Item itemState, long bagOwnerId, long workbenchOwnerId, Il2CppDict.Dictionary<int, int> needed, ref Il2CppDict.List<long> __result)
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             if (__result != null || needed == null) return;
             long start = Timing.Start();
             try
@@ -95,6 +96,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Data_Item itemState, long bagOwnerId, long workbenchOwnerId, Il2CppDict.List<int> tagCombo, int requiredTier, Il2CppDict.HashSet<int> excludeConfigIds, ref Il2CppDict.List<long> __result)
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             if (__result != null || tagCombo == null) return;
             long start = Timing.Start();
             try
@@ -127,6 +129,7 @@ namespace ProjectCook
     {
         private static void Prefix(ItemManager __instance, long itemId, ref long fromOwnerId, long toOwnerId)
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             try
             {
                 if (toOwnerId == 0 || toOwnerId != TabIndex.Station) return;
@@ -147,6 +150,7 @@ namespace ProjectCook
     {
         private static void Prefix(State_Web_Cooking state)
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             try
             {
                 if (state == null) return;
@@ -162,6 +166,7 @@ namespace ProjectCook
 
         private static void Postfix()
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             if (!LoadAllPatches.InRefresh) return;
             LoadAllPatches.InRefresh = false;
             if (Plugin.Verbose.Value)
@@ -177,6 +182,7 @@ namespace ProjectCook
     {
         private static void Prefix(State_Web_Cooking state, State_Data_Item itemState, Il2CppDict.Dictionary<int, int> totalCountById, Il2CppDict.Dictionary<int, int> totalTags)
         {
+            if (!Plugin.LoadFromAllTabs.Value) return;
             try
             {
                 if (!LoadAllPatches.Refresh.TakeFirst() || state == null || totalCountById == null || totalTags == null) return;

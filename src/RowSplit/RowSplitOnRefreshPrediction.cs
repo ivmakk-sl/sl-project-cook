@@ -12,6 +12,7 @@ namespace ProjectCook
         [HarmonyPriority(Priority.First)]
         private static void Postfix(State_Web_Cooking state, Il2CppSystem.Collections.Generic.IEnumerable<Config_CookingRecipe> allRecipes)
         {
+            if (!Plugin.RowSplit.Value) return;
             RowPlanner.Current = null;
             try
             {

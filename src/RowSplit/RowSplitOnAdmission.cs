@@ -13,6 +13,7 @@ namespace ProjectCook
     {
         private static void Postfix(long itemId, State_Web_Cooking state, ref bool __result)
         {
+            if (!Plugin.RowSplit.Value) return;
             if (__result) return;
             try
             {

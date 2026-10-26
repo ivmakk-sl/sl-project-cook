@@ -26,6 +26,7 @@
     <Compile Include="..\..\src\Codex\CodexLogic.cs" Link="CodexLogic.cs" />
     <Compile Include="..\..\src\LoadAll\LoadAllLogic.cs" Link="LoadAllLogic.cs" />
     <Compile Include="..\..\src\FastLoad\FastLoadLogic.cs" Link="FastLoadLogic.cs" />
+    <Compile Include="..\..\src\SwitchesLogic.cs" Link="SwitchesLogic.cs" />
     <None Include="..\fixtures\*.json" Link="fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

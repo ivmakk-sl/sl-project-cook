@@ -165,7 +165,7 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## Settings
 
-The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it, then restart the game.
+The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it. The change applies while you play: at once in an in-game config manager, or after an edit of the file at the next save load or when you open Settings. `CookingStorages` applies at the next game start.
 
 - `DishPreview` - the preview lines and the tooltip of the dish cards, the portion switch, and the added ingredient lines and tier marks.
 - `FoodSort` - the food sort in the storage window, the cooking window, and the Rat Cage window.

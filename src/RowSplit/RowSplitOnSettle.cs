@@ -22,6 +22,7 @@ namespace ProjectCook
 
         private static bool Prefix(Furniture __instance, ref Il2CppDict.List<ItemData> workbenchItems, Il2CppDict.List<int> recipeIds, ref Il2CppDict.List<Furniture.MatchedRecipeEntry> __result)
         {
+            if (!Plugin.RowSplit.Value) return true;
             if (inner) return true;
             try
             {

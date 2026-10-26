@@ -172,6 +172,7 @@ namespace ProjectCook
             Il2CppDict.Dictionary<int, int> workbenchCountById, Il2CppDict.Dictionary<int, int> workbenchTags,
             Il2CppDict.Dictionary<int, int> totalCountById, Il2CppDict.Dictionary<int, int> totalTags)
         {
+            if (!Plugin.UnknownRecipesOn) return;
             if (!UnknownRecipes.Refresh.TakeFirst()) return;
             UnknownRecipes.Evaluated = true;
             UnknownRecipes.ItemState = itemState;
@@ -191,11 +192,16 @@ namespace ProjectCook
     {
         private static void Prefix()
         {
+            if (!Plugin.UnknownRecipesOn) return;
             UnknownRecipes.Clear();
             UnknownRecipes.Refresh.Mark();
         }
 
         [HarmonyPriority(Priority.High)]
-        private static void Postfix(State_Web_Cooking state) => UnknownRecipes.Build(state);
+        private static void Postfix(State_Web_Cooking state)
+        {
+            if (!Plugin.UnknownRecipesOn) return;
+            UnknownRecipes.Build(state);
+        }
     }
 }

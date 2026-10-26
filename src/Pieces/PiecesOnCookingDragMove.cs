@@ -26,6 +26,7 @@ namespace ProjectCook
 
         private static void Prefix(ItemManager __instance, long itemId, long toOwnerId, Vector2Int bagPos)
         {
+            if (!Plugin.SeparatePieces.Value) return;
             Current = null;
             try
             {
@@ -64,6 +65,7 @@ namespace ProjectCook
 
         private static bool Prefix(ItemManager __instance, long srcInstanceId, long targetOwnerId, ref bool __result)
         {
+            if (!Plugin.SeparatePieces.Value) return true;
             var drag = PiecesOnCookingDragMove.Current;
             if (inner || drag == null || targetOwnerId != drag.To) return true;
             try
@@ -117,6 +119,7 @@ namespace ProjectCook
     {
         private static bool Prefix(ItemManager __instance, long fromOwnerId, long itemId, long toOwnerId)
         {
+            if (!Plugin.SeparatePieces.Value) return true;
             var drag = PiecesOnCookingDragMove.Current;
             if (drag == null || drag.Target == null || drag.Merged || toOwnerId != drag.To) return true;
             try

@@ -17,6 +17,7 @@ namespace ProjectCook
 
         private static void Prefix(Furniture __instance, CookingStartData data)
         {
+            if (!Plugin.RowSplit.Value) return;
             Pending = null;
             // The plan stays for a second start after a refused one (no power at an electric stove), which comes with
             // no prediction refresh. The signature check below keeps a plan of other items from applying.
@@ -61,6 +62,7 @@ namespace ProjectCook
 
         private static bool Prefix(Furniture __instance, Il2CppDict.List<int> clientRecipeIds, Il2CppDict.List<ItemData> workbenchItems, Config_FurnitureCook cookConfig, ref Il2CppDict.List<int> __result)
         {
+            if (!Plugin.RowSplit.Value) return true;
             var plan = RowSplitOnStart.Pending;
             if (inner || plan == null) return true;
             try

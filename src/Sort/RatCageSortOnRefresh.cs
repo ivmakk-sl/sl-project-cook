@@ -15,6 +15,7 @@ namespace ProjectCook
     {
         private static void Postfix(Il2CppDict.List<Data_Item> itemList, float currentHours)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 if (itemList == null || itemList.Count == 0) return;
@@ -35,6 +36,7 @@ namespace ProjectCook
     {
         internal static void Send(State_Web_RatCage state)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 if (state == null || state.BagItems == null || state.BagItems.Count > 0 || state.BagOwnerId == null) return;
@@ -71,6 +73,7 @@ namespace ProjectCook
     {
         private static void Postfix()
         {
+            if (!Plugin.FoodSort.Value && !Plugin.IconTabs.Value) return;
             try
             {
                 PageTick.Request();

@@ -84,6 +84,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_Cooking __result)
         {
+            if (!Plugin.IconTabs.Value && !Plugin.CookingStorages.Value) return;
             try
             {
                 var list = __result?.BagTabs;
@@ -105,6 +106,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_Brew __result)
         {
+            if (!Plugin.IconTabs.Value && !Plugin.CookingStorages.Value) return;
             try
             {
                 var list = __result?.BagTabs;
@@ -126,6 +128,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_RatCage __result)
         {
+            if (!Plugin.IconTabs.Value && !Plugin.CookingStorages.Value) return;
             try
             {
                 var list = __result?.BagTabs;
@@ -147,6 +150,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_Compressor __result)
         {
+            if (!Plugin.IconTabs.Value && !Plugin.CookingStorages.Value) return;
             try
             {
                 var list = __result?.CartTabs;

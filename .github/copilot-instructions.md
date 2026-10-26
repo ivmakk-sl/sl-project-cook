@@ -10,6 +10,7 @@ This repo is a BepInEx 6 (IL2CPP) Harmony mod for *Survival Log*. Plugins derive
 - **Never read an `Il2CppSystem.ValueTuple<...>` result of a game method,** direct or as a list element. The interop layer reads the fields wrongly and gives garbage with no error (seen with `Reducer_Web_Cooking.PreMatchRecipes` and `CookingFormula.CalcSplit`). Expect a method that returns a class, a dictionary, or an `Il2CppStructArray`, or the value calculated in the mod.
 - **Guard game lookups.** Singletons, config lookups, and the web view return null often. Flag an unchecked dereference inside a patch.
 - **A patch must not break the game.** Each patch body sits in a try/catch that logs the error, so the cooking window falls back to the game's own display.
+- **A feature patch checks its switch first.** Each feature patch attaches at the start and its first statement checks the config switch of its feature (a Prefix returns `true`, a Postfix returns, `ColdSortDetour` calls the original), so a switch takes effect while the game runs; a change of a `[Features]` entry sends the page features again (`Plugin.OnSettingChanged`), and the library `config-file` reads a hand edit of the file at a save load or the settings window open. Flag a feature patch that does work before its switch check, and a new switch that adds or leaves out a patch at `Load`. Only `CookingStorages` (with its tag patches) and `IgnoreCookingTalents` stay switches of the game start.
 
 ## Web UI
 

@@ -25,7 +25,7 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 
 With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
 
-With `RowSplit` off, the game matches recipes against all the ingredients together. If you restart with this setting off while a cook is in progress, it finishes with its saved recipes. The game assigns ingredients to those recipes using its usual rules, so the dishes may differ from the row previews.
+With `RowSplit` off, the game matches recipes against all the ingredients together. If you turn this setting off while a cook is in progress, the cook finishes with its saved recipes. The game assigns ingredients to those recipes using its usual rules, so the dishes may differ from the row previews.
 
 **Before turning off `CookingStorages`:** give any storage whose only tag is Cooking a game tag such as Food. Otherwise, it loses its tag rule and the robot no longer puts items there.
 
