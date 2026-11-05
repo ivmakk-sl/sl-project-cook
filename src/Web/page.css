@@ -232,6 +232,12 @@
   text-shadow: none;
 }
 
+/* Game 1.1.20719 puts the title into the flex row .pot-head, where it is only as wide as its text: with the switch in
+   it, the title fills the row, so the margin-left: auto above puts the switch at the right end. */
+.pot-head > .pot-sec-title:has(.projectcook-portion) {
+  flex: 1 1 auto;
+}
+
 .projectcook-portion-opt {
   padding: 1px 6px;
   border-radius: 3px;

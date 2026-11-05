@@ -116,6 +116,14 @@ test('portion switch: the CSS hides the mode tabs and gives the list its height 
   assert.match(css, /\.projectcook-no-dish-mode \.pot-sec\.has-dish-mode \.prediction-list\s*\{\s*max-height:\s*180px;?\s*\}/);
 });
 
+// Game 1.1.20719 puts the title into the flex row .pot-head, where it is only as wide as its text: the title with the
+// switch fills the row, so the margin-left: auto of the switch puts it at the right end (seen by the user).
+test('portion switch: the title with the switch fills the head row, so the switch sits at its right end', () => {
+  const css = fs.readFileSync(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', '..', 'src', 'Web', 'page.css'), 'utf8');
+  assert.match(css, /\.pot-head > \.pot-sec-title:has\(\.projectcook-portion\)\s*\{\s*flex:\s*1 1 auto;?\s*\}/);
+  assert.match(css, /\.pot-sec-title \.projectcook-portion\s*\{[^}]*margin-left:\s*auto/);
+});
+
 test.skipIf(!gameFilesExist)('portion switch: comes back after the game writes the title text', async (t) => {
   const w = await cookingWindow(t);
   w.renderPredictionList([ENTRY]);
