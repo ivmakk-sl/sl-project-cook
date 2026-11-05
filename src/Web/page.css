@@ -244,6 +244,21 @@
   background: var(--pc-sort-gold);
 }
 
+/* The cooking mode tabs of the game (Mixed / Separate, game 1.1.20719) share the head row of the pot section with the
+   switch: with the switch on they are hidden over the inline display of the game, and the head and the list get the
+   game's own sizes for no tabs (.pot-head margin-bottom 8px, .prediction-list max-height 180px of Cooking.html). */
+.projectcook-no-dish-mode #dishMode {
+  display: none !important;
+}
+
+.projectcook-no-dish-mode .pot-sec.has-dish-mode .pot-head {
+  margin-bottom: 8px;
+}
+
+.projectcook-no-dish-mode .pot-sec.has-dish-mode .prediction-list {
+  max-height: 180px;
+}
+
 /* The codex mark: a gold trophy on a round, opaque dark coin with a gold ring, the same on a dish card, in a cell
    badge, and as the dropdown icon of Codex. On a dish card it hangs 4 px out of the top left corner of the dish icon, as
    in a cell: a wrapper holds the icon and the coin, because the icon box cuts off its content. The pointer goes through

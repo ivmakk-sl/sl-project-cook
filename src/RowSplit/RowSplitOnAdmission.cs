@@ -7,7 +7,8 @@ namespace ProjectCook
     // The game's admission of an item to the cooking station counts the item itself when it is already there, so
     // with a full cooking station each move inside it is refused with no message, while the page shows the item at
     // its new cell. With row split the cell decides the dish, so a move inside the cooking station passes: the item
-    // passed the food checks when it went in.
+    // passed the food checks when it went in. During a cook the game refuses each move to the cooking station (game
+    // 1.1.20719: IsCooking, the text SR_Web_Cooking_100), and that refusal stays.
     [HarmonyPatch(typeof(Reducer_Web_Cooking), "CheckCookingAdmission")]
     internal static class RowSplitOnAdmission
     {
@@ -17,6 +18,11 @@ namespace ProjectCook
             if (__result) return;
             try
             {
+                if (state?.IsCooking != null && state.IsCooking.Value)
+                {
+                    if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"row split move during a cook refused item={itemId}");
+                    return;
+                }
                 var items = state?.WorkbenchItems;
                 for (int i = 0; items != null && i < items.Count; i++)
                 {

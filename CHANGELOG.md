@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Load in the Recipe Book is faster on a full home: the cooking window updates once after the last ingredient moves, not after each one. The ingredients and the window after the fill are the same as before.
 - A feature setting takes effect while you play, with no game restart: at once in an in-game config manager, or after an edit of the config file at the next save load or when you open Settings. `CookingStorages` and `IgnoreCookingTalents` still apply at the next game start.
+- The game's Mixed / Separate tabs of "THIS POT" (from cooking level 4, game 1.1.20719) are hidden while the Whole dish / Per portion switch shows, because they cover it. Cook by row already decides which dishes cook together. Your save keeps the mode it has. Part of `DishPreview`.
+
+### Removed
+
+- Support for game versions before 1.1.20719.
+
+### Fixed
+
+- Load from all tabs works again in game 1.1.20719, where it was off. The game now takes the ingredients of a recipe with fixed ingredients from all storage tabs itself; Project Cook adds the other tabs for a recipe that takes any ingredient of a food type, and the Recipe Book counts each ingredient once.
+- Cook by row in a save that uses the game's Separate mode: "THIS POT" and the cook give the dishes that Separate gives for the ingredients of each row.
 
 ## [1.5.0] - 2026-10-26
 

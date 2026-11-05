@@ -6,6 +6,7 @@ import { view } from './core';
 import type { CookingWindow } from './types';
 
 const CLS = 'projectcook-portion';
+const NO_MODES = 'projectcook-no-dish-mode';
 
 export function portionSwitchOn(): boolean {
   return !!view.data.features && view.data.features.indexOf('portionSwitch') >= 0 && !!view.data.portion;
@@ -14,6 +15,9 @@ export function portionSwitchOn(): boolean {
 // Shows the switch in the title when show is true, else removes it. redraw draws the list again after a choice.
 export function drawPortionSwitch(w: CookingWindow, show: boolean, redraw: () => void): void {
   const doc = w.document;
+  // The cooking mode tabs of the game (#dishMode, game 1.1.20719) share the head row with the switch, so they are
+  // hidden while the feature is on, also with no preview line (page.css).
+  doc.documentElement.classList.toggle(NO_MODES, portionSwitchOn());
   const title = doc.getElementById('potSectionTitle');
   if (!title) return;
   if (!w.__projectCookPortion) observeTitle(w, title);

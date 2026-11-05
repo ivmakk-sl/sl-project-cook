@@ -4,8 +4,8 @@ using ProjectCook;
 using Xunit;
 using static ProjectCook.LoadAllLogic;
 
-// The searches of the fill over all container tabs: the game's rule of Reducer_Web_Cooking.SelectItemsByConfigId and
-// SelectItemsByTagTiered (read with NativeDisasm in game 1.1.19611, design.md), over a longer owner list.
+// The search of a tag recipe over all container tabs: the game's rule of Reducer_Web_Cooking.SelectItemsByTagTiered
+// (read with NativeDisasm in game 1.1.19611, design.md), over a longer owner list.
 public class LoadAllLogicTests
 {
     private const long Station = 900, Open = 901, Fridge = 902, Storage = 903;
@@ -39,43 +39,6 @@ public class LoadAllLogicTests
     public void Owners_OpenTabNotInTheTabRowStillComesSecond()
     {
         Assert.Equal(new[] { Station, Open, Fridge }, Owners(Station, Open, new[] { new Tab(Fridge, false) }));
-    }
-
-    // The search by config id.
-
-    [Fact]
-    public void ByConfigId_TwoOwners_TheGameRule()
-    {
-        // The game walks the station, then the open tab, in list order, and takes the first N of each needed id.
-        var items = new[] { Food(1, Station, 10), Food(2, Open, 20), Food(3, Open, 10), Food(4, Open, 10) };
-        Assert.Equal(new long[] { 1, 3, 2 }, SelectByConfigId(new Pool(items), Need(10, 2, 20, 1)));
-    }
-
-    [Fact]
-    public void ByConfigId_ItemsOfTheOtherTabsAfterTheOpenTab()
-    {
-        var items = new[] { Food(1, Open, 10), Food(2, Fridge, 10), Food(3, Fridge, 20), Food(4, Storage, 10) };
-        Assert.Equal(new long[] { 1, 2, 3 }, SelectByConfigId(new Pool(items), Need(10, 2, 20, 1)));
-    }
-
-    [Fact]
-    public void ByConfigId_NullWhenAnIdIsShort()
-    {
-        var items = new[] { Food(1, Open, 10), Food(2, Fridge, 20) };
-        Assert.Null(SelectByConfigId(new Pool(items), Need(10, 2, 20, 1)));
-    }
-
-    [Fact]
-    public void ByConfigId_NullWhenAnIdIsMissing()
-    {
-        Assert.Null(SelectByConfigId(new Pool(new[] { Food(1, Open, 10) }), Need(10, 1, 30, 1)));
-    }
-
-    [Fact]
-    public void ByConfigId_OnlyCookableItems()
-    {
-        var items = new[] { new Item(1, Open, 10, false, 0, 0), Food(2, Fridge, 10) };
-        Assert.Equal(new long[] { 2 }, SelectByConfigId(new Pool(items), Need(10, 1)));
     }
 
     // The search by tag and tier.
@@ -143,11 +106,12 @@ public class LoadAllLogicTests
         Assert.Equal(new long[] { 2, 3 }, SelectByTagTiered(new Pool(items), Need(5, 2), 2, null));
     }
 
-    // The counts of the Recipe Book: one for each cookable item of the other tabs, by its config id and its tag, added
-    // to the game's counts of the station and the open tab.
+    // The counts of the Recipe Book: one for each cookable item of the other tabs, by its tag, added to the game's
+    // counts of the station and the open tab. The game counts the same items by config id itself
+    // (AddOtherTabsToExactCounts, game 1.1.20719), so the mod adds no count by config id.
 
     [Fact]
-    public void Counts_AddTheItemsOfTheOtherTabs()
+    public void Counts_AddTheTagsOfTheItemsOfTheOtherTabs()
     {
         var items = new[]
         {
@@ -155,22 +119,18 @@ public class LoadAllLogicTests
             Food(3, Fridge, 10, tag: 5), Food(4, Fridge, 20, tag: 6), Food(5, Storage, 10, tag: 5),
             new Item(6, Storage, 30, false, 7, 0),
         };
-        var ids = new Dictionary<int, int> { [10] = 2 };
         var tags = new Dictionary<int, int> { [5] = 2 };
 
-        AddCounts(items, Station, Open, ids, tags);
+        AddTagCounts(items, Station, Open, tags);
 
-        Assert.Equal(new Dictionary<int, int> { [10] = 4, [20] = 1 }, ids);
         Assert.Equal(new Dictionary<int, int> { [5] = 4, [6] = 1 }, tags);
     }
 
     [Fact]
     public void Counts_NothingWithNoOtherTab()
     {
-        var ids = new Dictionary<int, int> { [10] = 1 };
         var tags = new Dictionary<int, int>();
-        AddCounts(new[] { Food(1, Open, 10, tag: 5) }, Station, Open, ids, tags);
-        Assert.Equal(new Dictionary<int, int> { [10] = 1 }, ids);
+        AddTagCounts(new[] { Food(1, Open, 10, tag: 5) }, Station, Open, tags);
         Assert.Empty(tags);
     }
 
@@ -197,15 +157,14 @@ public class LoadAllLogicTests
         Assert.Empty(Needed(new int[0]));
     }
 
-    // The pool groups the items once: a search reads only the items of its config ids or its tags, in the order of the
-    // places (the work grows with the matching items, not with all items for each recipe).
+    // The pool groups the items once: a search reads only the items of its tags, in the order of the places (the work
+    // grows with the matching items, not with all items for each recipe).
     [Fact]
-    public void Pool_GroupsTheItemsByConfigIdAndTagInOrder()
+    public void Pool_GroupsTheItemsByTagInOrder()
     {
         var pool = new Pool(new[] { Food(1, Open, 10, tag: 5), Food(2, Open, 20, tag: 6), Food(3, Fridge, 10, tag: 5), new Item(4, Fridge, 10, false, 5, 0) });
-        Assert.Equal(new long[] { 1, 3 }, pool.ByConfigId(10).Select(i => i.Id));
         Assert.Equal(new long[] { 1, 3 }, pool.ByTag(5).Select(i => i.Id));
-        Assert.Empty(pool.ByConfigId(30));
+        Assert.Empty(pool.ByTag(30));
         Assert.Equal(4, pool.Items.Count);
     }
 

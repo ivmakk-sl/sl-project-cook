@@ -154,7 +154,7 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## Requirements
 
-- Survival Log 1.1.18902 or later.
+- Survival Log 1.1.20719 or later.
 - [BepInEx for Survival Log](https://www.nexusmods.com/survivallog/mods/12). Install it first.
 
 ## Install
@@ -190,7 +190,7 @@ If a cook is in progress when you remove the mod or turn off `RowSplit`, it fini
 
 ## Troubleshooting
 
-Project Cook 1.4.0 was verified on Survival Log `1.1.19131` (Steam build `26076180`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
+Project Cook 1.5.1 was verified on Survival Log `1.1.20719` (Steam build `26454866`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
 
 ## Build
 

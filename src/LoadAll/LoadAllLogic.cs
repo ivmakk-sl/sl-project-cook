@@ -2,11 +2,12 @@ using System.Collections.Generic;
 
 namespace ProjectCook
 {
-    // Game-free rules of Load from all tabs: the owner list of the fill, and the game's two item searches of the fill
-    // (Reducer_Web_Cooking.SelectItemsByConfigId and SelectItemsByTagTiered, read with NativeDisasm in game 1.1.19611)
-    // over that longer list. The game walks only the cooking station and the open container tab; with the same two
-    // owners these copies give the game's result. This file must not use any game or BepInEx type, because the unit
-    // tests compile it alone.
+    // Game-free rules of Load from all tabs: the owner list of the fill, and the game's item search of a tag recipe
+    // (Reducer_Web_Cooking.SelectItemsByTagTiered, read with NativeDisasm in game 1.1.19611) over that longer list.
+    // The game's search of a tag recipe walks only the cooking station and the open container tab; with the same two
+    // owners this copy gives the game's result. From game 1.1.20719 the game searches an exact recipe over all tabs
+    // itself (SelectItemsByConfigId with GetExactFillOwners). This file must not use any game or BepInEx type, because
+    // the unit tests compile it alone.
     public static class LoadAllLogic
     {
         // Config_Item.Category of a food.
@@ -69,13 +70,12 @@ namespace ProjectCook
         // other tier 0.
         public static int Rank(int tier) => tier == 1 ? 3 : tier == 2 ? 2 : tier == 3 ? 1 : 0;
 
-        // The items of the places in their order, and the cookable ones grouped once by config id and by tag, so that a
-        // search reads only the items of its config ids or tags: the work of the searches of a refresh grows with the
-        // matching items, not with all items for each recipe.
+        // The items of the places in their order, and the cookable ones grouped once by tag, so that a search reads
+        // only the items of its tags: the work of the searches of a refresh grows with the matching items, not with all
+        // items for each recipe.
         public sealed class Pool
         {
             private static readonly List<Item> None = new List<Item>();
-            private readonly Dictionary<int, List<Item>> byConfigId = new Dictionary<int, List<Item>>();
             private readonly Dictionary<int, List<Item>> byTag = new Dictionary<int, List<Item>>();
 
             public IReadOnlyList<Item> Items { get; }
@@ -87,13 +87,11 @@ namespace ProjectCook
                 foreach (var item in all)
                 {
                     if (!item.Cookable) continue;
-                    Add(byConfigId, item.ConfigId, item);
                     Add(byTag, item.SubCategory, item);
                 }
             }
 
-            // The cookable items of a config id, or of a tag, in the order of the places.
-            public IReadOnlyList<Item> ByConfigId(int configId) => byConfigId.TryGetValue(configId, out var list) ? list : None;
+            // The cookable items of a tag, in the order of the places.
             public IReadOnlyList<Item> ByTag(int tag) => byTag.TryGetValue(tag, out var list) ? list : None;
 
             private static void Add(Dictionary<int, List<Item>> groups, int key, Item item)
@@ -101,20 +99,6 @@ namespace ProjectCook
                 if (!groups.TryGetValue(key, out var list)) groups[key] = list = new List<Item>();
                 list.Add(item);
             }
-        }
-
-        // The search of an exact recipe: the items of each needed config id in the order of the places and of each
-        // list, the first N of each id; null when one id is short. needed is in the order of CountMaterials.
-        public static List<long> SelectByConfigId(Pool pool, IReadOnlyList<KeyValuePair<int, int>> needed)
-        {
-            var result = new List<long>();
-            foreach (var kv in needed)
-            {
-                var list = pool.ByConfigId(kv.Key);
-                if (list.Count < kv.Value) return null;
-                for (int i = 0; i < kv.Value; i++) result.Add(list[i].Id);
-            }
-            return result;
         }
 
         // The search of a tag recipe: for each tag in order, two passes over the items in the order of the places,
@@ -154,14 +138,14 @@ namespace ProjectCook
         }
 
         // The counts of the Recipe Book over the other tabs: the game's RefreshRecipeList counts the station and the
-        // open tab, one for each cookable item by its config id and one by its SubCategory (not its pieces). This adds
-        // the items of the other places in the same way.
-        public static void AddCounts(IEnumerable<Item> items, long station, long openTab, IDictionary<int, int> ids, IDictionary<int, int> tags)
+        // open tab, one for each cookable item by its config id and one by its SubCategory (not its pieces), and from
+        // game 1.1.20719 also the cookable items of the other unlocked tabs by config id (AddOtherTabsToExactCounts).
+        // This adds the items of the other places by SubCategory only.
+        public static void AddTagCounts(IEnumerable<Item> items, long station, long openTab, IDictionary<int, int> tags)
         {
             foreach (var item in items)
             {
                 if (!item.Cookable || item.Owner == station || item.Owner == openTab) continue;
-                ids[item.ConfigId] = (ids.TryGetValue(item.ConfigId, out int n) ? n : 0) + 1;
                 tags[item.SubCategory] = (tags.TryGetValue(item.SubCategory, out int t) ? t : 0) + 1;
             }
         }

@@ -27,6 +27,8 @@ namespace ProjectCook
             public List<Dish> Dishes = new List<Dish>();
             // The config id of each seasoning item of the cooking station, one for each item.
             public List<int> SeasoningIds = new List<int>();
+            // The plan follows the rule of the cooking mode Separate (RowSplitLogic.ExactFirst).
+            public bool Separate;
         }
 
         // The plan of the last prediction refresh, or null when row split does not apply. The client and the
@@ -59,23 +61,63 @@ namespace ProjectCook
             // The furniture that gets the start (RA_StartCook sends it to CurrentFurnitureId).
             long ownerId = state.CurrentFurnitureId;
             var plan = new Plan { OwnerId = ownerId, Signature = RowSplitLogic.Signature(ownerId, rows), Rows = rows, SeasoningIds = seasonings };
+            // The cooking mode of the window (game 1.1.20719): PreMatchRecipes matches with exactFirst in Separate, then
+            // also in Mixed Cooking, and gives a tag dish of Separate the recipe of its Mixed twin.
+            bool exactFirst = RowSplitLogic.ExactFirst(state.CookingLevel, Reducer_Web_Cooking.GetPickDishUnlockLevel(), state.DishPriority);
             foreach (var row in rows)
             {
-                // The loop of PreMatchRecipes on the items of this row only. BuildParticipatedIngredients takes the
-                // used items out of ids and tags.
-                var counts = RowSplitLogic.Counts(row);
-                var ids = ToIl2Cpp(counts.Ids);
-                var tags = ToIl2Cpp(counts.Tags);
-                for (int n = 0; n < MaxDishesPerRow; n++)
+                var dishes = MatchRow(state, allowed, row, allRecipes, exactFirst);
+                if (exactFirst)
                 {
-                    int tier = Reducer_Web_Cooking.ResolvePredictionTier(ids, state.TagTierFloorRank);
-                    var recipe = Reducer_Web_Cooking.SelectBestMatchedRecipe(state, allowed, ids, tags, allRecipes, tier, int.MaxValue);
-                    if (recipe == null) break;
-                    var participated = Reducer_Web_Cooking.BuildParticipatedIngredients(recipe, ids, tags);
-                    plan.Dishes.Add(new Dish { Row = row.Y, Recipe = recipe, Participated = participated });
+                    var mixed = MatchRow(state, allowed, row, allRecipes, false);
+                    var aligned = RowSplitLogic.AlignToMix(Keys(dishes), Keys(mixed));
+                    for (int i = 0; i < dishes.Count; i++)
+                    {
+                        if (aligned[i] == dishes[i].Recipe.ID) continue;
+                        foreach (var m in mixed)
+                            if (m.Recipe.ID == aligned[i]) { dishes[i].Recipe = m.Recipe; break; }
+                    }
                 }
+                plan.Dishes.AddRange(dishes);
             }
+            plan.Separate = exactFirst;
             return plan;
+        }
+
+        // The loop of PreMatchRecipes on the items of one row only. BuildParticipatedIngredients takes the used items
+        // out of ids and tags.
+        private static List<Dish> MatchRow(State_Web_Cooking state, Il2CppDict.HashSet<int> allowed, RowSplitLogic.Row row, Il2CppSystem.Collections.Generic.IEnumerable<Config_CookingRecipe> allRecipes, bool exactFirst)
+        {
+            var dishes = new List<Dish>();
+            var counts = RowSplitLogic.Counts(row);
+            var ids = ToIl2Cpp(counts.Ids);
+            var tags = ToIl2Cpp(counts.Tags);
+            for (int n = 0; n < MaxDishesPerRow; n++)
+            {
+                int tier = Reducer_Web_Cooking.ResolvePredictionTier(ids, state.TagTierFloorRank);
+                var recipe = Reducer_Web_Cooking.SelectBestMatchedRecipe(state, allowed, ids, tags, allRecipes, tier, int.MaxValue, exactFirst);
+                if (recipe == null) break;
+                var participated = Reducer_Web_Cooking.BuildParticipatedIngredients(recipe, ids, tags);
+                dishes.Add(new Dish { Row = row.Y, Recipe = recipe, Participated = participated });
+            }
+            return dishes;
+        }
+
+        private static List<RowSplitLogic.RecipeKey> Keys(List<Dish> dishes)
+        {
+            var keys = new List<RowSplitLogic.RecipeKey>(dishes.Count);
+            foreach (var d in dishes)
+            {
+                var combo = d.Recipe.TagCombo;
+                int[] tags = null;
+                if (combo != null)
+                {
+                    tags = new int[combo.Count];
+                    for (int i = 0; i < tags.Length; i++) tags[i] = combo[i];
+                }
+                keys.Add(new RowSplitLogic.RecipeKey(d.Recipe.ID, d.Recipe.Tier, tags));
+            }
+            return keys;
         }
 
         // The prediction list of the plan, one entry for each dish, with the game's rules of RefreshPrediction for
