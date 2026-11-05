@@ -1,6 +1,5 @@
 v1.5.1 - 2026-11-05
-Changed: Load in the Recipe Book is faster on a full home.
-Changed: Feature settings take effect while you play, with no game restart.
+Changed: Most mod settings take effect with no game restart. CookingStorages and IgnoreCookingTalents still apply at the next game start.
 Changed: The game's Mixed / Separate tabs above the dishes are hidden while the Whole dish / Per portion switch is on, because they cover it. Your save keeps the mode it has.
 Removed: Support for game versions before 1.1.20719.
 Fixed: Load in the Recipe Book takes ingredients from your other storage tabs again in game 1.1.20719.
