@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-11-05
+
 ### Changed
 
 - Load in the Recipe Book is faster on a full home: the cooking window updates once after the last ingredient moves, not after each one. The ingredients and the window after the fill are the same as before.
