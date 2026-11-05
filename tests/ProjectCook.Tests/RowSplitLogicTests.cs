@@ -231,3 +231,62 @@ public class RowSplitSplitIdsTests
         Assert.Null(RowSplitLogic.SplitIds(2, 0, Builder(new int[0], new[] { 10 }, new[] { 20 })));
     }
 }
+
+// The cooking mode of a row (game 1.1.20719): Reducer_Web_Cooking.UseExactFirst and AlignTagDishTierToMix.
+public class RowSplitCookingModeTests
+{
+    private static RowSplitLogic.RecipeKey Exact(int id) => new RowSplitLogic.RecipeKey(id, 0, null);
+    private static RowSplitLogic.RecipeKey Tag(int id, int tier, params int[] combo) => new RowSplitLogic.RecipeKey(id, tier, combo);
+
+    [Theory]
+    [InlineData(4, 4, 1, true)]
+    [InlineData(5, 4, 1, true)]
+    [InlineData(5, 4, 0, false)]
+    [InlineData(3, 4, 1, false)]
+    [InlineData(5, 0, 1, false)]
+    public void ExactFirst_FromTheUnlockLevelInSeparateOnly(int cookingLevel, int unlockLevel, int dishPriority, bool expected)
+    {
+        Assert.Equal(expected, RowSplitLogic.ExactFirst(cookingLevel, unlockLevel, dishPriority));
+    }
+
+    [Fact]
+    public void Align_ATagDishTakesTheRecipeOfItsMixedTwin()
+    {
+        // Separate gives the Low tier tag recipe 501, Mixed the High tier recipe 503 of the same tag combo.
+        var ids = RowSplitLogic.AlignToMix(new[] { Exact(10), Tag(501, 3, 7, 1) }, new[] { Tag(503, 1, 1, 7), Exact(10) });
+        Assert.Equal(new[] { 10, 503 }, ids);
+    }
+
+    [Fact]
+    public void Align_NothingWhenTheCountsDiffer()
+    {
+        // Three Roast Potatoes in Separate against one dish in Mixed: the lists differ, so Separate keeps its own.
+        var ids = RowSplitLogic.AlignToMix(new[] { Exact(20), Exact(20), Exact(20) }, new[] { Tag(601, 2, 4, 4, 4) });
+        Assert.Equal(new[] { 20, 20, 20 }, ids);
+    }
+
+    [Fact]
+    public void Align_StopsAtTheFirstDishWithNoTwin()
+    {
+        // The game's loop returns at the first dish with no same dish in Mixed; the dishes before it stay aligned.
+        var ids = RowSplitLogic.AlignToMix(new[] { Tag(501, 3, 7, 1), Exact(30), Tag(502, 3, 7, 1) }, new[] { Tag(503, 1, 7, 1), Exact(40), Tag(504, 1, 7, 1) });
+        Assert.Equal(new[] { 503, 30, 502 }, ids);
+    }
+
+    [Fact]
+    public void Align_EachMixedDishOnce()
+    {
+        var ids = RowSplitLogic.AlignToMix(new[] { Tag(501, 3, 7, 1), Tag(502, 3, 7, 1) }, new[] { Tag(503, 1, 7, 1), Tag(504, 2, 1, 7) });
+        Assert.Equal(new[] { 503, 504 }, ids);
+    }
+
+    [Fact]
+    public void SameDish_ByIdOrByTheTagComboOfTwoTieredRecipes()
+    {
+        Assert.True(RowSplitLogic.IsSameDish(Exact(10), Exact(10)));
+        Assert.False(RowSplitLogic.IsSameDish(Exact(10), Exact(11)));
+        Assert.True(RowSplitLogic.IsSameDish(Tag(501, 3, 7, 1, 1), Tag(503, 1, 1, 7, 1)));
+        Assert.False(RowSplitLogic.IsSameDish(Tag(501, 3, 7, 1), Tag(503, 1, 7, 1, 1)));
+        Assert.False(RowSplitLogic.IsSameDish(Tag(501, 0, 7, 1), Tag(503, 1, 7, 1)));
+    }
+}

@@ -1,3 +1,11 @@
+v1.5.1 - 2026-11-05
+Changed: Load in the Recipe Book is faster on a full home.
+Changed: Feature settings take effect while you play, with no game restart.
+Changed: The game's Mixed / Separate tabs above the dishes are hidden while the Whole dish / Per portion switch is on, because they cover it. Your save keeps the mode it has.
+Removed: Support for game versions before 1.1.20719.
+Fixed: Load in the Recipe Book takes ingredients from your other storage tabs again in game 1.1.20719.
+Fixed: Cook by row shows and cooks the right dishes in a save that uses the game's Separate mode.
+
 v1.5.0 - 2026-10-26
 Added: New dishes for your Codex are easy to spot: in the cooking window, a small gold trophy icon marks each dish you have never cooked, both in the dishes your pot will make and in the Recipe Book. Cook it once and the icon is gone.
 Added: A Codex button at the top of the Recipe Book shows only the recipes of dishes you have never cooked. Click it again to show all recipes.

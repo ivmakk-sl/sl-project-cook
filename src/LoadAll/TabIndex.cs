@@ -65,17 +65,6 @@ namespace ProjectCook
             return true;
         }
 
-        // A container tab of the open cooking window that the fill can take from: not locked, not the station.
-        internal static bool IsUsableTab(long station, long owner)
-        {
-            if (station != tabsStation || owner == station) return false;
-            foreach (var t in tabs) if (t.Owner == owner) return !t.Locked;
-            return false;
-        }
-
-        // The cooking station of the last refresh of the Recipe Book.
-        internal static long Station => tabsStation;
-
         // The items of the last build, for the timing line of a refresh.
         internal static int ItemCount => current?.Items.Count ?? 0;
 

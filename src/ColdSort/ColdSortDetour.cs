@@ -89,6 +89,8 @@ namespace ProjectCook
 
         private static byte Rank(int kind, IntPtr furniture, IntPtr cfg, float remainDays, IntPtr level, IntPtr specificity, IntPtr methodInfo)
         {
+            // The switch first: off, the game's own rank as it is.
+            if (!Plugin.ColdSortFood.Value) return rankOriginal(kind, furniture, cfg, remainDays, level, specificity, methodInfo);
             var result = rankOriginal(kind, furniture, cfg, remainDays, level, specificity, methodInfo);
             if (result != 0 || kind != (int)QuickStoreKind.Cold || furniture == IntPtr.Zero || cfg == IntPtr.Zero
                 || level == IntPtr.Zero || specificity == IntPtr.Zero)
@@ -109,6 +111,7 @@ namespace ProjectCook
 
         private static IntPtr CollectItems(IntPtr self, int kind, long roleId, float nowHours, IntPtr methodInfo)
         {
+            if (!Plugin.ColdSortFood.Value) return itemsOriginal(self, kind, roleId, nowHours, methodInfo);
             var result = itemsOriginal(self, kind, roleId, nowHours, methodInfo);
             if (kind != (int)QuickStoreKind.Cold || result == IntPtr.Zero) return result;
             try

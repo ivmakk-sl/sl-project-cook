@@ -45,6 +45,65 @@ namespace ProjectCook
         public static bool Applies(bool rowSplitOn, int cookingLevel, int unlockLevel, bool hotPot, int rowCount)
             => rowSplitOn && cookingLevel >= unlockLevel && !hotPot && rowCount >= 2;
 
+        // CookingDishPriority.Exact, the cooking mode Separate (State_Web_Cooking.DishPriority, game 1.1.20719).
+        public const int SeparateMode = 1;
+
+        // Reducer_Web_Cooking.UseExactFirst: the match puts first the recipes with specific ingredients only in Separate,
+        // from the unlock level of the cooking modes (GetPickDishUnlockLevel, 0 when the modes are off).
+        public static bool ExactFirst(int cookingLevel, int unlockLevel, int dishPriority)
+            => unlockLevel > 0 && cookingLevel >= unlockLevel && dishPriority == SeparateMode;
+
+        // A matched recipe for the compare of the two cooking modes: its id, its tier (0 for an exact recipe), and its
+        // tag combo (the food types of a tag recipe, null for none).
+        public readonly struct RecipeKey
+        {
+            public readonly int Id, Tier;
+            public readonly int[] TagCombo;
+
+            public RecipeKey(int id, int tier, int[] tagCombo) { Id = id; Tier = tier; TagCombo = tagCombo; }
+        }
+
+        // Reducer_Web_Cooking.IsSameDish: the same recipe, or two tiered recipes with the same food types and counts.
+        public static bool IsSameDish(RecipeKey a, RecipeKey b)
+        {
+            if (a.Id == b.Id) return true;
+            return a.Tier > 0 && b.Tier > 0 && SameTagCombo(a.TagCombo, b.TagCombo);
+        }
+
+        private static bool SameTagCombo(int[] a, int[] b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return false;
+            var counts = new Dictionary<int, int>();
+            foreach (int t in a) counts[t] = (counts.TryGetValue(t, out int n) ? n : 0) + 1;
+            foreach (int t in b)
+            {
+                if (!counts.TryGetValue(t, out int n) || n == 0) return false;
+                counts[t] = n - 1;
+            }
+            return true;
+        }
+
+        // Reducer_Web_Cooking.AlignTagDishTierToMix for the dishes of Separate: with as many dishes as Mixed Cooking,
+        // each dish in order takes the recipe of its first same dish of Mixed Cooking, which no earlier dish took (so a
+        // tag dish gets the tier of Mixed Cooking); the first dish with no same dish ends the compare. Gives the recipe
+        // ids of the dishes in order.
+        public static int[] AlignToMix(IReadOnlyList<RecipeKey> separate, IReadOnlyList<RecipeKey> mixed)
+        {
+            var ids = new int[separate.Count];
+            for (int i = 0; i < ids.Length; i++) ids[i] = separate[i].Id;
+            if (mixed == null || mixed.Count != separate.Count) return ids;
+            var left = new List<RecipeKey>(mixed);
+            for (int i = 0; i < ids.Length; i++)
+            {
+                var dish = separate[i];
+                int at = left.FindIndex(m => IsSameDish(dish, m));
+                if (at < 0) break;
+                ids[i] = left[at].Id;
+                left.RemoveAt(at);
+            }
+            return ids;
+        }
+
         public sealed class ItemCounts
         {
             public Dictionary<int, int> Ids = new Dictionary<int, int>();

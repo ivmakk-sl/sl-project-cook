@@ -13,6 +13,7 @@ namespace ProjectCook
     {
         internal static void Send(State_Web_Cooking state)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 if (state == null || state.BagItems == null || state.BagItems.Count > 0 || state.BagOwnerId == null) return;

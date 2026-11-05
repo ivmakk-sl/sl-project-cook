@@ -154,7 +154,7 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## Requirements
 
-- Survival Log 1.1.18902 or later.
+- Survival Log 1.1.20719 or later.
 - [BepInEx for Survival Log](https://www.nexusmods.com/survivallog/mods/12). Install it first.
 
 ## Install
@@ -165,7 +165,7 @@ Nexus page: https://www.nexusmods.com/survivallog/mods/13
 
 ## Settings
 
-The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it, then restart the game.
+The config file `BepInEx\config\com.ivmakk.survivallog.projectcook.cfg` (written at the first game start with the mod) has a switch for each feature in its `[Features]` section. Each is `true` by default. Set one to `false` to turn that feature off, for example when another mod conflicts with it. The change applies while you play: at once in an in-game config manager, or after an edit of the file at the next save load or when you open Settings. `CookingStorages` applies at the next game start.
 
 - `DishPreview` - the preview lines and the tooltip of the dish cards, the portion switch, and the added ingredient lines and tier marks.
 - `FoodSort` - the food sort in the storage window, the cooking window, and the Rat Cage window.
@@ -190,7 +190,7 @@ If a cook is in progress when you remove the mod or turn off `RowSplit`, it fini
 
 ## Troubleshooting
 
-Project Cook 1.4.0 was verified on Survival Log `1.1.19131` (Steam build `26076180`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
+Project Cook 1.5.1 was verified on Survival Log `1.1.20719` (Steam build `26454866`) with BepInEx `6.0.0-be.788`. A game update can change the cooking window. If the preview lines do not show, look in `BepInEx\LogOutput.log` for the `Project Cook loaded.` line and for a warning or an error from Project Cook.
 
 ## Build
 

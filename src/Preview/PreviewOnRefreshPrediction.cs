@@ -13,6 +13,7 @@ namespace ProjectCook
 
         private static void Postfix(State_Web_Cooking state, Il2CppDict.Dictionary<int, int> workbenchIds, Il2CppDict.Dictionary<int, int> workbenchTags)
         {
+            if (!Plugin.DishPreview.Value && !Plugin.CodexMarks.Value) return;
             try
             {
                 if (state == null) return;

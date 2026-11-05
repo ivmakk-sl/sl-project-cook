@@ -15,6 +15,7 @@ namespace ProjectCook
     {
         private static void Postfix(Il2CppDict.List<Data_Item> itemList, float currentHours)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 if (itemList == null || itemList.Count == 0) return;

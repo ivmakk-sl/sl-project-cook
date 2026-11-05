@@ -88,6 +88,42 @@ test.skipIf(!gameFilesExist)('portion switch: with the switch off, no switch and
   assert.deepEqual(cells(w), ['100%', '🍖123', '🧠68', 'x2']);
 });
 
+// The cooking mode tabs of the game (#dishMode, game 1.1.20719) share the head row with the switch: with the switch on,
+// the mod hides them, also with no preview line (design D17 of change 0109).
+const hidesModes = (w: Win) => w.document.documentElement.classList.contains('projectcook-no-dish-mode');
+
+test.skipIf(!gameFilesExist)('portion switch: hides the cooking mode tabs of the game, also with no preview line', async (t) => {
+  const w = await cookingWindow(t);
+  w.renderPredictionList([]);
+  assert.ok(hidesModes(w), 'hidden on an empty cooking station');
+  w.renderPredictionList([ENTRY]);
+  assert.ok(hidesModes(w), 'hidden with the switch');
+});
+
+test.skipIf(!gameFilesExist)('portion switch: with the switch off, the cooking mode tabs of the game stay', async (t) => {
+  view.data = { tips: {}, tiers: {} };
+  const w = await cookingWindow(t);
+  w.renderPredictionList([ENTRY]);
+  assert.ok(!hidesModes(w));
+});
+
+// jsdom computes no layout, so the test reads the CSS text: the tabs hidden over the inline display of the game, and
+// the head and the list with the game's sizes for no tabs (.pot-head 8 px under it, .prediction-list 180 px high).
+test('portion switch: the CSS hides the mode tabs and gives the list its height with no tabs', () => {
+  const css = fs.readFileSync(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', '..', 'src', 'Web', 'page.css'), 'utf8');
+  assert.match(css, /\.projectcook-no-dish-mode #dishMode\s*\{\s*display:\s*none\s*!important;?\s*\}/);
+  assert.match(css, /\.projectcook-no-dish-mode \.pot-sec\.has-dish-mode \.pot-head\s*\{\s*margin-bottom:\s*8px;?\s*\}/);
+  assert.match(css, /\.projectcook-no-dish-mode \.pot-sec\.has-dish-mode \.prediction-list\s*\{\s*max-height:\s*180px;?\s*\}/);
+});
+
+// Game 1.1.20719 puts the title into the flex row .pot-head, where it is only as wide as its text: the title with the
+// switch fills the row, so the margin-left: auto of the switch puts it at the right end (seen by the user).
+test('portion switch: the title with the switch fills the head row, so the switch sits at its right end', () => {
+  const css = fs.readFileSync(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', '..', 'src', 'Web', 'page.css'), 'utf8');
+  assert.match(css, /\.pot-head > \.pot-sec-title:has\(\.projectcook-portion\)\s*\{\s*flex:\s*1 1 auto;?\s*\}/);
+  assert.match(css, /\.pot-sec-title \.projectcook-portion\s*\{[^}]*margin-left:\s*auto/);
+});
+
 test.skipIf(!gameFilesExist)('portion switch: comes back after the game writes the title text', async (t) => {
   const w = await cookingWindow(t);
   w.renderPredictionList([ENTRY]);

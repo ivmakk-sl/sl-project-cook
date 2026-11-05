@@ -28,12 +28,14 @@ namespace ProjectCook
         // Built at the first use, after Load has set the page features, and again for a new book data.
         private static string noIngredientData;
         private static PageJson.Book noIngredientBook;
+        private static string[] noIngredientFeatures;
         private static string NoIngredientData(PageJson.Book book)
         {
-            if (noIngredientData == null || !ReferenceEquals(book, noIngredientBook))
+            if (noIngredientData == null || !ReferenceEquals(book, noIngredientBook) || !ReferenceEquals(Plugin.PageFeatures, noIngredientFeatures))
             {
                 noIngredientData = PageJson.DataJson(new KeyValuePair<int, string>[0], new KeyValuePair<int, int>[0], Plugin.PageFeatures, null, book);
                 noIngredientBook = book;
+                noIngredientFeatures = Plugin.PageFeatures;
             }
             return noIngredientData;
         }
@@ -106,6 +108,7 @@ namespace ProjectCook
     {
         private static void Postfix()
         {
+            if (!Plugin.IconTabs.Value) return;
             try
             {
                 PageTick.Request();
@@ -120,6 +123,7 @@ namespace ProjectCook
     {
         private static void Postfix()
         {
+            if (!Plugin.IconTabs.Value) return;
             try
             {
                 PageTick.Request();

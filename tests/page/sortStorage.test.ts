@@ -242,6 +242,25 @@ test('storage sort: Satiety packs the items in its order, with badges and a dim 
   assert.equal(w.document.querySelector('.projectcook-sort-dim'), null);
 });
 
+// FoodSort off while the game runs: C# sends no sort data (setSortData(null)), and the next pass takes the sort off.
+test('storage sort: with no sort data the dropdown, the badges, and the dim go, and the real places come back', () => {
+  const w = storageWindow();
+  view.sort = sortData('42');
+  applyStorageSort(w);
+  select(w, 1);
+  assert.ok(w.document.querySelector('.projectcook-sort-badge'));
+
+  view.sort = null;
+  applyStorageSort(w);
+  assert.equal(w.document.querySelector('.projectcook-sort'), null, 'no dropdown');
+  assert.equal(w.document.querySelector('.projectcook-sort-badge'), null, 'no badge');
+  assert.equal(w.document.querySelector('.projectcook-sort-dim'), null, 'no dim');
+  assert.ok(toolbarB(w).querySelector('.action-btn'), 'the game button again');
+  assert.deepEqual(place(w, 1), [0, 0]);
+  assert.deepEqual(place(w, 2), [2, 1]);
+  assert.deepEqual(place(w, 3), [1, 0]);
+});
+
 test('storage sort: a new items array of the game gets the sorted places at once', () => {
   const w = storageWindow();
   view.sort = sortData('42');

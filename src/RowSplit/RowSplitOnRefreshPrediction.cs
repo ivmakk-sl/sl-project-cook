@@ -12,6 +12,7 @@ namespace ProjectCook
         [HarmonyPriority(Priority.First)]
         private static void Postfix(State_Web_Cooking state, Il2CppSystem.Collections.Generic.IEnumerable<Config_CookingRecipe> allRecipes)
         {
+            if (!Plugin.RowSplit.Value) return;
             RowPlanner.Current = null;
             try
             {
@@ -21,7 +22,7 @@ namespace ProjectCook
                 string json = RowSplitLogic.PredictionJson(RowPlanner.Entries(plan, state, allRecipes));
                 state.PredictionListJson.Value = json;
                 RowPlanner.Current = plan;
-                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"row split plan owner={plan.OwnerId} rows={RowPlanner.Describe(plan)} list={json}");
+                if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"row split plan owner={plan.OwnerId} mode={(plan.Separate ? "separate" : "mixed")} rows={RowPlanner.Describe(plan)} list={json}");
             }
             catch (Exception e)
             {

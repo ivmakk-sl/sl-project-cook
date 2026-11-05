@@ -12,6 +12,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_BackpackUI state, float currentHours)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 if (state == null) return;
@@ -31,6 +32,7 @@ namespace ProjectCook
     {
         private static void Postfix(State_Web_BackpackUI state, float currentHours)
         {
+            if (!Plugin.FoodSort.Value) return;
             try
             {
                 SortData.RequestStorage(state, currentHours);
