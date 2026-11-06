@@ -342,6 +342,7 @@
   cursor: pointer;
 }
 
+/* No refresh reaches C# in hot pot mode, so the page hides the toggle: the game sets the class active by itself. */
 html:has(#hotPotPanel.active) .projectcook-row-toggle {
   display: none;
 }

@@ -26,6 +26,14 @@ public class RowAutoOffLogicTests
     }
 
     [Fact]
+    public void Ends_WhenThePlanHoldsTheRecipeOrAnotherTierOfIt()
+    {
+        Assert.True(RowAutoOff.Ends(Exact(3003), Keys(Exact(3003), Exact(3004))));
+        Assert.True(RowAutoOff.Ends(Tag(10, 2, 1, 2), Keys(Tag(11, 1, 2, 1))));
+        Assert.False(RowAutoOff.Ends(Exact(1001), Keys(Exact(6036))));
+    }
+
+    [Fact]
     public void Starts_ForATagRecipeOfAnotherTierOfTheDish()
     {
         Assert.True(RowAutoOff.Starts(Tag(5004, 2, 7, 1), Keys(Tag(6004, 3, 7, 1)), Keys(Exact(4022))));

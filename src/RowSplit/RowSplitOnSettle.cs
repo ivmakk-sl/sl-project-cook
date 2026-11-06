@@ -24,6 +24,9 @@ namespace ProjectCook
         {
             if (!Plugin.RowSplit.Value) return true;
             if (inner) return true;
+            // Auto off: the game's builder on the game's order, as in the preview. Auto off stays in memory, so after a
+            // save load during the cook the rule below applies.
+            if (RowPlanner.AutoOff.IsActive(__instance.InstanceId)) return true;
             try
             {
                 if (workbenchItems == null) return true;

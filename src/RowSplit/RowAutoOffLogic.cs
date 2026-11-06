@@ -17,6 +17,9 @@ namespace ProjectCook
         public static bool Starts(RowSplitLogic.RecipeKey clicked, IReadOnlyList<RowSplitLogic.RecipeKey> whole, IReadOnlyList<RowSplitLogic.RecipeKey> plan)
             => Holds(whole, clicked) && !Holds(plan, clicked);
 
+        // The dishes of the rows give the clicked recipe, so row split stays on after this click.
+        public static bool Ends(RowSplitLogic.RecipeKey clicked, IReadOnlyList<RowSplitLogic.RecipeKey> plan) => Holds(plan, clicked);
+
         private static bool Holds(IReadOnlyList<RowSplitLogic.RecipeKey> keys, RowSplitLogic.RecipeKey clicked)
         {
             foreach (var key in keys)

@@ -30,11 +30,11 @@ namespace ProjectCook
                 if (!Plugin.RowSplit.Value) return;
                 int clicked = RowPlanner.ClickedRecipe;
                 if (clicked == 0 && autoOff.IsActive(owner)) return;
-                // The game's own list, before the plan writes over it.
-                string wholeJson = state.PredictionListJson.Value;
+                // The game's own list, before the plan writes over it. Only a click on Load reads it.
+                string wholeJson = clicked != 0 ? state.PredictionListJson.Value : null;
                 var plan = RowPlanner.Make(state, allRecipes);
                 if (plan == null) return;
-                if (clicked != 0) Decide(plan, clicked, wholeJson);
+                if (clicked != 0) Decide(state, plan, clicked, wholeJson);
                 if (autoOff.IsActive(owner)) return;
                 string json = RowSplitLogic.PredictionJson(RowPlanner.Entries(plan, state, allRecipes));
                 state.PredictionListJson.Value = json;
@@ -53,8 +53,9 @@ namespace ProjectCook
             }
         }
 
-        // The refresh of a click on Load: auto off starts when only the game's match of all items gives the clicked recipe.
-        private static void Decide(RowPlanner.Plan plan, int clicked, string wholeJson)
+        // The refresh of a click on Load: auto off starts when only the game's match of all items gives the clicked recipe,
+        // and it ends when the dishes of the rows give it. With the fast load off each move decides, so the last one counts.
+        private static void Decide(State_Web_Cooking state, RowPlanner.Plan plan, int clicked, string wholeJson)
         {
             var clickedKey = RowPlanner.Key(clicked);
             if (clickedKey == null) return;
@@ -64,10 +65,10 @@ namespace ProjectCook
                 var key = RowPlanner.Key(entry.RecipeId);
                 if (key != null) whole.Add(key.Value);
             }
-            if (!RowAutoOff.Starts(clickedKey.Value, whole, RowPlanner.Keys(plan.Dishes))) return;
-            var ids = new List<long>();
-            foreach (var row in plan.Rows)
-                foreach (var item in row.Items) ids.Add(item.Id);
+            var rows = RowPlanner.Keys(plan.Dishes);
+            if (RowAutoOff.Ends(clickedKey.Value, rows)) RowPlanner.AutoOff.Click(plan.OwnerId);
+            if (!RowAutoOff.Starts(clickedKey.Value, whole, rows)) return;
+            var ids = ItemIds(state);
             RowPlanner.AutoOff.Begin(plan.OwnerId, ids);
             if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"row split auto off start owner={plan.OwnerId} recipe={clicked} ids={string.Join(",", ids)}");
         }

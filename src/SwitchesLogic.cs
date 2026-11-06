@@ -20,8 +20,6 @@ namespace ProjectCook
             if (v.DimUncookable) features.Add("dimUncookable");
             // The portion switch is part of the dish preview.
             if (v.DishPreview) features.Add("portionSwitch");
-            // Always on: with RowSplit off the toggle turns it on again.
-            features.Add("rowSplitToggle");
             return features.ToArray();
         }
 

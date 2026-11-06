@@ -10,14 +10,9 @@ const CLS = 'projectcook-row-toggle';
 const GAME_BADGE = 'capacity-badge';
 const ROW_SPLIT_MESSAGE = 'slmod|projectcook|rowsplit';
 
-// The selector of the page.css rule that hides the toggle in hot pot mode, where no refresh reaches C#: the game sets
-// the class active on #hotPotPanel by itself.
-export const ROW_TOGGLE_HIDDEN_IN_HOT_POT = 'html:has(#hotPotPanel.active) .' + CLS;
-
 function current(): RowToggle | null {
   const data = view.data.rowToggle;
-  const on = !!view.data.features && view.data.features.indexOf('rowSplitToggle') >= 0;
-  return on && data && data.show ? data : null;
+  return data && data.show ? data : null;
 }
 
 function create(doc: Document): HTMLElement {

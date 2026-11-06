@@ -6,7 +6,7 @@ import url from 'node:url';
 import { JSDOM } from 'jsdom';
 import { beforeEach, test, type TestContext } from 'vitest';
 import { view } from '../../src/Web/page/core';
-import { drawRowToggle, ROW_TOGGLE_HIDDEN_IN_HOT_POT } from '../../src/Web/page/rowToggle';
+import { drawRowToggle } from '../../src/Web/page/rowToggle';
 import type { RowToggle } from '../../src/Web/page/types';
 
 type Win = any;
@@ -35,11 +35,13 @@ async function cookingWindow(t: TestContext): Promise<Win> {
 const box = (w: Win) => w.document.querySelector('#potCapacityBar .projectcook-row-toggle') as HTMLElement | null;
 const isOn = (w: Win) => box(w)!.classList.contains('projectcook-row-toggle-is-on');
 
+const HIDDEN_IN_HOT_POT = 'html:has(#hotPotPanel.active) .projectcook-row-toggle';
+
 const sent: string[] = [];
 beforeEach(() => {
   sent.length = 0;
   (globalThis as Win).window = { vuplex: { postMessage: (m: string) => sent.push(m) } };
-  view.data = { tips: {}, tiers: {}, features: ['rowSplitToggle'], rowToggle: toggle() };
+  view.data = { tips: {}, tiers: {}, rowToggle: toggle() };
 });
 
 test.skipIf(!gameFilesExist)('row toggle: the label and the switch at the end of the bar, with no other text', async (t) => {
@@ -84,7 +86,7 @@ test.skipIf(!gameFilesExist)('row toggle: a new state updates the same node', as
   assert.equal(w.document.querySelectorAll('.projectcook-row-toggle').length, 1);
 });
 
-test.skipIf(!gameFilesExist)('row toggle: gone with show false, with no data, and without the page feature', async (t) => {
+test.skipIf(!gameFilesExist)('row toggle: gone with show false and with no data', async (t) => {
   const w = await cookingWindow(t);
   drawRowToggle(w);
   view.data.rowToggle = toggle({ show: false });
@@ -95,17 +97,14 @@ test.skipIf(!gameFilesExist)('row toggle: gone with show false, with no data, an
   view.data.rowToggle = undefined;
   drawRowToggle(w);
   assert.equal(box(w), null);
-  view.data = { tips: {}, tiers: {}, features: [], rowToggle: toggle() };
-  drawRowToggle(w);
-  assert.equal(box(w), null);
 });
 
 test.skipIf(!gameFilesExist)('row toggle: the rule hides it while the hot pot panel is active', async (t) => {
   const w = await cookingWindow(t);
   drawRowToggle(w);
   const css = fs.readFileSync(path.join(path.dirname(url.fileURLToPath(import.meta.url)), '..', '..', 'src', 'Web', 'page.css'), 'utf8');
-  assert.match(css, new RegExp(ROW_TOGGLE_HIDDEN_IN_HOT_POT.replace(/[.()#]/g, '\\$&') + '\\s*\\{\\s*display:\\s*none;?\\s*\\}'));
-  assert.equal(box(w)!.matches(ROW_TOGGLE_HIDDEN_IN_HOT_POT), false);
+  assert.match(css, new RegExp(HIDDEN_IN_HOT_POT.replace(/[.()#]/g, '\\$&') + '\\s*\\{\\s*display:\\s*none;?\\s*\\}'));
+  assert.equal(box(w)!.matches(HIDDEN_IN_HOT_POT), false);
   w.document.getElementById('hotPotPanel').classList.add('active');
-  assert.equal(box(w)!.matches(ROW_TOGGLE_HIDDEN_IN_HOT_POT), true);
+  assert.equal(box(w)!.matches(HIDDEN_IN_HOT_POT), true);
 });

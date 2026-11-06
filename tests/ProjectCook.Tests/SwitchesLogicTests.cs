@@ -11,8 +11,8 @@ public class SwitchesLogicTests
     [Fact]
     public void The_page_features_of_the_switches_that_are_on_in_a_fixed_order()
     {
-        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes", "separatePieces", "dimUncookable", "portionSwitch", "rowSplitToggle" }, SwitchesLogic.PageFeatures(All(true)));
-        Assert.Equal(new[] { "rowSplitToggle" }, SwitchesLogic.PageFeatures(All(false)));
+        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes", "separatePieces", "dimUncookable", "portionSwitch" }, SwitchesLogic.PageFeatures(All(true)));
+        Assert.Empty(SwitchesLogic.PageFeatures(All(false)));
     }
 
     [Fact]
@@ -20,12 +20,12 @@ public class SwitchesLogicTests
     {
         var v = All(false);
         v.UnknownWithIngredients = true;
-        Assert.Equal(new[] { "rowSplitToggle" }, SwitchesLogic.PageFeatures(v));
+        Assert.Empty(SwitchesLogic.PageFeatures(v));
         v.CodexMarks = true;
-        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes", "rowSplitToggle" }, SwitchesLogic.PageFeatures(v));
+        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes" }, SwitchesLogic.PageFeatures(v));
         v.UnknownWithIngredients = false;
         v.UnknownWithoutIngredients = true;
-        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes", "rowSplitToggle" }, SwitchesLogic.PageFeatures(v));
+        Assert.Equal(new[] { "codexMarks", "unknownCodexRecipes" }, SwitchesLogic.PageFeatures(v));
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class SwitchesLogicTests
     {
         var v = All(false);
         v.DishPreview = true;
-        Assert.Equal(new[] { "portionSwitch", "rowSplitToggle" }, SwitchesLogic.PageFeatures(v));
+        Assert.Equal(new[] { "portionSwitch" }, SwitchesLogic.PageFeatures(v));
     }
 
     [Fact]

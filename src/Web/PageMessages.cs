@@ -31,7 +31,7 @@ namespace ProjectCook
         {
             var state = RowPlanner.WindowState();
             if (state == null || (state.IsCooking != null && state.IsCooking.Value)) return;
-            bool endedAuto = Plugin.RowSplit.Value && RowPlanner.AutoOff.Click(state.CurrentFurnitureId);
+            bool endedAuto = RowPlanner.AutoOff.Click(state.CurrentFurnitureId);
             // A flip reaches the window through Plugin.OnSettingChanged.
             if (endedAuto) Ac_Cooking_RefreshBag.SendAction();
             else Plugin.RowSplit.Value = !Plugin.RowSplit.Value;
