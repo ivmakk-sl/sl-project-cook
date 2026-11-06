@@ -26,7 +26,11 @@ function start(): void {
     },
   }, '*');
   setTimeout(() => {
-    console.log('Project Cook setData:', window.__projectCook!.setData(data as PageData));
+    console.log('Project Cook setData:', window.__projectCook!.setData({
+      ...(data as PageData),
+      features: ['rowSplitToggle'],
+      rowToggle: { show: true, on: true, label: 'Split by row' },
+    }));
     cooking.postMessage({ type: 'WebUI_Cooking_PredictionMsg', data: { predictionListJson: JSON.stringify(prediction) } }, '*');
   }, 100);
 }

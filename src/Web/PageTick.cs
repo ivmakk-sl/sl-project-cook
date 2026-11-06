@@ -29,13 +29,15 @@ namespace ProjectCook
         private static string noIngredientData;
         private static PageJson.Book noIngredientBook;
         private static string[] noIngredientFeatures;
+        private static PageJson.RowToggle noIngredientToggle;
         private static string NoIngredientData(PageJson.Book book)
         {
-            if (noIngredientData == null || !ReferenceEquals(book, noIngredientBook) || !ReferenceEquals(Plugin.PageFeatures, noIngredientFeatures))
+            if (noIngredientData == null || !ReferenceEquals(book, noIngredientBook) || !ReferenceEquals(Plugin.PageFeatures, noIngredientFeatures) || !ReferenceEquals(RowPlanner.Toggle, noIngredientToggle))
             {
-                noIngredientData = PageJson.DataJson(new KeyValuePair<int, string>[0], new KeyValuePair<int, int>[0], Plugin.PageFeatures, null, book);
+                noIngredientData = PageJson.DataJson(new KeyValuePair<int, string>[0], new KeyValuePair<int, int>[0], Plugin.PageFeatures, null, book, RowPlanner.Toggle);
                 noIngredientBook = book;
                 noIngredientFeatures = Plugin.PageFeatures;
+                noIngredientToggle = RowPlanner.Toggle;
             }
             return noIngredientData;
         }

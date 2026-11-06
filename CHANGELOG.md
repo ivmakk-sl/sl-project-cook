@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-06
+
+### Added
+
+- A Split by row toggle above the ingredient grid of the cooking window, from cooking level 3. It changes the `RowSplit` setting, and the dish cards follow at once.
+
+### Changed
+
+- Cook by row is now named Split by row.
+
+### Fixed
+
+- A recipe too wide for one row, such as Luxurious Soup or Yangzhou Fried Rice at normal item sizes, can be cooked with Split by row on: Load turns row splitting off for that cooking station, and the toggle shows off until one of those ingredients leaves it.
+
 ## [1.5.1] - 2026-11-05
 
 ### Changed

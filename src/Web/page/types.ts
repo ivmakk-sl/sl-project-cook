@@ -130,6 +130,15 @@ export interface PageData {
   portion?: string[];
   // The book data of the Recipe Book (PageJson.Book in C#); no book data while the codex cannot be read.
   book?: BookData;
+  // The row split toggle (PageJson.RowToggle in C#); no field before the first refresh.
+  rowToggle?: RowToggle;
+}
+
+// The row split toggle: whether it shows, whether row split is on at the open cooking station, and its label.
+export interface RowToggle {
+  show: boolean;
+  on: boolean;
+  label: string;
 }
 
 // The codex of the Recipe Book: the dish entries that are unlocked and all dish entries, and the ids of the recipes
@@ -209,6 +218,8 @@ declare global {
   interface Window {
     // The interface of the page script in the root page.
     __projectCook?: ProjectCookApi;
+    // The channel to C#, in the root page of the game (PageMessages.cs).
+    vuplex?: { postMessage(message: string): void };
   }
 }
 

@@ -16,6 +16,7 @@ namespace ProjectCook
         private static Dictionary<int, int> tiers;
         private static PageJson.Book book;
         private static string[] features;
+        private static PageJson.RowToggle rowToggle;
         private static string json;
 
         // The tiers are the game's tiers 1 to 3; PageJson keeps only the tiers that the page marks.
@@ -47,11 +48,12 @@ namespace ProjectCook
                 if (Plugin.Verbose.Value) Plugin.Log.LogDebug($"ingredient tips: {tips.Count} items, {tiers.Count} with a tier, appraisal={currentAppraisal}");
             }
             // A switch change gives a new feature list (Plugin.OnSettingChanged).
-            if (json == null || !ReferenceEquals(currentBook, book) || !ReferenceEquals(Plugin.PageFeatures, features))
+            if (json == null || !ReferenceEquals(currentBook, book) || !ReferenceEquals(Plugin.PageFeatures, features) || !ReferenceEquals(RowPlanner.Toggle, rowToggle))
             {
-                json = PageJson.DataJson(tips, tiers, Plugin.PageFeatures, current.Portion, currentBook);
+                json = PageJson.DataJson(tips, tiers, Plugin.PageFeatures, current.Portion, currentBook, RowPlanner.Toggle);
                 book = currentBook;
                 features = Plugin.PageFeatures;
+                rowToggle = RowPlanner.Toggle;
             }
             return json;
         }

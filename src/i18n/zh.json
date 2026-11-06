@@ -4,6 +4,7 @@
   "expLabel": "烹饪熟练度",
   "portionWhole": "整道菜",
   "portionOne": "每份",
+  "rowToggleLabel": "按行分菜",
   "sortDefault": "默认",
   "expirationDate": "保质期",
   "expired": "已过期",

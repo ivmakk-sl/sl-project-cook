@@ -3,6 +3,7 @@ using System.Text;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.ReduxUI;
+using Il2CppInterop.Runtime;
 using Il2CppDict = Il2CppSystem.Collections.Generic;
 
 namespace ProjectCook
@@ -34,6 +35,28 @@ namespace ProjectCook
         // The plan of the last prediction refresh, or null when row split does not apply. The client and the
         // authority run in one process, so the start reads it from here.
         internal static Plan Current;
+
+        internal static readonly RowAutoOff AutoOff = new RowAutoOff();
+
+        // The recipe of the click on Load that runs now, or 0 (RowSplitOnRecipeClick).
+        internal static int ClickedRecipe;
+
+        // The state of the row split toggle for the page data, null before the first refresh. A new state is a new object.
+        internal static PageJson.RowToggle Toggle;
+
+        // Called at each refresh, also with RowSplit off. The hot pot mode has no refresh, so the page hides the toggle there.
+        internal static void WriteToggle(State_Web_Cooking state)
+        {
+            bool show = state.CookingLevel >= Reducer_Web_Cooking.GetMultiPotUnlockLevel() && !state.HotPotMode.Value;
+            bool on = Plugin.RowSplit.Value && !AutoOff.IsActive(state.CurrentFurnitureId);
+            var toggle = new PageJson.RowToggle(show, on, ModTexts.Current()["rowToggleLabel"]);
+            if (toggle.SameAs(Toggle)) return;
+            Toggle = toggle;
+            PageTick.Request();
+        }
+
+        // The cooking window state, or null before a load. Its owner is 0 until the first open of the window.
+        internal static State_Web_Cooking WindowState() => ReduxUISystem.Instance?.GetState<State_Web_Cooking>(Il2CppType.Of<State_Web_Cooking>());
 
         private const int SeasoningFoodType = 8;
         // The game's loop ends when no recipe matches. The limit only guards against a recipe that uses no item.
@@ -103,21 +126,30 @@ namespace ProjectCook
             return dishes;
         }
 
-        private static List<RowSplitLogic.RecipeKey> Keys(List<Dish> dishes)
+        internal static List<RowSplitLogic.RecipeKey> Keys(List<Dish> dishes)
         {
             var keys = new List<RowSplitLogic.RecipeKey>(dishes.Count);
-            foreach (var d in dishes)
-            {
-                var combo = d.Recipe.TagCombo;
-                int[] tags = null;
-                if (combo != null)
-                {
-                    tags = new int[combo.Count];
-                    for (int i = 0; i < tags.Length; i++) tags[i] = combo[i];
-                }
-                keys.Add(new RowSplitLogic.RecipeKey(d.Recipe.ID, d.Recipe.Tier, tags));
-            }
+            foreach (var d in dishes) keys.Add(Key(d.Recipe));
             return keys;
+        }
+
+        // Null for a recipe id with no recipe (0 is a dark dish).
+        internal static RowSplitLogic.RecipeKey? Key(int recipeId)
+        {
+            var recipe = recipeId == 0 ? null : ConfigManager.Instance.Get_Config_CookingRecipe(recipeId);
+            return recipe == null ? (RowSplitLogic.RecipeKey?)null : Key(recipe);
+        }
+
+        private static RowSplitLogic.RecipeKey Key(Config_CookingRecipe recipe)
+        {
+            var combo = recipe.TagCombo;
+            int[] tags = null;
+            if (combo != null)
+            {
+                tags = new int[combo.Count];
+                for (int i = 0; i < tags.Length; i++) tags[i] = combo[i];
+            }
+            return new RowSplitLogic.RecipeKey(recipe.ID, recipe.Tier, tags);
         }
 
         // The prediction list of the plan, one entry for each dish, with the game's rules of RefreshPrediction for

@@ -25,6 +25,7 @@ export const ICON_TABS_PREFIX = 'projectcook';
 //   storageSort: Vue.watch, .grid-container, .toolbar (storage window; bagB is in the setup state of #app)
 //   codexBook: renderRecipeListFromData, updateRecipeCount, #recipeCountDisplay, #recipePanelTitle
 //   unknownBook: sendRecipeClick, bindRecipeTooltip (the Load and the tooltip of an unknown recipe row)
+//   rowToggle: #potCapacityBar
 // .ico-ph (the game's "?" of a row with no icon) exists only after a render, so the codex book checks it after its draw.
 // #predictionList .pot-bd exists only after a render, so it is checked in the render wrapper instead of here.
 // tagIconSvg is in the setup state of the #app component, so installTagIcon checks it.
@@ -39,7 +40,8 @@ export const FEATURES = {
   tagIcon: ['#app'],
   storageSort: ['Vue.watch', '.grid-container', '.toolbar'],
   codexBook: ['renderRecipeListFromData', 'updateRecipeCount', '#recipeCountDisplay', '#recipePanelTitle'],
-  unknownBook: ['sendRecipeClick', 'bindRecipeTooltip']
+  unknownBook: ['sendRecipeClick', 'bindRecipeTooltip'],
+  rowToggle: ['#potCapacityBar']
 };
 
 export type Feature = keyof typeof FEATURES;
@@ -57,7 +59,8 @@ const PAGE_OF: Record<Feature, Page> = {
   tagIcon: 'storage',
   storageSort: 'storage',
   codexBook: 'cooking',
-  unknownBook: 'cooking'
+  unknownBook: 'cooking',
+  rowToggle: 'cooking'
 };
 
 // The data of the last setData; the version counts the setData calls, so a frame draws its bag items again

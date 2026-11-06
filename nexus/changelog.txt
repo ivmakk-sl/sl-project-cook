@@ -1,3 +1,8 @@
+v1.6.0 - 2026-11-06
+Added: A Split by row switch above the ingredient grid of the cooking window, from cooking level 3. The dish cards change at once, and your choice stays after a restart.
+Changed: Cook by row is now named Split by row.
+Fixed: Recipes too wide for one row, such as Luxurious Soup and Yangzhou Fried Rice, can be cooked with Split by row on. Click Load in the Recipe Book and the switch turns off for that cooking station. It turns on again when one of those ingredients leaves. If you place all ingredients by hand, click the switch yourself.
+
 v1.5.1 - 2026-11-05
 Changed: Most mod settings take effect with no game restart. CookingStorages and IgnoreCookingTalents still apply at the next game start.
 Changed: The game's Mixed / Separate tabs above the dishes are hidden while the Whole dish / Per portion switch is on, because they cover it. Your save keeps the mode it has.
