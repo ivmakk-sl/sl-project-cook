@@ -16,6 +16,7 @@
   "expLabel": "Cooking XP",
   "portionWhole": "Whole dish",
   "portionOne": "Per portion",
+  "rowToggleLabel": "Split by row",
   "sortDefault": "Default",
   "expirationDate": "Expiration Date",
   "expired": "Expired",

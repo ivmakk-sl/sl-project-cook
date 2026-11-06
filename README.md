@@ -7,7 +7,7 @@ The cooking window tells you which dish you get, but not how good it will be. Se
 - **Dish previews.** Each dish card in "THIS POT" shows the chance, eat values, and portion count for each possible quality. Drinks from the Juicer and Coffee Machine get previews too.
 - **Portion switch.** Switch the dish cards between the stats of the whole dish and of one portion.
 - **Cooking tooltips.** Hover over dish cards for tier, cooking XP, and trade values. Ingredient tooltips show raw stats and trade values, with tier badges on ingredients.
-- **Cook by row.** From cooking level 3, each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP.
+- **Split by row.** From cooking level 3, each row of the ingredient grid is matched to recipes separately. Three Frozen Pork Chops in three rows give three Salt and Pepper Pork Chops, each with its own quality roll and cooking XP. A toggle above the ingredient grid turns it off, and Load turns it off by itself for a recipe too wide for one row.
 - **Separate pieces.** Drop a piece of Wild Rabbit or another ingredient with more than one use on free cells in the ingredient grid to keep it separate. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual.
 - **Dim uncookable items.** Items you cannot cook, such as Beef Slices or ingredients that need cutting first, appear dimmed in the cooking window's tabs. Fuel stays bright at a stove that burns fuel.
 - **Food sort.** Find food by Satiety, Morale, Stamina, Life, Trade value, or Expiration Date, with numbers on each item. Also in the Rat Cage window.
@@ -50,6 +50,15 @@ From cooking level 3 the game can cook more than one dish at once, but it puts a
 - An item that covers two rows belongs to the row of its top cell.
 
 The "THIS POT" panel shows the dishes of the rows, from the top row down, each with its own preview lines. Row splitting has no effect with all ingredients in one row or below cooking level 3. Cooking time stays the same.
+
+The **Split by row** switch above the ingredient grid shows whether row splitting is on. Click it to turn row splitting on or off at every cooking station: the dish cards change at once, and your choice stays after a game restart. It shows from cooking level 3, and not in hot pot mode. During a cook the game's cooking overlay covers it.
+
+Some recipes, such as Luxurious Soup and Yangzhou Fried Rice, are too wide for one row: at normal item sizes their ingredients need more cells than a row has. When you click Load on such a recipe and its ingredients end up in two rows, the switch turns off for that cooking station, and it cooks the recipe. Your setting stays on.
+
+- The switch turns on again when one of those ingredients leaves the cooking station, also when a cook uses it, when you click it, and after a save load. A cook that already runs still gives its dishes.
+- It stays off when you add an ingredient, move one inside the cooking station, or close and open the window. Other cooking stations keep row splitting.
+- With all ingredients placed by hand the Recipe Book shows Ready, which has no Load, and each row gives its own dishes. Click the switch to cook the recipe.
+- With [Compact Inventory](https://www.nexusmods.com/survivallog/mods/14) each ingredient takes one cell, so these recipes fit one row.
 
 ## Separate pieces
 

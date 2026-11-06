@@ -43,6 +43,33 @@ public class PageJsonTests
         Assert.Equal("{\"tips\":{},\"tiers\":{},\"features\":[\"portionSwitch\"],\"portion\":[\"Whole dish\",\"Per \\\"portion\\\"\"]}", json);
     }
 
+    // With the dish preview off the data has no portion labels, and still the toggle.
+    [Fact]
+    public void DataJson_writes_the_row_toggle_with_its_label()
+    {
+        string json = PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>(), rowToggle: new PageJson.RowToggle(true, false, "Cook by \"row\""));
+
+        Assert.Equal("{\"tips\":{},\"tiers\":{},\"rowToggle\":{\"show\":true,\"on\":false,\"label\":\"Cook by \\\"row\\\"\"}}", json);
+    }
+
+    [Fact]
+    public void DataJson_has_no_row_toggle_before_the_first_refresh()
+    {
+        Assert.DoesNotContain("rowToggle", PageJson.DataJson(new Dictionary<int, string>(), new Dictionary<int, int>()));
+    }
+
+    [Fact]
+    public void Two_toggles_differ_by_each_value()
+    {
+        var toggle = new PageJson.RowToggle(true, true, "Split by row");
+
+        Assert.True(toggle.SameAs(new PageJson.RowToggle(true, true, "Split by row")));
+        Assert.False(toggle.SameAs(null));
+        Assert.False(toggle.SameAs(new PageJson.RowToggle(false, true, "Split by row")));
+        Assert.False(toggle.SameAs(new PageJson.RowToggle(true, false, "Split by row")));
+        Assert.False(toggle.SameAs(new PageJson.RowToggle(true, true, "按行分菜")));
+    }
+
     // The page features that are on in the config.
     [Fact]
     public void DataJson_lists_the_page_features()

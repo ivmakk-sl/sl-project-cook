@@ -7,7 +7,7 @@ using HarmonyLib;
 
 namespace ProjectCook
 {
-    [BepInPlugin(PluginGuid, "Project Cook", "1.5.1")]
+    [BepInPlugin(PluginGuid, "Project Cook", "1.6.0")]
     [BepInProcess("SurvivalLog.exe")]
     public sealed class Plugin : BasePlugin
     {
@@ -40,7 +40,7 @@ namespace ProjectCook
                 "The Cooking tag, and the storages with the Cooking tag or the Food tag as tabs of the cooking window, the Brewing Barrel, the Rat Cage, and the Ration Press. Off works like an uninstall of this part: the game drops the Cooking tag from each storage on the next save, a storage with only the Cooking tag loses its rule, and turning it on again does not bring the tag back. Needs a game restart.");
             RowSplit = Config.Bind(
                 "Features", "RowSplit", true,
-                "From cooking level 3, each row of the cooking station is its own group of ingredients: the game matches the dishes of each row alone, and the seasonings still help every dish. With all ingredients in one row, the cook works as without the mod.");
+                "From cooking level 3, each row of the cooking station is its own group of ingredients: the game matches the dishes of each row alone, and the seasonings still help every dish. With all ingredients in one row, the cook works as without the mod. The Split by row toggle above the ingredient grid changes this setting.");
             SeparatePieces = Config.Bind(
                 "Features", "SeparatePieces", true,
                 "A piece of an item with more than one use (for example Wild Rabbit 1/3) that you drop on a free cell of the cooking station stays its own item, so a recipe counts it as its own ingredient. A drop on an item of the same kind merges the piece into that item.");
@@ -88,7 +88,9 @@ namespace ProjectCook
                 typeof(SlShared.ConfigFile.ConfigFileReloadOnSettings),
                 // The prediction Postfix adds the preview lines and the codex flags of the dish cards.
                 typeof(PreviewOnRefreshPrediction),
-                typeof(RowSplitOnRefreshPrediction), typeof(RowSplitOnStart), typeof(RowSplitOnValidate), typeof(RowSplitOnSettle), typeof(RowSplitOnAdmission),
+                typeof(RowSplitOnRefreshPrediction), typeof(RowSplitOnStartBattle), typeof(RowSplitOnRecipeClick), typeof(RowSplitOnStart), typeof(RowSplitOnValidate), typeof(RowSplitOnSettle), typeof(RowSplitOnAdmission),
+                // A click on the row split toggle.
+                typeof(PageMessages),
                 typeof(PiecesOnCookingDragMove), typeof(PiecesOnTryMergeIntoOwner), typeof(PiecesOnMoveItem),
                 // The tab list of each food window: the icon tabs, and the Verbose line of the cooking storage tabs.
                 typeof(IconTabsOnCookingOpen), typeof(IconTabsOnBrewOpen), typeof(IconTabsOnRatCageOpen), typeof(IconTabsOnCompressorOpen),
@@ -165,10 +167,20 @@ namespace ProjectCook
             var entry = e.ChangedSetting;
             if (Verbose.Value) Log.LogDebug($"config: {entry.Definition.Key} = {entry.BoxedValue}");
             if (entry.BoxedValue is bool on && SwitchesLogic.ClearsSort(entry.Definition.Key, on)) PageTick.RequestSort(SwitchesLogic.NoSortJson);
+            if (entry == RowSplit) OnRowSplitChanged();
             var features = SwitchesLogic.PageFeatures(SwitchValues());
             if (SwitchesLogic.Same(features, PageFeatures)) return;
             PageFeatures = features;
             PageTick.Request();
+        }
+
+        // A change of the entry ends auto off, so a turn on gives row split to the items on the cooking station, and a
+        // window that shows gets the dishes and the toggle of the new state. The game's own refresh does nothing with
+        // no window owner.
+        private static void OnRowSplitChanged()
+        {
+            RowPlanner.AutoOff.Clear();
+            if (RowPlanner.WindowState() != null) GameCore.HotUpdate.ReduxUI.Ac_Cooking_RefreshBag.SendAction();
         }
 
         // Patches all classes of a feature, or none: when one target is missing (a game update), the patches already

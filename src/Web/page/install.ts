@@ -5,6 +5,7 @@ import { installCodexMark } from './codexMark';
 import { installItemTip } from './itemTip';
 import { installPieces } from './pieces';
 import { refreshPortionSwitch } from './portionSwitch';
+import { drawRowToggle } from './rowToggle';
 import { installPreview } from './preview';
 import type { SortedGrid } from './dropFilter';
 import { applyCookingSort, cookingGrid } from './sortCooking';
@@ -169,6 +170,7 @@ function runCooking(w: CookingWindow): string | null {
     if (w.__cookingTierMark && w.__projectCookDrawn !== view.version) redrawTiers(w);
     try { redrawBook(w); } catch (e) { addError(w, 'codexBook: ' + e); }
     try { refreshPortionSwitch(w); } catch (e) { addError(w, 'portionSwitch: ' + e); }
+    try { drawRowToggle(w); } catch (e) { addError(w, 'rowToggle: ' + e); }
     if (hasFeature(w, doc, 'cookingSort')) {
       try { applyCookingSort(w); } catch (e) { addError(w, 'cookingSort: ' + e); }
     }

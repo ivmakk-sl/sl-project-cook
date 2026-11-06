@@ -20,6 +20,7 @@
     <Compile Include="..\..\src\Eat\EatLogic.cs" Link="EatLogic.cs" />
     <Compile Include="..\..\src\Sort\SortLogic.cs" Link="SortLogic.cs" />
     <Compile Include="..\..\src\RowSplit\RowSplitLogic.cs" Link="RowSplitLogic.cs" />
+    <Compile Include="..\..\src\RowSplit\RowAutoOffLogic.cs" Link="RowAutoOffLogic.cs" />
     <Compile Include="..\..\src\Pieces\PiecesLogic.cs" Link="PiecesLogic.cs" />
     <Compile Include="..\..\src\ColdSort\ColdSortLogic.cs" Link="ColdSortLogic.cs" />
     <Compile Include="..\..\src\IconTabs\IconTabsLogic.cs" Link="IconTabsLogic.cs" />

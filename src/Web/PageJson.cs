@@ -71,10 +71,25 @@ namespace ProjectCook
                 && Missing == other.Missing && ShowOnly == other.ShowOnly && ShowAll == other.ShowAll && Empty == other.Empty;
         }
 
+        // The row split toggle: whether it shows, whether row split is on at the open cooking station (auto off shows as
+        // off), and its label in the display language.
+        public sealed class RowToggle
+        {
+            public readonly bool Show, On;
+            public readonly string Label;
+
+            public RowToggle(bool show, bool on, string label)
+            {
+                Show = show; On = on; Label = label;
+            }
+
+            public bool SameAs(RowToggle other) => other != null && Show == other.Show && On == other.On && Label == other.Label;
+        }
+
         // The data of setData: the tooltip lines of each ingredient and the tier of each ingredient that the
         // page marks (High 1 and Low 3), by config ID, the names of the page features that are on in the config, the
-        // labels of the portion switch, and the book data (a locked codex sends the lock alone).
-        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null, Book book = null)
+        // labels of the portion switch, the book data (a locked codex sends the lock alone), and the row split toggle.
+        public static string DataJson(IEnumerable<KeyValuePair<int, string>> tips, IEnumerable<KeyValuePair<int, int>> tiers, IEnumerable<string> features = null, string[] portion = null, Book book = null, RowToggle rowToggle = null)
         {
             var sb = new StringBuilder("{\"tips\":{");
             bool first = true;
@@ -146,9 +161,18 @@ namespace ProjectCook
                 }
                 sb.Append('}');
             }
+            if (rowToggle != null)
+                sb.Append(",\"rowToggle\":{\"show\":").Append(rowToggle.Show ? "true" : "false").Append(",\"on\":").Append(rowToggle.On ? "true" : "false")
+                    .Append(",\"label\":").AppendStr(rowToggle.Label).Append('}');
             sb.Append('}');
             return sb.ToString();
         }
+
+        // The start of each message of the page script to C# (window.vuplex.postMessage).
+        public const string MessagePrefix = "slmod|projectcook|";
+
+        // The text of the message of a click on the row split toggle.
+        public const string RowSplitMessage = "rowsplit";
 
         // The result of a command when the root page has no page script: a new root page, or one that
         // the game built again after a browser crash.

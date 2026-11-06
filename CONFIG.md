@@ -12,7 +12,7 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 | --- | --- | --- | --- |
 | `DishPreview` | `true` | `true` / `false` | Shows quality chances, eat values, and portion counts on dish cards. Adds dish card tooltips, the portion switch after the "THIS POT" title, ingredient tooltip lines, and ingredient tier badges. |
 | `FoodSort` | `true` | `true` / `false` | Lets you sort food by stat, trade value, or expiration date in the storage window, the cooking window, and the Rat Cage window. Shows the selected value on items, including cooking workbench ingredients. |
-| `RowSplit` | `true` | `true` / `false` | From cooking level 3, matches recipes for each row of the ingredient grid separately. Row splitting has no effect when all ingredients are in one row. |
+| `RowSplit` | `true` | `true` / `false` | From cooking level 3, matches recipes for each row of the ingredient grid separately. Row splitting has no effect when all ingredients are in one row. The Split by row toggle above the ingredient grid changes this setting. |
 | `SeparatePieces` | `true` | `true` / `false` | Keeps a piece of an ingredient with more than one use (for example Wild Rabbit 1/3) separate when you drop it on free cells in the ingredient grid. Drop it onto an item of the same kind to merge them, if that item is not full. Quick moves and hot pot mode work as usual. |
 | `DimUncookable` | `true` | `true` / `false` | Dims items you cannot cook in each tab of the cooking window: items that are not food, products such as Beef Slices, or ingredients that need cutting first. Fuel stays bright at a stove that burns fuel. |
 | `CookingStorages` | `true` | `true` / `false` | Lets you use ingredients directly from home storages tagged Cooking or Food in the cooking, Brewing Barrel, Rat Cage, and Ration Press windows, from cooking level 2 (in the Rat Cage window at any level). Adds the Cooking tag to storage settings. |
@@ -26,6 +26,8 @@ Each feature is on by default. Set its value to `false` to turn it off and keep 
 With `SeparatePieces` off, each piece that joins the cooking station merges into an item of the same kind, as without the mod.
 
 With `RowSplit` off, the game matches recipes against all the ingredients together. If you turn this setting off while a cook is in progress, the cook finishes with its saved recipes. The game assigns ingredients to those recipes using its usual rules, so the dishes may differ from the row previews.
+
+The toggle can also show off after a click on Load, for a recipe too wide for one row. That holds only that cooking station and does not change this setting.
 
 **Before turning off `CookingStorages`:** give any storage whose only tag is Cooking a game tag such as Food. Otherwise, it loses its tag rule and the robot no longer puts items there.
 

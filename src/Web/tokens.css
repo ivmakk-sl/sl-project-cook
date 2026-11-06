@@ -43,6 +43,12 @@
   --pc-codex-filter-on-fg: #231c18;
   --pc-codex-empty: var(--text-main, #e8e2dc);
 
+  /* The row split toggle: its label in the color of the game's capacity labels, and a dark track with the game's light
+     border. The track of the switch that is on and the knob of the switch that is off use the gold and this label color. */
+  --pc-row-label: var(--text-dark, #c0c0c0);
+  --pc-row-track: #17120f;
+  --pc-row-line: var(--border-light, rgb(255 255 255 / 18%));
+
   /* The variables of the dropdown library and the number badge library (prefix projectcook-sort). The badge is
      above the frost of a freezer in a cell (z-index 3) and below the open list of a dropdown. */
   --projectcook-sort-fg: var(--pc-white);

@@ -328,3 +328,51 @@
   margin: 0;
   stroke-width: 2.4;
 }
+
+/* The row split toggle at the right end of the line above the grid of the cooking station: a capacity badge of the game
+   (its class gives the box and the label) with a slide switch. On a narrow cooking station it goes to its own line. */
+.pot-capacity-bar:has(.projectcook-row-toggle) {
+  flex-wrap: wrap;
+}
+
+.pot-capacity-bar .projectcook-row-toggle {
+  margin-left: auto;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+/* No refresh reaches C# in hot pot mode, so the page hides the toggle: the game sets the class active by itself. */
+html:has(#hotPotPanel.active) .projectcook-row-toggle {
+  display: none;
+}
+
+.projectcook-row-toggle-switch {
+  position: relative;
+  box-sizing: border-box;
+  width: 32px;
+  height: 18px;
+  border: 1px solid var(--pc-row-line);
+  border-radius: 9px;
+  background: var(--pc-row-track);
+}
+
+.projectcook-row-toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--pc-row-label);
+}
+
+.projectcook-row-toggle-is-on .projectcook-row-toggle-switch {
+  background: var(--pc-sort-gold);
+}
+
+.projectcook-row-toggle-is-on .projectcook-row-toggle-switch::after {
+  left: 16px;
+  background: var(--pc-row-track);
+}
